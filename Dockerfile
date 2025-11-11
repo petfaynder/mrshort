@@ -22,6 +22,7 @@ RUN apk add --no-cache \
     nginx \
     supervisor \
     curl \
+    icu-dev \
     libzip-dev \
     libpng-dev \
     libjpeg-turbo-dev \
@@ -37,7 +38,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     pdo \
     pdo_mysql \
     exif \
-    pcntl
+    pcntl \
+    intl
 
 # Copy application files from previous stages
 COPY --from=composer /app/vendor/ /var/www/html/vendor/
