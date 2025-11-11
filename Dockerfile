@@ -3,7 +3,7 @@ FROM composer:2 as composer
 WORKDIR /app
 COPY database/ database/
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-interaction --no-plugins --no-scripts --prefer-dist
+RUN composer install --no-dev --no-interaction --no-plugins --no-scripts --prefer-dist --ignore-platform-reqs
 
 # Stage 2: NPM - Build frontend assets
 FROM node:18 as npm
