@@ -11,6 +11,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+COPY --from=composer /app/vendor/ ./vendor/
 RUN npm run build
 
 # Stage 3: Final Application Image
