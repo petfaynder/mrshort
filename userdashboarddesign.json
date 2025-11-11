@@ -1,0 +1,408 @@
+{
+  "designSystem": {
+    "name": "Cufy.io Dashboard",
+    "version": "1.0.0",
+    "colorPalette": {
+      "primary": {
+        "blue": "#007AFF",
+        "blueLight": "#4A9EFF",
+        "blueDark": "#0056CC"
+      },
+      "success": {
+        "green": "#34C759",
+        "greenLight": "#5ED75A",
+        "greenDark": "#248A3D"
+      },
+      "warning": {
+        "orange": "#FF9500",
+        "orangeLight": "#FFB340",
+        "orangeDark": "#CC7700"
+      },
+      "error": {
+        "red": "#FF3B30",
+        "redLight": "#FF6B5B",
+        "redDark": "#CC2E24"
+      },
+      "neutral": {
+        "white": "#FFFFFF",
+        "gray50": "#F9FAFB",
+        "gray100": "#F3F4F6",
+        "gray200": "#E5E7EB",
+        "gray300": "#D1D5DB",
+        "gray400": "#9CA3AF",
+        "gray500": "#6B7280",
+        "gray600": "#4B5563",
+        "gray700": "#374151",
+        "gray800": "#1F2937",
+        "gray900": "#111827"
+      }
+    },
+    "elementStyling": {
+      "layout": {
+        "sidebar": {
+          "background": "#FFFFFF",
+          "width": "240px",
+          "shadow": "2px 0 8px rgba(0, 0, 0, 0.04)",
+          "borderRight": "1px solid #E5E7EB"
+        },
+        "mainContent": {
+          "background": "#F9FAFB",
+          "padding": "24px"
+        },
+        "topHeader": {
+          "background": "#FFFFFF",
+          "borderBottom": "1px solid #E5E7EB",
+          "height": "64px",
+          "shadow": "0 1px 3px rgba(0, 0, 0, 0.05)"
+        }
+      },
+      "navigation": {
+        "logo": {
+          "text": "#007AFF",
+          "fontWeight": "700",
+          "fontSize": "24px"
+        },
+        "menuItems": {
+          "default": {
+            "background": "transparent",
+            "text": "#6B7280",
+            "icon": "#6B7280",
+            "padding": "8px 16px",
+            "borderRadius": "6px",
+            "fontSize": "14px"
+          },
+          "hover": {
+            "background": "#F3F4F6",
+            "text": "#374151",
+            "icon": "#374151"
+          },
+          "active": {
+            "background": "#EBF5FF",
+            "text": "#007AFF",
+            "icon": "#007AFF",
+            "borderLeft": "3px solid #007AFF"
+          }
+        }
+      },
+      "cards": {
+        "statsCard": {
+          "background": "#FFFFFF",
+          "border": "1px solid #E5E7EB",
+          "borderRadius": "12px",
+          "shadow": "0 1px 3px rgba(0, 0, 0, 0.05)",
+          "padding": "24px",
+          "minHeight": "120px"
+        },
+        "statsCardIcon": {
+          "background": "rgba(0, 122, 255, 0.1)",
+          "iconColor": "#007AFF",
+          "size": "40px",
+          "borderRadius": "8px",
+          "padding": "8px"
+        },
+        "statsCardTitle": {
+          "color": "#6B7280",
+          "fontSize": "14px",
+          "fontWeight": "500",
+          "marginBottom": "4px"
+        },
+        "statsCardValue": {
+          "color": "#111827",
+          "fontSize": "28px",
+          "fontWeight": "700"
+        },
+        "statsCardSubtext": {
+          "color": "#9CA3AF",
+          "fontSize": "12px",
+          "fontWeight": "400"
+        }
+      },
+      "buttons": {
+        "primary": {
+          "background": "#007AFF",
+          "text": "#FFFFFF",
+          "border": "none",
+          "borderRadius": "8px",
+          "padding": "10px 16px",
+          "fontSize": "14px",
+          "fontWeight": "600",
+          "shadow": "0 1px 2px rgba(0, 0, 0, 0.05)",
+          "hover": {
+            "background": "#0056CC",
+            "shadow": "0 2px 4px rgba(0, 0, 0, 0.1)"
+          },
+          "active": {
+            "background": "#004299"
+          }
+        },
+        "secondary": {
+          "background": "#FFFFFF",
+          "text": "#374151",
+          "border": "1px solid #D1D5DB",
+          "borderRadius": "8px",
+          "padding": "10px 16px",
+          "fontSize": "14px",
+          "fontWeight": "500",
+          "hover": {
+            "background": "#F9FAFB",
+            "borderColor": "#9CA3AF"
+          }
+        }
+      },
+      "alerts": {
+        "warning": {
+          "background": "#FEF3CD",
+          "border": "1px solid #F59E0B",
+          "borderRadius": "8px",
+          "padding": "12px 16px",
+          "icon": "#F59E0B",
+          "text": "#92400E"
+        }
+      },
+      "table": {
+        "container": {
+          "background": "#FFFFFF",
+          "border": "1px solid #E5E7EB",
+          "borderRadius": "12px",
+          "overflow": "hidden"
+        },
+        "header": {
+          "background": "#F9FAFB",
+          "text": "#374151",
+          "fontSize": "12px",
+          "fontWeight": "600",
+          "textTransform": "uppercase",
+          "letterSpacing": "0.5px",
+          "padding": "12px 16px",
+          "borderBottom": "1px solid #E5E7EB"
+        },
+        "row": {
+          "background": "#FFFFFF",
+          "borderBottom": "1px solid #F3F4F6",
+          "padding": "16px",
+          "hover": {
+            "background": "#F9FAFB"
+          }
+        },
+        "cell": {
+          "text": "#111827",
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      },
+      "chart": {
+        "container": {
+          "background": "#FFFFFF",
+          "padding": "24px",
+          "borderRadius": "12px"
+        },
+        "gridLines": "#F3F4F6",
+        "axisLabels": "#9CA3AF",
+        "dataLine": "#007AFF",
+        "dataPoints": "#007AFF"
+      },
+      "promotion": {
+        "banner": {
+          "background": "linear-gradient(135deg, #667EEA 0%, #764BA2 100%)",
+          "borderRadius": "12px",
+          "padding": "20px 24px",
+          "text": "#FFFFFF",
+          "shadow": "0 4px 12px rgba(102, 126, 234, 0.25)"
+        },
+        "icon": {
+          "background": "rgba(255, 255, 255, 0.2)",
+          "iconColor": "#FFFFFF",
+          "borderRadius": "8px",
+          "size": "48px"
+        }
+      }
+    },
+    "typography": {
+      "fontFamily": {
+        "primary": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+      },
+      "headings": {
+        "h1": {
+          "fontSize": "32px",
+          "fontWeight": "700",
+          "lineHeight": "1.2",
+          "color": "#111827"
+        },
+        "h2": {
+          "fontSize": "24px",
+          "fontWeight": "600",
+          "lineHeight": "1.3",
+          "color": "#111827"
+        },
+        "h3": {
+          "fontSize": "18px",
+          "fontWeight": "600",
+          "lineHeight": "1.4",
+          "color": "#374151"
+        }
+      },
+      "body": {
+        "large": {
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "lineHeight": "1.5",
+          "color": "#374151"
+        },
+        "medium": {
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "lineHeight": "1.5",
+          "color": "#6B7280"
+        },
+        "small": {
+          "fontSize": "12px",
+          "fontWeight": "400",
+          "lineHeight": "1.4",
+          "color": "#9CA3AF"
+        }
+      }
+    },
+    "spacing": {
+      "xs": "4px",
+      "sm": "8px",
+      "md": "12px",
+      "lg": "16px",
+      "xl": "24px",
+      "2xl": "32px",
+      "3xl": "48px"
+    },
+    "borderRadius": {
+      "sm": "4px",
+      "md": "6px",
+      "lg": "8px",
+      "xl": "12px",
+      "2xl": "16px"
+    },
+    "shadows": {
+      "sm": "0 1px 2px rgba(0, 0, 0, 0.05)",
+      "md": "0 1px 3px rgba(0, 0, 0, 0.05)",
+      "lg": "0 4px 12px rgba(0, 0, 0, 0.1)",
+      "xl": "0 8px 24px rgba(0, 0, 0, 0.12)"
+    },
+    "animations": {
+      "hover": {
+        "duration": "200ms",
+        "easing": "cubic-bezier(0.4, 0, 0.2, 1)"
+      },
+      "focus": {
+        "duration": "150ms",
+        "easing": "cubic-bezier(0.4, 0, 0.2, 1)"
+      }
+    },
+    "componentRules": {
+      "iconUsage": {
+        "sidebarIcons": {
+          "size": "20px",
+          "color": "#6B7280",
+          "activeColor": "#007AFF",
+          "placement": "left of text, 8px margin"
+        },
+        "statsCardIcons": {
+          "size": "24px",
+          "color": "#007AFF",
+          "background": "rgba(0, 122, 255, 0.1)",
+          "containerSize": "40px",
+          "containerRadius": "8px"
+        },
+        "actionIcons": {
+          "size": "16px",
+          "color": "#6B7280",
+          "hoverColor": "#374151"
+        }
+      },
+      "cardVariants": {
+        "statsCard": {
+          "background": "#FFFFFF",
+          "iconContainer": "colored background circle",
+          "textHierarchy": "title → value → subtitle"
+        },
+        "promotionCard": {
+          "background": "gradient",
+          "textColor": "#FFFFFF",
+          "iconContainer": "semi-transparent white background"
+        }
+      },
+      "buttonHierarchy": {
+        "primary": "blue background, white text",
+        "secondary": "white background, gray border, dark text",
+        "ghost": "transparent background, colored text"
+      }
+    },
+    "applicationRules": {
+      "DO_NOT": [
+        "Apply card gradients to icons or text elements",
+        "Use sidebar navigation colors on main content buttons",
+        "Apply stats card icon styling to navigation icons",
+        "Use promotion banner colors on regular UI elements",
+        "Apply table row colors to card backgrounds",
+        "Use chart colors for interface elements",
+        "Apply hover states to static content areas"
+      ],
+      "ALWAYS": [
+        "Use white backgrounds for content cards",
+        "Apply shadows to elevated elements (cards, modals, dropdowns)",
+        "Use consistent border radius within component categories",
+        "Maintain color hierarchy: primary blue → secondary gray → muted gray",
+        "Apply proper contrast ratios for text readability",
+        "Use gradient backgrounds only for promotional/feature elements",
+        "Keep navigation consistent with sidebar styling"
+      ]
+    },
+    "specificImplementations": {
+      "dashboard": {
+        "layout": "sidebar + main content",
+        "cardGrid": "responsive grid with consistent gaps",
+        "statsCards": {
+          "layout": "icon top-left, title below, large value, small subtitle",
+          "spacing": "24px padding, 16px gaps between elements"
+        }
+      },
+      "dataVisualization": {
+        "chartBackground": "#FFFFFF",
+        "gridColor": "#F3F4F6",
+        "dataColor": "#007AFF",
+        "axisTextColor": "#9CA3AF"
+      }
+    },
+    "contextualStyling": {
+      "sidebar": {
+        "background": "#FFFFFF",
+        "itemDefault": "transparent background, gray text/icons",
+        "itemHover": "light gray background",
+        "itemActive": "blue accent left border, blue text/icons, light blue background"
+      },
+      "mainDashboard": {
+        "background": "#F9FAFB",
+        "cardShadows": "subtle elevation shadows",
+        "cardBackgrounds": "pure white",
+        "textHierarchy": "dark titles, medium gray subtitles, light gray metadata"
+      },
+      "promotionalElements": {
+        "background": "purple-blue gradient",
+        "textColor": "white",
+        "iconBackground": "semi-transparent white"
+      }
+    },
+    "stateManagement": {
+      "hover": {
+        "navigationItems": "background lightens, text darkens",
+        "buttons": "background darkens slightly",
+        "tableRows": "background becomes light gray",
+        "cards": "shadow intensity increases"
+      },
+      "focus": {
+        "buttons": "outline: 2px solid rgba(0, 122, 255, 0.5)",
+        "inputs": "border color changes to primary blue"
+      },
+      "active": {
+        "navigationItems": "blue accent styling applied",
+        "buttons": "background becomes darker variant"
+      }
+    }
+  }
+}

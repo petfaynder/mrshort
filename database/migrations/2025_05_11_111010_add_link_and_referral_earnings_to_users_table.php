@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->decimal('link_earnings', 10, 2)->default(0.00)->after('earnings');
+            $table->decimal('referral_earnings', 10, 2)->default(0.00)->after('link_earnings');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('referral_earnings');
+            $table->dropColumn('link_earnings');
+        });
+    }
+};

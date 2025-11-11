@@ -1,0 +1,1 @@
+// Gelecekteki JavaScript etkileşimleri buraya eklenecektir.

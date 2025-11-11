@@ -1,0 +1,378 @@
+{
+  "designSystem": {
+    "colorPalette": {
+      "primary": {
+        "gradient": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        "solid": "#667eea"
+      },
+      "accent": {
+        "coral": "#ff7b7b",
+        "turquoise": "#4ecdc4", 
+        "lavender": "#c3a6ff",
+        "peach": "#ffb366"
+      },
+      "neutral": {
+        "white": "#ffffff",
+        "lightGray": "#f5f5f7",
+        "mediumGray": "#8e8e93",
+        "darkGray": "#1d1d1f",
+        "inputGray": "#f2f2f7"
+      },
+      "semantic": {
+        "link": "#007aff",
+        "linkHover": "#0056cc"
+      }
+    },
+
+    "elementStyling": {
+      "layout": {
+        "container": {
+          "background": "#ffffff",
+          "minHeight": "100vh",
+          "display": "flex"
+        },
+        "leftPanel": {
+          "background": "#ffffff",
+          "width": "40%",
+          "padding": "80px 60px",
+          "display": "flex",
+          "flexDirection": "column",
+          "justifyContent": "center"
+        },
+        "rightPanel": {
+          "background": "#f8f9ff",
+          "width": "60%",
+          "position": "relative",
+          "overflow": "hidden",
+          "display": "flex",
+          "alignItems": "center",
+          "justifyContent": "center"
+        }
+      },
+
+      "branding": {
+        "logo": {
+          "background": "linear-gradient(135deg, #4ecdc4 0%, #667eea 60%, #c3a6ff 100%)",
+          "width": "60px",
+          "height": "60px",
+          "borderRadius": "16px",
+          "marginBottom": "32px",
+          "display": "flex",
+          "alignItems": "center",
+          "justifyContent": "center"
+        },
+        "logoText": {
+          "color": "#ffffff",
+          "fontSize": "32px",
+          "fontWeight": "800",
+          "fontFamily": "system-ui, -apple-system, sans-serif"
+        }
+      },
+
+      "typography": {
+        "pageTitle": {
+          "color": "#1d1d1f",
+          "fontSize": "32px",
+          "fontWeight": "600",
+          "marginBottom": "32px",
+          "fontFamily": "system-ui, -apple-system, sans-serif"
+        },
+        "heroTitle": {
+          "color": "#1d1d1f",
+          "fontSize": "64px",
+          "fontWeight": "800",
+          "lineHeight": "1.1",
+          "fontFamily": "system-ui, -apple-system, sans-serif"
+        },
+        "inputLabel": {
+          "color": "#8e8e93",
+          "fontSize": "14px",
+          "fontWeight": "400",
+          "marginBottom": "8px"
+        },
+        "linkText": {
+          "color": "#007aff",
+          "fontSize": "14px",
+          "fontWeight": "500",
+          "textDecoration": "none"
+        },
+        "bodyText": {
+          "color": "#8e8e93",
+          "fontSize": "14px",
+          "fontWeight": "400"
+        }
+      },
+
+      "buttons": {
+        "socialAuth": {
+          "background": "#ffffff",
+          "border": "1px solid #e5e5ea",
+          "borderRadius": "12px",
+          "padding": "14px 20px",
+          "width": "100%",
+          "marginBottom": "24px",
+          "display": "flex",
+          "alignItems": "center",
+          "justifyContent": "center",
+          "gap": "12px",
+          "cursor": "pointer",
+          "transition": "all 0.2s ease",
+          "hover": {
+            "backgroundColor": "#f9f9fb",
+            "borderColor": "#d1d1d6",
+            "transform": "translateY(-1px)"
+          },
+          "text": {
+            "color": "#1d1d1f",
+            "fontSize": "16px",
+            "fontWeight": "500"
+          }
+        },
+        "primary": {
+          "background": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          "border": "none",
+          "borderRadius": "12px",
+          "padding": "16px 24px",
+          "width": "100%",
+          "cursor": "pointer",
+          "transition": "all 0.2s ease",
+          "hover": {
+            "background": "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
+            "transform": "translateY(-2px)",
+            "boxShadow": "0 8px 25px rgba(102, 126, 234, 0.4)"
+          },
+          "text": {
+            "color": "#ffffff",
+            "fontSize": "16px",
+            "fontWeight": "600"
+          }
+        }
+      },
+
+      "inputs": {
+        "textField": {
+          "background": "#f2f2f7",
+          "border": "1px solid transparent",
+          "borderRadius": "12px",
+          "padding": "14px 16px",
+          "width": "100%",
+          "marginBottom": "16px",
+          "fontSize": "16px",
+          "color": "#1d1d1f",
+          "transition": "all 0.2s ease",
+          "placeholder": {
+            "color": "#8e8e93"
+          },
+          "focus": {
+            "borderColor": "#667eea",
+            "backgroundColor": "#ffffff",
+            "boxShadow": "0 0 0 3px rgba(102, 126, 234, 0.1)"
+          }
+        },
+        "passwordField": {
+          "background": "#f2f2f7",
+          "border": "1px solid transparent",
+          "borderRadius": "12px",
+          "padding": "14px 16px",
+          "paddingRight": "50px",
+          "width": "100%",
+          "marginBottom": "16px",
+          "fontSize": "16px",
+          "color": "#1d1d1f",
+          "position": "relative",
+          "focus": {
+            "borderColor": "#667eea",
+            "backgroundColor": "#ffffff",
+            "boxShadow": "0 0 0 3px rgba(102, 126, 234, 0.1)"
+          }
+        },
+        "toggleIcon": {
+          "position": "absolute",
+          "right": "16px",
+          "top": "50%",
+          "transform": "translateY(-50%)",
+          "color": "#8e8e93",
+          "cursor": "pointer",
+          "hover": {
+            "color": "#667eea"
+          }
+        }
+      },
+
+      "checkboxes": {
+        "default": {
+          "width": "18px",
+          "height": "18px",
+          "borderRadius": "4px",
+          "border": "2px solid #e5e5ea",
+          "background": "#ffffff",
+          "marginRight": "8px",
+          "transition": "all 0.2s ease",
+          "checked": {
+            "background": "#667eea",
+            "borderColor": "#667eea"
+          },
+          "checkmark": {
+            "color": "#ffffff",
+            "fontSize": "12px"
+          }
+        }
+      },
+
+      "decorativeElements": {
+        "backgroundShapes": {
+          "circle1": {
+            "background": "linear-gradient(135deg, #ff7b7b 0%, #ffb366 100%)",
+            "width": "200px",
+            "height": "200px",
+            "borderRadius": "50%",
+            "position": "absolute",
+            "top": "10%",
+            "right": "15%",
+            "opacity": "0.8"
+          },
+          "circle2": {
+            "background": "linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)",
+            "width": "160px",
+            "height": "160px",
+            "borderRadius": "50%",
+            "position": "absolute",
+            "bottom": "20%",
+            "left": "10%",
+            "opacity": "0.7"
+          },
+          "blob1": {
+            "background": "linear-gradient(135deg, #667eea 0%, #c3a6ff 100%)",
+            "width": "300px",
+            "height": "200px",
+            "borderRadius": "50px",
+            "position": "absolute",
+            "top": "5%",
+            "left": "5%",
+            "opacity": "0.6",
+            "transform": "rotate(-15deg)"
+          },
+          "blob2": {
+            "background": "linear-gradient(135deg, #c3a6ff 0%, #ff7b7b 100%)",
+            "width": "180px",
+            "height": "120px",
+            "borderRadius": "40px",
+            "position": "absolute",
+            "bottom": "5%",
+            "right": "5%",
+            "opacity": "0.5",
+            "transform": "rotate(25deg)"
+          },
+          "triangle": {
+            "background": "linear-gradient(135deg, #764ba2 0%, #c3a6ff 100%)",
+            "width": "0",
+            "height": "0",
+            "borderLeft": "80px solid transparent",
+            "borderRight": "80px solid transparent",
+            "borderBottom": "140px solid currentColor",
+            "position": "absolute",
+            "bottom": "40%",
+            "right": "30%",
+            "opacity": "0.4",
+            "transform": "rotate(45deg)"
+          }
+        }
+      },
+
+      "spacing": {
+        "containerPadding": "80px 60px",
+        "sectionGap": "32px",
+        "elementGap": "16px",
+        "smallGap": "8px",
+        "largeGap": "48px"
+      },
+
+      "borderRadius": {
+        "small": "8px",
+        "medium": "12px",
+        "large": "16px",
+        "circle": "50%"
+      },
+
+      "shadows": {
+        "subtle": "0 2px 8px rgba(0, 0, 0, 0.04)",
+        "medium": "0 4px 16px rgba(0, 0, 0, 0.08)",
+        "elevated": "0 8px 25px rgba(102, 126, 234, 0.4)",
+        "focus": "0 0 0 3px rgba(102, 126, 234, 0.1)"
+      }
+    },
+
+    "componentStates": {
+      "hover": {
+        "buttons": {
+          "transform": "translateY(-2px)",
+          "transitionDuration": "0.2s"
+        },
+        "socialButtons": {
+          "backgroundColor": "#f9f9fb",
+          "borderColor": "#d1d1d6",
+          "transform": "translateY(-1px)"
+        },
+        "links": {
+          "color": "#0056cc"
+        }
+      },
+      "focus": {
+        "inputs": {
+          "borderColor": "#667eea",
+          "backgroundColor": "#ffffff",
+          "boxShadow": "0 0 0 3px rgba(102, 126, 234, 0.1)"
+        }
+      },
+      "active": {
+        "buttons": {
+          "transform": "translateY(0px)"
+        }
+      }
+    },
+
+    "doNotRules": {
+      "gradients": [
+        "DO NOT apply decorative background gradients to text elements",
+        "DO NOT use hero title gradients on input fields",
+        "DO NOT apply shape gradients to functional UI elements like buttons",
+        "DO NOT mix decorative gradients with functional button gradients"
+      ],
+      "colors": [
+        "DO NOT use decorative shape colors (#ff7b7b, #4ecdc4) for functional text",
+        "DO NOT apply background shape colors to button backgrounds",
+        "DO NOT use accent colors for primary navigation or critical actions",
+        "DO NOT apply hero text colors to form labels or helper text"
+      ],
+      "effects": [
+        "DO NOT apply decorative shape shadows to form elements",
+        "DO NOT use background blur effects on functional UI components",
+        "DO NOT apply transform animations to text content",
+        "DO NOT use decorative opacity values on interactive elements"
+      ],
+      "spacing": [
+        "DO NOT use decorative element spacing for functional UI spacing",
+        "DO NOT apply hero section margins to form elements",
+        "DO NOT use background shape positioning for UI component layout"
+      ]
+    },
+
+    "implementationGuidelines": {
+      "colorUsage": {
+        "functional": "Use neutral grays for text hierarchy, primary gradient for CTAs, semantic colors for links and states",
+        "decorative": "Use accent colors only for background shapes and non-functional visual elements",
+        "contrast": "Maintain 4.5:1 contrast ratio for all functional text elements"
+      },
+      "gradientApplication": {
+        "buttons": "Apply primary gradient to CTA buttons only",
+        "branding": "Use multi-color gradient for logo/brand elements",
+        "decoration": "Use varied gradients for background shapes with appropriate opacity"
+      },
+      "responsive": {
+        "mobile": "Stack panels vertically, reduce decorative elements, maintain button sizing",
+        "tablet": "Adjust panel proportions, scale decorative elements proportionally",
+        "desktop": "Use full split-panel layout with all decorative elements visible"
+      }
+    }
+  }
+}
