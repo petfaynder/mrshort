@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use Filament\Http\Livewire\Auth\Login;
 
 Route::post('/admin/login', Login::class)->name('filament.admin.auth.login');
@@ -112,6 +113,8 @@ Route::middleware('auth', 'can:admin')->group(function () { // Sadece adminlerin
     })->name('admin.users.login-as');
 });
 
+
+Route::get('/debug-ip', [LinkController::class, 'debugIp'])->name('debug.ip');
 
 Route::get('/test-ip', function () {
     phpinfo();
