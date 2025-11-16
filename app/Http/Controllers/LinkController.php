@@ -116,7 +116,7 @@ class LinkController extends Controller
 
             // Save detailed click information
             $linkClick = $link->clicks()->create([
-                'ip_address' => $request->ip(),
+                'ip_address' => $clientIp,
                 'country_id' => $countryId,
                 'cpm_rate' => $cpmRate, // Hesaplanan CPM oranını kaydet
                 'country' => $countryIsoCode, // Eski 'country' sütununa ISO kodu kaydedelim
