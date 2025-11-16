@@ -87,6 +87,8 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
+Route::get('/debug-ip', [LinkController::class, 'debugIp'])->name('debug.ip');
+
 Route::post('/links', [LinkController::class, 'store'])->name('links.store');
 
 Route::get('/{code}', [LinkController::class, 'redirect'])->name('shortlink.redirect');
@@ -113,8 +115,6 @@ Route::middleware('auth', 'can:admin')->group(function () { // Sadece adminlerin
     })->name('admin.users.login-as');
 });
 
-
-Route::get('/debug-ip', [LinkController::class, 'debugIp'])->name('debug.ip');
 
 Route::get('/test-ip', function () {
     phpinfo();
