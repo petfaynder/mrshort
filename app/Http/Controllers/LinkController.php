@@ -57,7 +57,7 @@ class LinkController extends Controller
 
             // Get GeoIP information
             $clientIp = $this->getClientIp($request);
-            $databasePath = Storage::path('private/geoip/GeoLite2-Country.mmdb');
+            $databasePath = storage_path('app/private/geoip/GeoLite2-Country.mmdb'); // Corrected path
             $debugInfo = [
                 'step1_detected_ip' => $clientIp,
                 'step2_database_path' => $databasePath,
