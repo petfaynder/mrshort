@@ -335,24 +335,4 @@ class LinkController extends Controller
         \Log::warning('LinkController: Güvenilir IP başlığı bulunamadı, request->ip() kullanılıyor.', ['ip' => $fallbackIp]);
         return $fallbackIp;
     }
-
-    public function debugIp(Request $request)
-    {
-        $headers = [
-            'HTTP_CF_CONNECTING_IP',
-            'HTTP_X_REAL_IP',
-            'HTTP_X_FORWARDED_FOR',
-            'REMOTE_ADDR'
-        ];
-
-        $ipData = [];
-        foreach ($headers as $header) {
-            $ipData[$header] = $request->server($header) ?? 'Not Set';
-        }
-
-        $ipData['determined_ip'] = $this->getClientIp($request);
-        $ipData['laravel_request_ip'] = $request->ip();
-
-        return response()->json($ipData);
-    }
 }

@@ -87,8 +87,6 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::get('/debug-ip', [LinkController::class, 'debugIp'])->name('debug.ip');
-
 Route::post('/links', [LinkController::class, 'store'])->name('links.store');
 
 Route::get('/{code}', [LinkController::class, 'redirect'])->name('shortlink.redirect');
