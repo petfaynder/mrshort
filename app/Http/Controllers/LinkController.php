@@ -57,41 +57,34 @@ class LinkController extends Controller
 
             // Get GeoIP information
             $clientIp = $this->getClientIp($request);
-            $databasePath = storage_path('app/private/geoip/GeoLite2-Country.mmdb'); // Corrected path
-            $debugInfo = [
-                'step1_detected_ip' => $clientIp,
-                'step2_database_path' => $databasePath,
-                'step3_database_exists' => file_exists($databasePath),
-                'step4_geoip_lookup_result' => null,
-                'step5_country_model_search_result' => null,
-                'error' => null,
-            ];
+            \Log::info('LinkController: Tespit edilen istemci IP adresi.', ['ip' => $clientIp]);
 
-            if ($debugInfo['step3_database_exists']) {
+
+            $databasePath = storage_path('app/private/geoip/GeoLite2-Country.mmdb'); // Corrected path
+            \Log::info('GeoLite2-Country.mmdb kontrol ediliyor.', ['path' => $databasePath]);
+
+            if (file_exists($databasePath)) {
                 try {
                     $reader = new Reader($databasePath);
+                    \Log::info('GeoIP lookup başlatılıyor.', ['ip' => $clientIp]);
                     $record = $reader->country($clientIp);
                     $countryIsoCode = $record->country->isoCode;
-                    $debugInfo['step4_geoip_lookup_result'] = [
-                        'iso_code' => $countryIsoCode,
-                        'country_name' => $record->country->name,
-                    ];
+                    \Log::info('GeoIP ülke kodu tespit edildi.', ['ip' => $clientIp, 'country_iso_code' => $countryIsoCode]);
 
+                    // Ülke ISO koduna göre Country modelini bul
                     $countryModel = \App\Models\Country::where('iso_code', $countryIsoCode)->first();
                     if ($countryModel) {
                         $countryId = $countryModel->id;
-                        $debugInfo['step5_country_model_search_result'] = 'SUCCESS: Found country in DB with ID: ' . $countryId;
+                        \Log::info('Ülke veritabanında bulundu.', ['country_id' => $countryId, 'country_name' => $countryModel->name]);
                     } else {
-                        $debugInfo['step5_country_model_search_result'] = 'FAIL: Could not find ISO code "' . $countryIsoCode . '" in the countries table.';
+                        \Log::warning('Ülke veritabanında bulunamadı.', ['iso_code' => $countryIsoCode]);
                     }
                 } catch (\Exception $e) {
-                    $debugInfo['error'] = $e->getMessage();
+                    \Log::error('GeoIP sorgusu başarısız oldu.', ['ip' => $request->ip(), 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
                 }
             } else {
-                $debugInfo['error'] = 'GeoLite2-Country.mmdb file not found.';
+                \Log::warning('GeoLite2-Country.mmdb dosyası bulunamadı.', ['path' => $databasePath]);
             }
-
-            dd($debugInfo); // Die and dump debug info
 
             // Determine device, OS, browser, and bot status using Jenssegers/Agent
             if ($agent->isDesktop()) {
