@@ -6,7 +6,7 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.2.0",
         "barryvdh/laravel-dompdf": "^3.1",
         "filament/filament": "^3.2",
         "geoip2/geoip2": "^3.1",
