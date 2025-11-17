@@ -15,7 +15,7 @@
         </div>
         <div class="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900/50 sm:p-6">
             <h2 class="pb-3 text-lg font-bold leading-tight tracking-[-0.015em] text-gray-900 dark:text-white">Shorten a New Link</h2>
-            <form wire:submit.prevent="shortenLink" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <form wire:submit.prevent.stop="shortenLink" class="flex flex-col gap-3 sm:flex-row sm:items-end">
                 <label class="flex flex-col flex-1">
                     <span class="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Destination URL</span>
                     <input type="url" wire:model="original_url" id="original_url" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border border-gray-300 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-background-dark dark:text-white dark:placeholder:text-gray-500 h-14 p-[15px] text-base font-normal leading-normal @error('original_url') border-red-500 @enderror" placeholder="https://enter-a-long-url-to-shorten.com/..." value=""/>

@@ -18,6 +18,7 @@ class EarningsChart extends Component
     public function mount()
     {
         $this->selectedMonth = Carbon::now()->format('Y-m');
+        $this->dispatch('chartDataUpdated', data: $this->getStatsData());
     }
 
     public function updateChartForMonth($data)

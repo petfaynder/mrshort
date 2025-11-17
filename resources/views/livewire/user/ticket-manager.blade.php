@@ -87,7 +87,7 @@
 
     <div class="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm">
         <h2 class="text-2xl font-semibold mb-6 text-text-light-primary dark:text-white">Create Support Request</h2>
-        <form wire:submit.prevent="createTicket" class="space-y-6">
+        <form wire:submit.prevent.stop="createTicket" class="space-y-6">
             <div>
                 <label class="block text-sm font-medium mb-2 text-text-light-secondary dark:text-white" for="subject">Subject</label>
                 <input wire:model.defer="newTicketSubject" class="block w-full rounded-md border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-text-light-primary dark:text-white focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 placeholder:text-slate-400" id="subject" name="subject" placeholder="e.g. Issue with link redirection" type="text"/>
