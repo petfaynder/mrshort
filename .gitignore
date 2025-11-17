@@ -1,23 +1,30 @@
+# Cache
 /.phpunit.cache
+
+# Dependencies
 /node_modules
+
+# Build assets
 /public/build
 /public/hot
-/public/storage
-/storage/*.key
-/storage/pail
-/vendor
+
+# Environment files
 .env
 .env.backup
 .env.production
+
+# IDE files
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
-npm-debug.log
-yarn-error.log
 /auth.json
 /.fleet
 /.idea
 /.nova
 /.vscode
 /.zed
+
+# Log files
+npm-debug.log
+yarn-error.log
