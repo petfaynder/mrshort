@@ -27,13 +27,13 @@ trait HasState
     {
         foreach ($this->getComponents(withHidden: true) as $component) {
             if ($component->getStatePath() === $path) {
-                $component->callAfterStateUpdated();
+                $component->callAfterStateUpdated(shouldBubbleToParents: false);
 
                 return true;
             }
 
             if (str($path)->startsWith("{$component->getStatePath()}.")) {
-                $component->callAfterStateUpdated();
+                $component->callAfterStateUpdated(shouldBubbleToParents: false);
             }
 
             foreach ($component->getChildComponentContainers() as $container) {
@@ -76,6 +76,27 @@ trait HasState
         }
 
         return $state;
+    }
+
+    public function hasDehydratedComponent(string $statePath): bool
+    {
+        foreach ($this->getComponents(withHidden: true) as $component) {
+            if (! $component->isDehydrated()) {
+                continue;
+            }
+
+            if ($component->hasStatePath() && ($component->getStatePath() === $statePath)) {
+                return true;
+            }
+
+            foreach ($component->getChildComponentContainers(withHidden: true) as $container) {
+                if ($container->hasDehydratedComponent($statePath)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**

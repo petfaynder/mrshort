@@ -131,6 +131,11 @@ trait CanExportRecords
             $records = $action instanceof ExportTableBulkAction ? $action->getRecords() : null;
 
             $totalRows = $records ? $records->count() : $query->toBase()->getCountForPagination();
+
+            if ((! $records) && $query->getQuery()->limit) {
+                $totalRows = min($totalRows, $query->getQuery()->limit);
+            }
+
             $maxRows = $action->getMaxRows() ?? $totalRows;
 
             if ($maxRows < $totalRows) {
@@ -175,6 +180,9 @@ trait CanExportRecords
             $export->file_disk = $action->getFileDisk() ?? $exporter->getFileDisk();
             // Temporary save to obtain the sequence number of the export file.
             $export->save();
+
+            // Delete the export directory to prevent data contamination from previous exports with the same ID.
+            $export->deleteFileDirectory();
 
             $export->file_name = $action->getFileName($export) ?? $exporter->getFileName($export);
             $export->save();

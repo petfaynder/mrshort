@@ -433,6 +433,7 @@ Geziyor
 Ghost Inspector
 GigablastOpenSource
 GIS-LABS
+GitLab\/
 github-camo
 GitHub-Hookshot
 github\.com
@@ -716,6 +717,7 @@ MagpieRSS
 Mail::STS
 MailChimp
 Mail\.Ru
+Mailpit\/
 Majestic12
 makecontact\/
 Mandrill
