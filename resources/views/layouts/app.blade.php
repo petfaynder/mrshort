@@ -6,34 +6,13 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>LinkShortener - Dashboard</title>
-        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        
+        <!-- Fonts -->
         <link href="https://fonts.googleapis.com" rel="preconnect"/>
         <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-        <script>
-            tailwind.config = {
-                darkMode: "class",
-                theme: {
-                    extend: {
-                        colors: {
-                            "primary": "#0f66bd",
-                            "background-light": "#f6f7f8",
-                            "background-dark": "#101922",
-                        },
-                        fontFamily: {
-                            "display": ["Inter", "sans-serif"]
-                        },
-                        borderRadius: {
-                            "DEFAULT": "0.25rem",
-                            "lg": "0.5rem",
-                            "xl": "0.75rem",
-                            "full": "9999px"
-                        },
-                    },
-                },
-            }
-        </script>
+        
         <style>
             body {
                 font-family: 'Inter', sans-serif;
@@ -42,7 +21,6 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-
         @livewireStyles
     </head>
     <body class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200">
@@ -65,14 +43,13 @@
                     <button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
                         <span class="truncate">Admin Panel</span>
                     </button>
-                    <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar with an abstract colorful background" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDhMGZSUfVTis0d6mVvSpe0WXV9eL-4YceMbiU_Vx6NB7VUXEIWfZ73eOyhp14wW6T1yATsSLKZmKvxaXlofPAddDt9mLIsInA1WIrZQPSTj0K8Na7AQesHEO9alTwf_RJa5OVMwwWVNlabUkNb29hRMN4F3oGOETTOV0rzwuZdct7zO-RDQTL9xhxqTPyfLpc7yuOCbOJJ2PYlVpvwulG3C47CWDSQrhdwlQfUMwYRbxsP84JZJImLDifHstlYcAEWZglU40RfivqY");'></div>
+                    <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" style='background-image: url("https://ui-avatars.com/api/?name=User&size=128&background=0f66bd&color=fff");'></div>
                 </div>
             </header>
             <main class="flex h-full grow flex-col">
                 {{ $slot }}
             </main>
         </div>
-
 
         @livewireScripts
     </body>
