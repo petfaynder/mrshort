@@ -1,3 +1,169 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    .error-message {
+        display: none;
+    }
+}
+
+@layer utilities {
+    .animate-form-item {
+        animation: form-item-fade-in 0.5s ease-out forwards;
+    }
+    .animate-globe-spin {
+        animation: globe-spin 40s linear infinite;
+    }
+    .animate-link-arc-in {
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        animation: link-arc-in 2s ease-out forwards;
+    }
+    .animate-float-up {
+        animation: float-up 5s ease-in-out infinite;
+    }
+    .animate-pulse-subtle {
+        animation: pulse-subtle 4s ease-in-out infinite;
+    }
+    .spinner {
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid #fff;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        animation: spin 1s linear infinite;
+    }
+}
+
+@keyframes form-item-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes globe-spin {
+    from { transform: rotateY(0deg); }
+    to { transform: rotateY(360deg); }
+}
+@keyframes link-arc-in {
+    0% { stroke-dashoffset: 1; opacity: 0; }
+    20% { opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes float-up {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateY(-100px) scale(1); opacity: 0; }
+}
+@keyframes pulse-subtle {
+   0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(13, 127, 242, 0.4); }
+   50% { transform: scale(1.05); box-shadow: 0 0 15px 5px rgba(13, 127, 242, 0.2); }
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.password-strength-bar > div {
+    transition: width 0.3s ease-in-out;
+}
+
+.hero-section {
+    background-color: #0B0F1A;
+    position: relative;
+}
+#hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    opacity: 0.2;
+}
+@media (prefers-reduced-motion: reduce) {
+    #hero-video {
+        display: none;
+    }
+}
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(circle at 50% 50%, rgba(11, 15, 26, 0) 0%, #0B0F1A 80%);
+    z-index: 1;
+}
+.hero-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.1;
+    background-size: 40px 40px;
+    z-index: 2;
+}
+@media (max-width: 1024px) {
+    .hero-section::before {
+         background-image: radial-gradient(circle at 50% 20%, rgba(11, 15, 26, 0.2) 0%, #0B0F1A 70%);
+    }
+}
+.activity-feed-item {
+    display: none;
+}
+.activity-feed-item.active {
+    display: flex;
+}
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: #00BFFF;
+    cursor: pointer;
+    border-radius: 9999px;
+    box-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF;
+}
+input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: #00BFFF;
+    cursor: pointer;
+    border-radius: 9999px;
+    box-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF;
+}
+.animate-scroll-left {
+    animation: scroll-left 40s linear infinite;
+}
+.animate-pulse-slow {
+    animation: pulse-slow 8s ease-in-out infinite;
+}
+.text-shadow-lg {
+text-shadow: 0px 0px 15px rgba(0, 191, 255, 0.5), 0px 0px 30px rgba(255, 0, 255, 0.3);
+}
+[x-cloak] { display: none !important; }
+.transition-transform {
+    transition: transform 0.3s ease;
+}
+.rotate-45 {
+    transform: rotate(45deg);
+}
+.x-collapse {
+   overflow: hidden;
+   transition: height 0.3s ease-in-out;
+}

@@ -12,50 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 
     <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-            extend: {
-                colors: {
-                  "primary": "#137fec",
-                  "background-light": "#f6f7f8",
-                  "background-dark": "#101922",
-                  "green-accent": "#28a745",
-                  "red-accent": "#dc3545",
-                  "card-light": "#ffffff",
-                  "card-dark": "#161d31",
-                  "border-light": "#e2e8f0",
-                  "border-dark": "#334155",
-                  "text-light": "#64748b",
-                  "text-dark": "#94a3b8",
-                  "heading-light": "#0f172a",
-                  "heading-dark": "#ffffff",
-                },
-                fontFamily: {
-                  display: ["Inter", "sans-serif"],
-                },
-            borderRadius: {
-              DEFAULT: "0.75rem",
-              lg: "1rem",
-              xl: "1.25rem",
-            },
-          },
-        },
-      };
-    </script>
-    <style>
-      .material-symbols-outlined {
-        font-variation-settings:
-        'FILL' 0,
-        'wght' 300,
-        'GRAD' 0,
-        'opsz' 24
-      }
-    </style>
-    @vite('resources/css/app.css')
     @livewireStyles
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -194,7 +152,6 @@
 
     </main>
 </div>
-@vite('resources/js/app.js')
 @livewireScripts
 @stack('scripts')
 </body>
