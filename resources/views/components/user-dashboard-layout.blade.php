@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 
     <!-- Scripts -->
-        <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
       tailwind.config = {
@@ -177,7 +177,7 @@
                 <div class="flex items-center gap-4">
                     <livewire:user.notifications />
                     <div class="flex items-center gap-3">
-                        <img alt="User avatar" class="w-10 h-10 rounded-full" src="https://via.placeholder.com/40"/>
+                        <img alt="User avatar" class="w-10 h-10 rounded-full" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&size=40&background=0D8ABC&color=fff"/>
                         <div>
                             <p class="font-semibold text-heading-light dark:text-heading-dark">{{ Auth::user()->name }}</p>
                             <p class="text-sm text-text-light dark:text-text-dark">Balance: ${{ number_format(Auth::user()->balance, 5) }}</p>
