@@ -19,7 +19,7 @@ class ReferralManager extends Component
     public function mount()
     {
         $user = Auth::user();
-        $this->referralLink = route('register', ['ref' => $user->username]);
+        $this->referralLink = route('register', ['referral_code' => $user->referral_code]);
         $this->loadReferrals();
     }
 

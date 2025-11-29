@@ -3,31 +3,55 @@
 namespace App\Livewire\User;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Models\AdCampaign;
 
 class AdCampaigns extends Component
 {
-    protected $layout = 'components.user-dashboard-layout'; // Layout'u belirt
+    use WithPagination;
 
-    public $adCampaigns;
+    protected $layout = 'components.user-dashboard-layout';
 
-    public function mount()
-    {
-        $this->adCampaigns = AdCampaign::where('user_id', auth()->id())->get();
-    }
+    public $search = '';
+    public $status = '';
+    public $type = '';
 
     public function deleteCampaign($campaignId)
     {
         $campaign = AdCampaign::where('user_id', auth()->id())->findOrFail($campaignId);
         $campaign->delete();
         session()->flash('success', 'Reklam kampanyası başarıyla silindi.');
-        $this->adCampaigns = AdCampaign::where('user_id', auth()->id())->get(); // Listeyi güncelle
+    }
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
     }
 
     public function render()
     {
+        $query = AdCampaign::where('user_id', auth()->id());
+
+        if ($this->search) {
+            $query->where('name', 'like', '%' . $this->search . '%');
+        }
+
+        if ($this->status !== '') {
+            if ($this->status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($this->status === 'paused') {
+                $query->where('is_active', false);
+            }
+        }
+
+        // Type filtering is placeholder as requested fields don't exist yet, 
+        // but we keep the structure for future implementation.
+        if ($this->type !== '') {
+             // Placeholder logic
+        }
+
         return view('livewire.user.ad-campaigns', [
-            'adCampaigns' => $this->adCampaigns,
+            'adCampaigns' => $query->latest()->paginate(10),
         ]);
     }
 }

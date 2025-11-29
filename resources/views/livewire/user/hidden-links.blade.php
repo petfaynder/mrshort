@@ -31,7 +31,10 @@
                                 {{ $link->created_at->format('Y-m-d H:i') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button wire:click="unhideLink({{ $link->id }})" class="text-green-600 hover:text-green-900">Görünür Yap</button>
+                                <button wire:click="unhideLink({{ $link->id }})" wire:loading.attr="disabled" class="text-green-600 hover:text-green-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 float-right">
+                                    <span wire:loading.remove wire:target="unhideLink({{ $link->id }})">Görünür Yap</span>
+                                    <span wire:loading wire:target="unhideLink({{ $link->id }})" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                                </button>
                             </td>
                         </tr>
                     @endforeach

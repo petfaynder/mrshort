@@ -1,7 +1,26 @@
 <!DOCTYPE html>
-<html class="dark" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html class="{{ auth()->user()->theme_preference ?? 'dark' }}" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
+    <script>
+        // Check for saved theme in localStorage and apply it immediately to avoid flash of wrong theme
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+
+        // Also check database preference if available (passed from backend)
+        @if(auth()->check() && auth()->user()->theme_preference)
+            if ("{{ auth()->user()->theme_preference }}" === 'dark') {
+                 document.documentElement.classList.add('dark');
+                 localStorage.theme = 'dark';
+            } else {
+                 document.documentElement.classList.remove('dark');
+                 localStorage.theme = 'light';
+            }
+        @endif
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 

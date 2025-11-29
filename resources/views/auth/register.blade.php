@@ -45,6 +45,7 @@
 
                 <form method="POST" action="{{ route('register') }}" class="flex flex-col gap-4">
                     @csrf
+                    <input type="hidden" name="referral_code" value="{{ request('referral_code', request('ref')) }}">
                     <div class="flex flex-col sm:flex-row gap-4 w-full animate-form-item" style="animation-delay: 0.4s;">
                         <!-- First Name -->
                         <div class="flex flex-col w-full">

@@ -8,9 +8,9 @@
         </div>
         <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-md">
             <h3 class="text-xl font-semibold text-heading-light dark:text-heading-dark mb-4">Daily Statistics</h3>
-            @if (count($statsData) > 0)
+            @if ($dailyStats->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                    @foreach (array_slice(array_reverse($statsData), 0, 5) as $dayStats)
+                    @foreach ($dailyStats as $dayStats)
                         <div class="p-4 bg-background-light dark:bg-background-dark rounded-lg">
                             <p class="font-semibold text-heading-light dark:text-heading-dark">{{ \Carbon\Carbon::parse($dayStats['date'])->format('l, d M') }}</p>
                             <p class="text-sm text-text-light dark:text-text-dark">{{ $dayStats['views'] }} Clicks</p>

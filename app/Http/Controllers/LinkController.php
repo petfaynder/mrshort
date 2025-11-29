@@ -40,6 +40,28 @@ class LinkController extends Controller
         return redirect('/')->with('success', 'Bağlantı kısaltıldı: ' . $link->shortLink());
     }
 
+    public function apiStore(Request $request)
+    {
+        $request->validate([
+            'url' => 'required|url',
+        ]);
+
+        $code = Str::random(6);
+
+        $link = Link::create([
+            'user_id' => auth()->id(),
+            'original_url' => $request->input('url'),
+            'code' => $code,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'short_link' => route('shortlink.redirect', $link->code),
+            'code' => $link->code,
+            'original_url' => $link->original_url
+        ]);
+    }
+
     public function redirect(Request $request, Agent $agent, string $code) // Inject Agent
     {
         $link = Link::where('code', $code)->first();

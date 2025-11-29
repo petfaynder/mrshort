@@ -13,6 +13,21 @@ return new class extends Migration
     {
         $teams = config('permission.teams');
         $tableNames = config('permission.table_names');
+        if (empty($tableNames)) {
+            $tableNames = [
+                'permissions' => 'permissions',
+                'roles' => 'roles',
+                'model_has_permissions' => 'model_has_permissions',
+                'model_has_roles' => 'model_has_roles',
+                'role_has_permissions' => 'role_has_permissions',
+            ];
+        }
+
+        if (Schema::hasTable($tableNames['permissions'])) {
+            return;
+        }
+
+        $tableNames = config('permission.table_names');
         $columnNames = config('permission.column_names');
         $pivotRole = $columnNames['role_pivot_key'] ?? 'role_id';
         $pivotPermission = $columnNames['permission_pivot_key'] ?? 'permission_id';

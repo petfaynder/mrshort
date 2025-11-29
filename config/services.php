@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'cryptomus' => [
+        'merchant_id' => env('CRYPTOMUS_MERCHANT_ID'),
+        'payment_key' => env('CRYPTOMUS_PAYMENT_KEY'),
+    ],
+
 ];

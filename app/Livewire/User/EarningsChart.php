@@ -29,8 +29,19 @@ class EarningsChart extends Component
 
     public function render()
     {
+        $statsData = $this->getStatsData();
+
+        // Filter stats for the cards: Show Today + Past 4 days (Total 5), descending
+        $dailyStats = collect($statsData)
+            ->filter(function ($item) {
+                return Carbon::parse($item['date'])->lte(Carbon::now()->endOfDay());
+            })
+            ->reverse()
+            ->take(5);
+
         return view('livewire.user.earnings-chart', [
-            'statsData' => $this->getStatsData(),
+            'statsData' => $statsData,
+            'dailyStats' => $dailyStats
         ]);
     }
 

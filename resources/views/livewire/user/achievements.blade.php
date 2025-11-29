@@ -161,6 +161,7 @@
                     <div wire:click="$set('filterCategory', '{{ $categoryKey }}')"
                          class="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg px-4
                                 {{ $filterCategory === $categoryKey ? 'bg-primary/20 border border-primary' : 'bg-[#233648] hover:bg-primary/20' }}">
+                        <span wire:loading wire:target="$set('filterCategory', '{{ $categoryKey }}')" class="material-symbols-outlined text-sm animate-spin {{ $filterCategory === $categoryKey ? 'text-primary' : 'text-slate-300' }}">progress_activity</span>
                         <p class="{{ $filterCategory === $categoryKey ? 'text-primary text-sm font-bold' : 'text-slate-300 hover:text-white text-sm font-medium' }} leading-normal">{{ $categoryName }}</p>
                     </div>
                 @endforeach

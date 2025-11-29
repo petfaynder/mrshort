@@ -37,6 +37,7 @@ class EditAdCampaign extends Component
     // Trafik Bilgileri (Salt okunur)
     public $estimated_traffic = 0;
     public $available_traffic = 0;
+    public $showConfirmModal = false;
 
     // Sabit değerler
     public $campaign_type = 'user';
@@ -117,6 +118,12 @@ class EditAdCampaign extends Component
     public function updatedSelectedOs()
     {
         $this->calculateCostAndTraffic();
+    }
+
+    public function openConfirmationModal()
+    {
+        $this->validate();
+        $this->showConfirmModal = true;
     }
 
     public function calculateCostAndTraffic()

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
-use Illuminate\Support\Str; // Add this line
+use Illuminate\Support\Str;
 
 class RegisteredUserController extends Controller
 {
@@ -34,29 +34,31 @@ class RegisteredUserController extends Controller
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::min(8)], // Explicitly set min length to 8
-            'referral_code' => ['nullable', 'string', 'exists:users,referral_code'], // Add validation for referral code
+            'password' => ['required', 'confirmed', Rules\Password::min(8)],
+            'referral_code' => ['nullable', 'string', 'exists:users,referral_code'],
+            'ref' => ['nullable', 'string', 'exists:users,referral_code'],
         ]);
 
         // Find the referrer user if a referral code is provided
         $referrer = null;
-        if ($request->filled('referral_code')) {
-            $referrer = User::where('referral_code', $request->referral_code)->first();
+        $incomingReferralCode = $request->filled('referral_code') ? $request->referral_code : ($request->filled('ref') ? $request->ref : null);
+        
+        if ($incomingReferralCode) {
+            $referrer = User::where('referral_code', $incomingReferralCode)->first();
         }
 
         // Generate a unique referral code for the new user
-        $referralCode = Str::random(8); // Generate a random code
-        while (User::where('referral_code', $referralCode)->exists()) {
-            $referralCode = Str::random(8); // Regenerate if it already exists
+        $newUserReferralCode = Str::random(8);
+        while (User::where('referral_code', $newUserReferralCode)->exists()) {
+            $newUserReferralCode = Str::random(8);
         }
 
-
         $user = User::create([
-            'name' => $request->first_name . ' ' . $request->last_name, // Combine first and last name
+            'name' => $request->first_name . ' ' . $request->last_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'referred_by_user_id' => $referrer ? $referrer->id : null, // Set referred_by_user_id
-            'referral_code' => $referralCode, // Set the generated referral code
+            'referred_by_user_id' => $referrer ? $referrer->id : null,
+            'referral_code' => $newUserReferralCode, // Use the newly generated code for the new user
         ]);
 
         event(new Registered($user));

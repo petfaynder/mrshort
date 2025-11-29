@@ -12,7 +12,11 @@
             <div class="p-6">
                 <div class="flex items-center gap-4">
                     <input wire:model.defer="pointsToConvert" class="flex-grow w-full px-4 py-2 bg-slate-100 dark:bg-slate-700 border-slate-200 dark:border-slate-600 rounded focus:ring-primary focus:border-primary text-slate-800 dark:text-slate-200" placeholder="0" type="number" min="1" max="{{ Auth::user()->gamification_points }}">
-                    <button wire:click="convertPoints" class="px-6 py-2 font-semibold text-white bg-green-500 rounded hover:bg-green-600 transition-colors flex-shrink-0">Convert</button>
+                    <button wire:click="convertPoints" wire:loading.attr="disabled" class="px-6 py-2 font-semibold text-white bg-green-500 rounded hover:bg-green-600 transition-colors flex-shrink-0 disabled:opacity-75 disabled:cursor-not-allowed flex items-center gap-2">
+                        <span wire:loading.remove wire:target="convertPoints">Convert</span>
+                        <span wire:loading wire:target="convertPoints" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                        <span wire:loading wire:target="convertPoints">Converting...</span>
+                    </button>
                 </div>
                 @error('pointsToConvert') <p class="text-sm text-red-500 mt-2">{{ $message }}</p> @enderror
                 <p class="text-sm text-slate-500 dark:text-slate-400 mt-3">Estimated Amount to be Earned: <span class="font-medium text-slate-700 dark:text-slate-300">{{ number_format(($pointsToConvert > 0 ? $pointsToConvert : 0) * $conversionRate, 2) }} Unit of Money</span></p>
@@ -134,7 +138,10 @@
             <div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 rounded-b-lg flex justify-end gap-3">
                 <button wire:click="closeModal" class="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">Close</button>
                 @if(!$selectedItem->is_active && (!$selectedItem->expires_at || $selectedItem->expires_at > now()))
-                    <button wire:click="useReward({{ $selectedItem->id }})" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-blue-600 transition-colors">Activate Item</button>
+                    <button wire:click="useReward({{ $selectedItem->id }})" wire:loading.attr="disabled" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-blue-600 transition-colors disabled:opacity-75 disabled:cursor-not-allowed flex items-center gap-2">
+                        <span wire:loading.remove wire:target="useReward({{ $selectedItem->id }})">Activate Item</span>
+                        <span wire:loading wire:target="useReward({{ $selectedItem->id }})" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                    </button>
                 @endif
             </div>
         </div>
@@ -156,7 +163,11 @@
             </div>
             <div class="px-6 py-4 bg-slate-800/50 rounded-b-lg flex justify-center gap-4">
                 <button wire:click="cancelConversion" class="px-6 py-2.5 text-sm font-semibold text-slate-300 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors w-full">Cancel</button>
-                <button wire:click="confirmConversion" class="px-6 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors w-full">Confirm Convert</button>
+                <button wire:click="confirmConversion" wire:loading.attr="disabled" class="px-6 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors w-full disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    <span wire:loading.remove wire:target="confirmConversion">Confirm Convert</span>
+                    <span wire:loading wire:target="confirmConversion" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                    <span wire:loading wire:target="confirmConversion">Converting...</span>
+                </button>
             </div>
         </div>
     </div>

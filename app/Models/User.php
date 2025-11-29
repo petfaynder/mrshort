@@ -38,11 +38,16 @@ class User extends Authenticatable
         'referral_earnings',
         'gamification_points', // Gamification puanları
         'virtual_currency',    // Sanal para birimi
+        'referral_code',
+        'referred_by_user_id',
+        'payment_method',
+        'payment_account',
+        'theme_preference',
+        'allow_analytics',
+        'allow_personalized_ads',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
      * @var list<string>
      */
     protected $hidden = [

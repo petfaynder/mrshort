@@ -15,6 +15,8 @@ use App\Enums\CampaignType;
 use App\Enums\StepType;
 use App\Enums\AdType;
 use Carbon\Carbon; // Add this import
+use App\Services\CryptomusService; // Add Service
+use Illuminate\Support\Facades\Log; // Add Log
 
 class CreateAdCampaign extends Component
 {
@@ -34,6 +36,8 @@ class CreateAdCampaign extends Component
     public $budget = 0; // Yeni: Toplam bütçe
     public $run_until_budget_depleted = false; // Yeni: Bakiye bitene kadar devam et
 
+    public $payment_method = 'balance'; // Default to balance
+
     // Yeni: Hedefleme seçenekleri
     public $selectedDevices = [];
     public $selectedOs = [];
@@ -41,6 +45,7 @@ class CreateAdCampaign extends Component
     // Trafik Bilgileri (Salt okunur)
     public $estimated_traffic = 0;
     public $available_traffic = 0;
+    public $showConfirmModal = false;
 
     // Sabit değerler
     public $campaign_type = 'user';
@@ -62,12 +67,29 @@ class CreateAdCampaign extends Component
         'start_date' => 'nullable|date',
         'end_date' => 'nullable|date|after_or_equal:start_date|required_if:run_until_budget_depleted,false',
         'daily_click_limit' => 'nullable|integer|min:0', // Günlük tıklama limiti 0 olabilir (limitsiz)
+        'payment_method' => 'required|in:balance,crypto',
     ];
 
     public function mount()
     {
         $this->start_date = Carbon::now()->format('Y-m-d');
         $this->calculateCostAndTraffic();
+
+        // Initialize payment method based on balance availability
+        if ($this->isBalancePaymentAvailable()) {
+            $this->payment_method = 'balance';
+        } else {
+            $this->payment_method = 'crypto'; // Default to crypto if balance insufficient
+        }
+    }
+
+    public function isBalancePaymentAvailable()
+    {
+        $user = Auth::user();
+        // Check if user has enough balance (min $10 and covers cost)
+        // Note: calculated_cost might be 0 initially or change, so this check is dynamic in frontend
+        // Here we just check the minimum requirement to be safe or just return true and let validation handle specific cost
+        return $user->earnings >= 10;
     }
 
     public function updatedDesiredClicks()
@@ -83,6 +105,12 @@ class CreateAdCampaign extends Component
     public function updatedSelectedAgeRanges()
     {
         $this->calculateCostAndTraffic();
+    }
+
+    public function openConfirmationModal()
+    {
+        $this->validate();
+        $this->showConfirmModal = true;
     }
 
     public function calculateCostAndTraffic()
@@ -132,15 +160,23 @@ class CreateAdCampaign extends Component
         $this->estimated_traffic = min($this->desired_clicks * 2, $this->available_traffic); // İstenen tıklamanın 2 katı veya mevcut trafikten az
     }
 
-    public function createCampaign()
+    public function createCampaign(CryptomusService $cryptomusService)
     {
         $this->validate();
 
-        $targetingRules = [
-            'countries' => $this->selectedCountries,
-            'age_ranges' => $this->selectedAgeRanges,
-            // Cihaz, tarayıcı vb. gibi diğer hedeflemeler admin tarafından yönetilecek
-        ];
+        $user = Auth::user();
+
+        // Check Balance if payment method is balance
+        if ($this->payment_method === 'balance') {
+            if ($user->earnings < 10) {
+                $this->addError('payment_method', 'Minimum balance of $10.00 is required.');
+                return;
+            }
+            if ($user->earnings < $this->calculated_cost) {
+                $this->addError('payment_method', 'Insufficient balance to cover the estimated cost.');
+                return;
+            }
+        }
 
         $targetingRules = [
             'countries' => $this->selectedCountries,
@@ -150,10 +186,10 @@ class CreateAdCampaign extends Component
         ];
 
         $campaign = AdCampaign::create([
-            'user_id' => Auth::id(),
+            'user_id' => $user->id,
             'name' => $this->name,
             'campaign_type' => $this->campaign_type,
-            'is_active' => $this->is_active, // Admin onayı bekleniyor
+            'is_active' => false, // Initially false
             'targeting_rules' => $targetingRules,
             'daily_budget' => $this->daily_budget,
             'budget' => $this->budget,
@@ -166,7 +202,26 @@ class CreateAdCampaign extends Component
             'daily_click_limit' => $this->daily_click_limit,
             'estimated_traffic' => $this->estimated_traffic,
             'available_traffic' => $this->available_traffic,
+            'payment_status' => 'unpaid', // Set initial status
+            'payment_provider' => $this->payment_method,
         ]);
+
+        // Handle Payment
+        if ($this->payment_method === 'balance') {
+             // Deduct balance
+            $user->decrement('earnings', $this->calculated_cost);
+            $campaign->update(['payment_status' => 'paid']);
+        } elseif ($this->payment_method === 'crypto') {
+            try {
+                $paymentUrl = $cryptomusService->createPayment($this->calculated_cost, $campaign->id);
+                return redirect($paymentUrl);
+            } catch (\Exception $e) {
+                $this->addError('payment_method', 'Failed to initiate crypto payment: ' . $e->getMessage());
+                // Optionally delete campaign or mark as failed
+                $campaign->update(['payment_status' => 'failed']);
+                return;
+            }
+        }
 
         // Pop-up reklam içeriğini doğrudan AdCampaign modelinde saklayalım.
         // Bunun için ad_campaigns tablosuna 'popup_ad_data' (json) ve 'is_popup_campaign' (boolean)
@@ -197,7 +252,7 @@ class CreateAdCampaign extends Component
             ]),
         ]);
 
-        session()->flash('success', '🎉 Reklam kampanyanız oluşturuldu ve admin onayı bekleniyor!');
+        session()->flash('success', '🎉 Reklam kampanyanız oluşturuldu ve ödemesi bakiyenizden alındı. Admin onayı bekleniyor!');
 
         return redirect()->route('user.ads.index');
     }

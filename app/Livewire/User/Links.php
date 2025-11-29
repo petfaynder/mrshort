@@ -4,6 +4,7 @@ namespace App\Livewire\User;
 
 use App\Models\Link;
 use Livewire\Component;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -13,15 +14,28 @@ use Illuminate\Support\Facades\DB;
 
 class Links extends Component
 {
+    use WithPagination;
+
     protected $layout = 'components.user-dashboard-layout';
 
-    public $links;
+    // Filters & Sorting
+    public $search = '';
+    public $filterDate = '';
+    public $sortStr = 'newest';
+    
+    // Bulk Actions
+    public $selectedLinks = [];
+    public $selectAll = false;
+
+    // Creating/Editing
     public $original_url;
     public $editingLink = null;
     public $newOriginalUrl;
     public $newShortLink;
     public $newTitle;
     public $newExpiresAt;
+    
+    // Stats
     public $showingStats = null;
     public $statsData = [];
     public $performanceData = [];
@@ -33,14 +47,68 @@ class Links extends Component
         'newExpiresAt' => 'nullable|date',
     ];
 
-    public function mount()
+    // Reset pagination when filters change
+    public function updatedSearch() { $this->resetPage(); }
+    public function updatedFilterDate() { $this->resetPage(); }
+    public function updatedSortStr() { $this->resetPage(); }
+
+    public function updatedSelectAll($value)
     {
-        $this->loadLinks();
+        if ($value) {
+            $this->selectedLinks = $this->getLinksQuery()->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        } else {
+            $this->selectedLinks = [];
+        }
+    }
+
+    public function updatedSelectedLinks()
+    {
+        $this->selectAll = false;
     }
 
     public function render()
     {
-        return view('livewire.user.links');
+        $links = $this->getLinksQuery()->paginate(10);
+        $this->loadPerformanceData($links->items());
+
+        return view('livewire.user.links', [
+            'links' => $links
+        ]);
+    }
+
+    protected function getLinksQuery()
+    {
+        $query = Auth::user()->links()->where('is_hidden', false);
+
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('original_url', 'like', '%' . $this->search . '%')
+                  ->orWhere('code', 'like', '%' . $this->search . '%')
+                  ->orWhere('title', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        if ($this->filterDate) {
+            $query->whereDate('created_at', $this->filterDate);
+        }
+
+        switch ($this->sortStr) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'clicks_high':
+                $query->orderByDesc('clicks');
+                break;
+            case 'clicks_low':
+                $query->orderBy('clicks');
+                break;
+            case 'newest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        return $query;
     }
 
     public function shortenLink()
@@ -55,8 +123,8 @@ class Links extends Component
         ]);
 
         $this->original_url = ''; // Clear the input field
-        $this->loadLinks(); // Refresh the links list
-
+        $this->resetPage(); // Go to first page to see new link
+        
         session()->flash('message', 'Bağlantı başarıyla kısaltıldı.');
     }
 
@@ -66,9 +134,20 @@ class Links extends Component
 
         if ($link) {
             $link->delete();
-            $this->loadLinks();
             session()->flash('message', 'Bağlantı başarıyla silindi.');
         }
+    }
+
+    public function deleteSelected()
+    {
+        if (empty($this->selectedLinks)) return;
+
+        Auth::user()->links()->whereIn('id', $this->selectedLinks)->delete();
+        
+        $this->selectedLinks = [];
+        $this->selectAll = false;
+        
+        session()->flash('message', 'Seçilen bağlantılar başarıyla silindi.');
     }
 
     public function editLink($linkId)
@@ -99,7 +178,6 @@ class Links extends Component
             ]);
 
             $this->cancelEdit();
-            $this->loadLinks();
             session()->flash('message', 'Bağlantı başarıyla güncellendi.');
         }
     }
@@ -111,18 +189,6 @@ class Links extends Component
         $this->newShortLink = '';
         $this->newTitle = '';
         $this->newExpiresAt = null;
-    }
-
-    public function toggleHiddenStatus($linkId)
-    {
-        $link = Auth::user()->links()->find($linkId);
-
-        if ($link) {
-            $link->is_hidden = !$link->is_hidden;
-            $link->save();
-            $this->loadLinks();
-            session()->flash('message', 'Bağlantı gizlilik durumu güncellendi.');
-        }
     }
 
     public function toggleStats($linkId)
@@ -142,39 +208,25 @@ class Links extends Component
         $link = Auth::user()->links()->find($linkId);
 
         if ($link) {
-            Log::info('Loading stats for link ID: ' . $linkId);
             $this->statsData = $link->clicks()
                 ->selectRaw('DATE(created_at) as click_date, count(*) as total_clicks')
                 ->where('created_at', '>=', now()->subDays(7))
                 ->groupBy('click_date')
                 ->orderBy('click_date')
                 ->get();
-            Log::info('Stats data loaded: ' . json_encode($this->statsData));
-        } else {
-            Log::warning('Link not found for stats: ' . $linkId);
         }
     }
 
-    public function shareLink($linkId)
+    // Simplified performance data loading for current page links
+    protected function loadPerformanceData($currentLinks)
     {
-        $link = Auth::user()->links()->find($linkId);
-
-        if ($link) {
-            $gamificationService = app(GamificationService::class);
-            $gamificationService->updateGoalProgress($link->user, 'shares', 1);
-            session()->flash('message', 'Bağlantı paylaşım hedefi güncellendi.');
+        $currentLinksCollection = collect($currentLinks);
+        if ($currentLinksCollection->isEmpty()) {
+            $this->performanceData = [];
+            return;
         }
-    }
 
-    protected function loadLinks()
-    {
-        $this->links = Auth::user()->links()->where('is_hidden', false)->get();
-        $this->loadPerformanceData();
-    }
-
-    protected function loadPerformanceData()
-    {
-        $linkIds = $this->links->pluck('id');
+        $linkIds = $currentLinksCollection->pluck('id');
         $startDate = Carbon::now()->subDays(6)->startOfDay();
         $endDate = Carbon::now()->endOfDay();
 
@@ -191,7 +243,7 @@ class Links extends Component
             ->groupBy('link_id');
 
         $this->performanceData = [];
-        foreach ($this->links as $link) {
+        foreach ($currentLinks as $link) {
             $linkClicks = $clicks->get($link->id, collect())->keyBy('date');
             $dailyClicks = [];
             for ($i = 0; $i < 7; $i++) {

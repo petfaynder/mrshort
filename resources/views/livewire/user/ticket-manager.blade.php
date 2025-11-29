@@ -121,8 +121,10 @@
                 @error('newTicketMessage') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
             </div>
             <div class="pt-2 flex justify-end">
-                <button class="inline-flex justify-center rounded-md border border-transparent bg-gradient-to-b from-blue-500 to-blue-600 py-2 px-6 text-sm font-medium text-white shadow-sm hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-primary-darker focus:ring-offset-2 dark:focus:ring-offset-slate-900" type="submit">
-                    Send
+                <button type="submit" wire:loading.attr="disabled" class="inline-flex justify-center rounded-md border border-transparent bg-gradient-to-b from-blue-500 to-blue-600 py-2 px-6 text-sm font-medium text-white shadow-sm hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-primary-darker focus:ring-offset-2 dark:focus:ring-offset-slate-900 disabled:opacity-75 disabled:cursor-not-allowed gap-2 items-center">
+                    <span wire:loading.remove wire:target="createTicket">Send</span>
+                    <span wire:loading wire:target="createTicket" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                    <span wire:loading wire:target="createTicket">Sending...</span>
                 </button>
             </div>
         </form>
@@ -256,8 +258,10 @@
                     <textarea wire:model="userReply" class="block w-full rounded-md border-slate-600 bg-slate-900 text-white placeholder:text-slate-400 focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm" placeholder="Type your reply..." rows="3"></textarea>
                     @error('userReply') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     <div class="mt-3 flex justify-end gap-3">
-                        <button type="submit" class="inline-flex justify-center rounded-md border border-transparent bg-primary py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-primary-darker focus:outline-none focus:ring-2 focus:ring-primary-darker focus:ring-offset-2 dark:focus:ring-offset-slate-800">
-                            Reply
+                        <button type="submit" wire:loading.attr="disabled" class="inline-flex justify-center rounded-md border border-transparent bg-primary py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-primary-darker focus:outline-none focus:ring-2 focus:ring-primary-darker focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:opacity-75 disabled:cursor-not-allowed gap-2 items-center">
+                            <span wire:loading.remove wire:target="sendUserReply">Reply</span>
+                            <span wire:loading wire:target="sendUserReply" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                            <span wire:loading wire:target="sendUserReply">Sending...</span>
                         </button>
                     </div>
                 </form>

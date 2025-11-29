@@ -3,13 +3,13 @@
         <div class="flex flex-col gap-8">
             <div class="flex flex-col flex-wrap justify-between gap-4 sm:flex-row sm:items-center">
                 <div class="flex min-w-72 flex-col gap-2">
-                <p class="text-3xl font-black leading-tight tracking-[-0.033em] text-gray-900 dark:text-white">Welcome back, Admin User</p>
+                <p class="text-3xl font-black leading-tight tracking-[-0.033em] text-gray-900 dark:text-white">Welcome back, {{ Auth::user()->name }}</p>
                 <p class="text-base font-normal leading-normal text-gray-500 dark:text-gray-400">Here's your link management dashboard.</p>
             </div>
             <div class="flex flex-wrap gap-4">
                 <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900/50">
                     <p class="text-base font-medium leading-normal text-gray-600 dark:text-gray-300">Current Balance</p>
-                    <p class="tracking-light text-2xl font-bold leading-tight text-gray-900 dark:text-white">$1,234.56</p>
+                    <p class="tracking-light text-2xl font-bold leading-tight text-gray-900 dark:text-white">${{ number_format(Auth::user()->earniigss ?? 0, 2) }}</p>
                 </div>
             </div>
         </div>
@@ -18,10 +18,11 @@
             <form wire:submit.prevent.stop="shortenLink" class="flex flex-col gap-3 sm:flex-row sm:items-end">
                 <label class="flex flex-col flex-1">
                     <span class="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Destination URL</span>
-                    <input type="url" wire:model="original_url" id="original_url" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border border-gray-300 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-background-dark dark:text-white dark:placeholder:text-gray-500 h-14 p-[15px] text-base font-normal leading-normal @error('original_url') border-red-500 @enderror" placeholder="https://enter-a-long-url-to-shorten.com/..." value=""/>
+                    <input type="url" wire:model="original_url" id="original_url" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border border-gray-300 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-background-dark dark:text-white dark:placeholder:text-gray-500 h-14 p-[15px] text-base font-normal leading-normal @error('original_url') border-red-500 @enderror" placeholder="https://enter-a-long-url-to-shorten.com/..." />
                 </label>
-                <button type="submit" class="flex h-14 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-6 text-base font-bold text-white transition-colors hover:bg-primary/90">
-                    <span class="truncate">Shorten</span>
+                <button type="submit" wire:loading.attr="disabled" class="flex h-14 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-6 text-base font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-75 disabled:cursor-not-allowed">
+                    <span wire:loading.remove wire:target="shortenLink" class="truncate">Shorten</span>
+                    <span wire:loading wire:target="shortenLink" class="material-symbols-outlined animate-spin">progress_activity</span>
                 </button>
             </form>
             @error('original_url')
@@ -41,39 +42,33 @@
                 <div class="flex w-full flex-col gap-3 lg:flex-row lg:items-center">
                     <div class="relative w-full flex-1">
                         <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-                        <input class="form-input w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-background-dark dark:text-white" placeholder="Search links by URL or alias..." type="text"/>
+                        <input wire:model.live.debounce.300ms="search" class="form-input w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-background-dark dark:text-white" placeholder="Search links by URL or alias..." type="text"/>
                     </div>
                     <div class="flex flex-wrap items-center gap-3 sm:flex-nowrap">
-                        <select class="form-select w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-background-dark dark:text-white sm:w-auto">
-                            <option>All Tags</option>
-                            <option>Social Media</option>
-                            <option>Campaign</option>
-                            <option>Personal</option>
-                        </select>
-                        <input class="form-input w-full rounded-lg border border-gray-300 bg-white py-2 px-3 text-sm text-gray-500 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-background-dark dark:text-gray-400 sm:w-auto" type="date"/>
-                        <select class="form-select w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-background-dark dark:text-white sm:w-auto">
-                            <option>Sort by: Newest</option>
-                            <option>Sort by: Oldest</option>
-                            <option>Sort by: Clicks (High to Low)</option>
-                            <option>Sort by: Clicks (Low to High)</option>
+                        <input wire:model.live="filterDate" class="form-input w-full rounded-lg border border-gray-300 bg-white py-2 px-3 text-sm text-gray-500 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-background-dark dark:text-gray-400 sm:w-auto" type="date"/>
+                        <select wire:model.live="sortStr" class="form-select w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-background-dark dark:text-white sm:w-auto">
+                            <option value="newest">Sort by: Newest</option>
+                            <option value="oldest">Sort by: Oldest</option>
+                            <option value="clicks_high">Sort by: Clicks (High to Low)</option>
+                            <option value="clicks_low">Sort by: Clicks (Low to High)</option>
                         </select>
                     </div>
                 </div>
             </div>
+            
+            @if(count($selectedLinks) > 0)
             <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 dark:border-gray-800 dark:bg-gray-900">
-                <span class="text-sm font-medium text-gray-600 dark:text-gray-300">3 links selected</span>
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ count($selectedLinks) }} links selected</span>
                 <div class="flex items-center gap-2">
-                    <button class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-800">
-                        <span class="material-symbols-outlined text-sm">label</span> Tag
-                    </button>
-                    <button class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-800">
-                        <span class="material-symbols-outlined text-sm">toggle_on</span> Activate
-                    </button>
-                    <button class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-500/10">
-                        <span class="material-symbols-outlined text-sm">delete</span> Delete
+                    <button wire:click="deleteSelected" wire:loading.attr="disabled" onclick="confirm('Are you sure you want to delete selected links?') || event.stopImmediatePropagation()" class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-500/10 disabled:opacity-75 disabled:cursor-not-allowed">
+                        <span wire:loading.remove wire:target="deleteSelected" class="material-symbols-outlined text-sm">delete</span>
+                        <span wire:loading wire:target="deleteSelected" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                        Delete Selected
                     </button>
                 </div>
             </div>
+            @endif
+
             <div class="w-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
                 <div class="overflow-x-auto">
                     <table class="w-full min-w-[1200px] text-left text-sm">
@@ -81,13 +76,12 @@
                             <tr>
                                 <th class="p-4" scope="col">
                                     <div class="flex items-center">
-                                        <input class="form-checkbox h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary focus:ring-2 focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800" id="checkbox-all" type="checkbox"/>
+                                        <input wire:model.live="selectAll" class="form-checkbox h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary focus:ring-2 focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800" id="checkbox-all" type="checkbox"/>
                                         <label class="sr-only" for="checkbox-all">select all links</label>
                                     </div>
                                 </th>
                                 <th class="px-6 py-3 font-medium" scope="col">Short Link</th>
                                 <th class="px-6 py-3 font-medium" scope="col">Original URL</th>
-                                <th class="px-6 py-3 font-medium" scope="col">Tags</th>
                                 <th class="px-6 py-3 font-medium text-center" scope="col">Clicks</th>
                                 <th class="px-6 py-3 font-medium text-center" scope="col">Performance (7d)</th>
                                 <th class="px-6 py-3 font-medium" scope="col">Created At</th>
@@ -100,7 +94,7 @@
                                     <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-900">
                                         <td class="w-4 p-4">
                                             <div class="flex items-center">
-                                                <input class="form-checkbox h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary focus:ring-2 focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800" id="checkbox-{{ $link->id }}" type="checkbox"/>
+                                                <input wire:model.live="selectedLinks" value="{{ $link->id }}" class="form-checkbox h-4 w-4 rounded border-gray-300 bg-gray-100 text-primary focus:ring-2 focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800" id="checkbox-{{ $link->id }}" type="checkbox"/>
                                                 <label class="sr-only" for="checkbox-{{ $link->id }}">select link {{ $link->id }}</label>
                                             </div>
                                         </td>
@@ -117,13 +111,6 @@
                                             </div>
                                         </td>
                                         <td class="max-w-xs truncate px-6 py-4 font-medium text-gray-900 dark:text-white" title="{{ $link->original_url }}"><a class="hover:underline" href="{{ $link->original_url }}" target="_blank">{{ Str::limit($link->original_url, 50) }}</a></td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex flex-wrap gap-1">
-                                                {{-- Tags will be implemented later if needed --}}
-                                                <span class="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-300">Campaign</span>
-                                                <span class="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-300">Social</span>
-                                            </div>
-                                        </td>
                                         <td class="whitespace-nowrap px-6 py-4 text-center">{{ $link->clicks }}</td>
                                         <td class="px-6 py-4">
                                             <div class="flex h-8 w-24 items-end gap-0.5" x-data="{
@@ -149,8 +136,10 @@
                                                 <button wire:click="editLink({{ $link->id }})" class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
                                                     <span class="material-symbols-outlined text-sm">settings</span> Details
                                                 </button>
-                                                <button wire:click="deleteLink({{ $link->id }})" onclick="confirm('Are you sure you want to delete this link?') || event.stopImmediatePropagation()" class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-500/10">
-                                                    <span class="material-symbols-outlined text-sm">delete</span> Delete
+                                                <button wire:click="deleteLink({{ $link->id }})" wire:loading.attr="disabled" onclick="confirm('Are you sure you want to delete this link?') || event.stopImmediatePropagation()" class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-500/10 disabled:opacity-75 disabled:cursor-not-allowed">
+                                                    <span wire:loading.remove wire:target="deleteLink({{ $link->id }})" class="material-symbols-outlined text-sm">delete</span>
+                                                    <span wire:loading wire:target="deleteLink({{ $link->id }})" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                                                    Delete
                                                 </button>
                                             </div>
                                         </td>
@@ -203,16 +192,9 @@
                 </div>
             </div>
             {{-- Pagination --}}
-            <nav aria-label="Table navigation" class="flex flex-col items-center justify-between gap-4 py-3 sm:flex-row">
-                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">Showing <span class="font-semibold text-gray-900 dark:text-white">1-10</span> of <span class="font-semibold text-gray-900 dark:text-white">1000</span></span>
-                <div class="inline-flex h-8 -space-x-px text-sm">
-                    <a class="flex items-center justify-center rounded-l-lg border border-gray-300 bg-white px-3 leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white" href="#">Previous</a>
-                    <a aria-current="page" class="z-10 flex items-center justify-center border border-primary bg-primary/20 px-3 leading-tight text-primary hover:bg-primary/30 hover:text-primary dark:border-gray-700 dark:bg-gray-700 dark:text-white" href="#">1</a>
-                    <a class="flex items-center justify-center border border-gray-300 bg-white px-3 leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white" href="#">2</a>
-                    <a class="flex items-center justify-center border border-gray-300 bg-white px-3 leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white" href="#">3</a>
-                    <a class="flex items-center justify-center rounded-r-lg border border-gray-300 bg-white px-3 leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white" href="#">Next</a>
-                </div>
-            </nav>
+            <div class="mt-4">
+                {{ $links->links() }}
+            </div>
         </div>
     </div>
 </div>
@@ -255,29 +237,14 @@
                             @error('newExpiresAt') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
                     </div>
-                    <div class="space-y-2">
-                        <h4 class="font-semibold text-gray-800 dark:text-gray-200">Tags</h4>
-                        <div class="flex flex-wrap items-center gap-2 rounded-lg border border-gray-300 p-2 dark:border-gray-700">
-                            {{-- Tags will be implemented later if needed --}}
-                            <div class="flex items-center gap-1 rounded bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                                <span>Campaign</span>
-                                <button class="text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-100">
-                                    <span class="material-symbols-outlined !text-sm">close</span>
-                                </button>
-                            </div>
-                            <div class="flex items-center gap-1 rounded bg-purple-100 px-2 py-1 text-sm text-purple-800 dark:bg-purple-900 dark:text-purple-300">
-                                <span>Social</span>
-                                <button class="text-purple-600 hover:text-purple-800 dark:text-purple-300 dark:hover:text-purple-100">
-                                    <span class="material-symbols-outlined !text-sm">close</span>
-                                </button>
-                            </div>
-                            <input class="min-w-0 flex-1 bg-transparent p-1 text-sm text-gray-900 placeholder-gray-500 focus:outline-none dark:text-white" placeholder="Add a tag..." type="text"/>
-                        </div>
-                    </div>
                 </div>
                 <div class="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900/50">
                     <button type="button" wire:click="cancelEdit" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">Cancel</button>
-                    <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">Save Changes</button>
+                    <button type="submit" wire:loading.attr="disabled" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-75 disabled:cursor-not-allowed flex items-center gap-2">
+                        <span wire:loading.remove wire:target="updateLink">Save Changes</span>
+                        <span wire:loading wire:target="updateLink" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                        <span wire:loading wire:target="updateLink">Saving...</span>
+                    </button>
                 </div>
             </form>
         </div>

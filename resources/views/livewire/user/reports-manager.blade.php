@@ -31,15 +31,11 @@
                 <h3 class="text-lg font-bold text-white">Coğrafi Yoğunluk Haritası</h3>
                 <div class="flex items-center gap-2 text-sm text-gray-400">
                     <span>Düşük</span>
-                    <div class="flex h-3 w-32 rounded-full overflow-hidden">
-                        <div class="w-1/4 h-full bg-blue-900"></div>
-                        <div class="w-1/4 h-full bg-blue-700"></div>
-                        <div class="w-1/4 h-full bg-blue-500"></div>
-                        <div class="w-1/4 h-full bg-cyan-300"></div>
-                    </div>
+                    <div class="h-3 w-32 rounded-full" style="background: linear-gradient(to right, #2c3e50, #00f2ff);"></div>
                     <span>Yüksek</span>
-                    <button wire:click="exportCsv('countries')" class="flex items-center gap-2 font-medium hover:text-white ml-2">
-                        <span class="material-symbols-outlined !text-base">download</span>
+                    <button wire:click="exportCsv('countries')" wire:loading.attr="disabled" class="flex items-center gap-2 font-medium hover:text-white ml-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span wire:loading.remove wire:target="exportCsv('countries')" class="material-symbols-outlined !text-base">download</span>
+                        <span wire:loading wire:target="exportCsv('countries')" class="material-symbols-outlined !text-base animate-spin">progress_activity</span>
                     </button>
                 </div>
             </div>
@@ -51,8 +47,9 @@
             <div class="bg-gray-900 rounded-xl border border-gray-800">
                 <div class="p-4 flex justify-between items-center border-b border-gray-800">
                     <h3 class="text-lg font-bold text-white">Cihaz Türleri</h3>
-                    <button wire:click="exportCsv('device_types')" class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white">
-                        <span class="material-symbols-outlined !text-base">download</span>
+                    <button wire:click="exportCsv('device_types')" wire:loading.attr="disabled" class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span wire:loading.remove wire:target="exportCsv('device_types')" class="material-symbols-outlined !text-base">download</span>
+                        <span wire:loading wire:target="exportCsv('device_types')" class="material-symbols-outlined !text-base animate-spin">progress_activity</span>
                     </button>
                 </div>
                 <ul class="divide-y divide-gray-800">
@@ -75,8 +72,9 @@
             <div class="bg-gray-900 rounded-xl border border-gray-800">
                 <div class="p-4 flex justify-between items-center border-b border-gray-800">
                     <h3 class="text-lg font-bold text-white">İşletim Sistemleri</h3>
-                    <button wire:click="exportCsv('operating_systems')" class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white">
-                        <span class="material-symbols-outlined !text-base">download</span>
+                    <button wire:click="exportCsv('operating_systems')" wire:loading.attr="disabled" class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span wire:loading.remove wire:target="exportCsv('operating_systems')" class="material-symbols-outlined !text-base">download</span>
+                        <span wire:loading wire:target="exportCsv('operating_systems')" class="material-symbols-outlined !text-base animate-spin">progress_activity</span>
                     </button>
                 </div>
                 <ul class="divide-y divide-gray-800">
@@ -91,8 +89,9 @@
             <div class="bg-gray-900 rounded-xl border border-gray-800">
                 <div class="p-4 flex justify-between items-center border-b border-gray-800">
                     <h3 class="text-lg font-bold text-white">Tarayıcılar</h3>
-                    <button wire:click="exportCsv('browsers')" class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white">
-                        <span class="material-symbols-outlined !text-base">download</span>
+                    <button wire:click="exportCsv('browsers')" wire:loading.attr="disabled" class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span wire:loading.remove wire:target="exportCsv('browsers')" class="material-symbols-outlined !text-base">download</span>
+                        <span wire:loading wire:target="exportCsv('browsers')" class="material-symbols-outlined !text-base animate-spin">progress_activity</span>
                     </button>
                 </div>
                 <ul class="divide-y divide-gray-800">
@@ -109,8 +108,9 @@
             <div class="bg-gray-900 rounded-xl border border-gray-800">
                 <div class="p-4 flex justify-between items-center border-b border-gray-800">
                     <h3 class="text-lg font-bold text-white">Yönlendiren Domainler</h3>
-                    <button wire:click="exportCsv('referrers')" class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white">
-                        <span class="material-symbols-outlined !text-base">download</span>
+                    <button wire:click="exportCsv('referrers')" wire:loading.attr="disabled" class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span wire:loading.remove wire:target="exportCsv('referrers')" class="material-symbols-outlined !text-base">download</span>
+                        <span wire:loading wire:target="exportCsv('referrers')" class="material-symbols-outlined !text-base animate-spin">progress_activity</span>
                     </button>
                 </div>
                 <ul class="divide-y divide-gray-800">
@@ -125,14 +125,20 @@
             <div class="bg-gray-900 rounded-xl border border-gray-800">
                 <div class="p-4 flex justify-between items-center border-b border-gray-800">
                     <h3 class="text-lg font-bold text-white">En çok tıklama alınan Ülkeler</h3>
-                    <button wire:click="exportCsv('countries_table')" class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white">
-                        <span class="material-symbols-outlined !text-base">download</span>
+                    <button wire:click="exportCsv('countries_table')" wire:loading.attr="disabled" class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span wire:loading.remove wire:target="exportCsv('countries_table')" class="material-symbols-outlined !text-base">download</span>
+                        <span wire:loading wire:target="exportCsv('countries_table')" class="material-symbols-outlined !text-base animate-spin">progress_activity</span>
                     </button>
                 </div>
                 <ul class="divide-y divide-gray-800">
                     @foreach(collect($clicksByCountryChartData['labels'])->zip($clicksByCountryChartData['data'])->sortByDesc(1)->take(4) as $country)
                     <li class="p-4 flex justify-between items-center">
-                        <span class="text-sm font-medium text-white">{{ $country[0] ?? 'Bilinmiyor' }}</span>
+                        <div class="flex items-center gap-2">
+                            @if($country[0] && $country[0] !== 'Bilinmiyor')
+                                <span class="fi fi-{{ strtolower($country[0]) }}"></span>
+                            @endif
+                            <span class="text-sm font-medium text-white">{{ $country[0] ?? 'Bilinmiyor' }}</span>
+                        </div>
                         <span class="text-sm font-semibold text-gray-300">{{ number_format($country[1]) }}</span>
                     </li>
                     @endforeach
@@ -143,8 +149,9 @@
             <div class="bg-gray-900 rounded-xl border border-gray-800 md:col-span-2 p-6 flex flex-col justify-between">
                 <div class="flex justify-between items-start">
                     <h3 class="text-lg font-bold text-white">İnsan Tıklaması</h3>
-                    <button wire:click="exportCsv('bot_status')" class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white">
-                        <span class="material-symbols-outlined !text-base">download</span>
+                    <button wire:click="exportCsv('bot_status')" wire:loading.attr="disabled" class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span wire:loading.remove wire:target="exportCsv('bot_status')" class="material-symbols-outlined !text-base">download</span>
+                        <span wire:loading wire:target="exportCsv('bot_status')" class="material-symbols-outlined !text-base animate-spin">progress_activity</span>
                     </button>
                 </div>
                 <div class="mt-4 flex-1 flex flex-col items-center justify-center text-center">
@@ -190,8 +197,9 @@
         <div class="mt-6 bg-gray-900 rounded-xl border border-gray-800">
             <div class="p-4 flex justify-between items-center border-b border-gray-800">
                 <h3 class="text-lg font-bold text-white">Linklere Göre Tıklamalar</h3>
-                <button wire:click="exportCsv('links')" class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white">
-                    <span class="material-symbols-outlined !text-base">download</span>
+                <button wire:click="exportCsv('links')" wire:loading.attr="disabled" class="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span wire:loading.remove wire:target="exportCsv('links')" class="material-symbols-outlined !text-base">download</span>
+                    <span wire:loading wire:target="exportCsv('links')" class="material-symbols-outlined !text-base animate-spin">progress_activity</span>
                     <span>CSV Export</span>
                 </button>
             </div>
@@ -279,10 +287,16 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     polygonSeries.mapPolygons.template.states.create("hover", {
-        fill: am5.color(0x67e8f9)
+        fill: am5.color(0x00f2ff)
     });
 
-    
+    polygonSeries.heatRules.push({
+        target: polygonSeries.mapPolygons.template,
+        dataField: "value",
+        min: am5.color(0x2c3e50),
+        max: am5.color(0x00f2ff),
+        key: "fill"
+    });
 
     function updateData(data) {
         console.log("Updating map data:", data);
@@ -291,20 +305,11 @@ document.addEventListener("DOMContentLoaded", function() {
             for (var i = 0; i < data.labels.length; i++) {
                 heatData.push({
                     id: data.labels[i],
-                    value: data.data[i]
+                    value: Number(data.data[i])
                 });
             }
         }
         
-        polygonSeries.set("heatRules", [{
-            target: polygonSeries.mapPolygons.template,
-            key: "fill",
-            min: am5.color(0x1e3a8a),
-            max: am5.color(0x67e8f9),
-            dataField: "value",
-            logarithmic: true
-        }]);
-
         polygonSeries.data.setAll(heatData);
         console.log("Map data updated successfully.");
     }

@@ -28,9 +28,15 @@
             </div>
             <div class="flex flex-col gap-4 pt-8">
                 <h3 class="text-lg font-bold leading-tight tracking-[-0.015em] text-heading-light dark:text-heading-dark">Invite New Users</h3>
-                <div class="flex flex-col sm:flex-row items-center gap-2 p-4 rounded-lg border border-border-light dark:border-border-dark">
-                    <input class="w-full flex-1 bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark text-heading-light dark:text-heading-dark rounded-lg px-3 h-10 focus:outline-none focus:ring-2 focus:ring-primary" readonly="" type="text" value="{{ route('register', ['ref' => auth()->user()->referral_code]) }}"/>
-                    <button class="flex items-center justify-center gap-2 h-10 px-4 rounded-lg bg-primary text-white text-sm font-bold w-full sm:w-auto hover:bg-primary/90 transition-colors">
+                <div class="flex flex-col sm:flex-row items-center gap-2 p-4 rounded-lg border border-border-light dark:border-border-dark" x-data="{ 
+                    referralLink: '{{ route('register', ['referral_code' => auth()->user()->referral_code]) }}',
+                    copyToClipboard() {
+                        navigator.clipboard.writeText(this.referralLink);
+                        $dispatch('notify', { message: 'Referral link copied to clipboard!', type: 'success' });
+                    }
+                }">
+                    <input class="w-full flex-1 bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark text-heading-light dark:text-heading-dark rounded-lg px-3 h-10 focus:outline-none focus:ring-2 focus:ring-primary" readonly type="text" x-model="referralLink"/>
+                    <button @click="copyToClipboard()" class="flex items-center justify-center gap-2 h-10 px-4 rounded-lg bg-primary text-white text-sm font-bold w-full sm:w-auto hover:bg-primary/90 transition-colors">
                         <span class="material-symbols-outlined text-base">content_copy</span>
                         <span>Copy Link</span>
                     </button>

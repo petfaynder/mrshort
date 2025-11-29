@@ -32,9 +32,7 @@ Route::middleware('auth')->group(function () {
         return view('user.hidden-links.index'); // Hidden Links management view
     })->name('user.hidden-links.index');
 
-    Route::get('/user/withdrawals', function () {
-        return view('user.withdrawals.index'); // Withdrawals view
-    })->name('user.withdrawals');
+    Route::get('/user/withdrawals', \App\Livewire\User\Withdrawals::class)->name('user.withdrawals');
 
     Route::get('/user/tools', function () {
         return view('user.tools.index'); // Tools view (placeholder)
@@ -50,9 +48,7 @@ Route::middleware('auth')->group(function () {
         return view('user.reports.index'); // Reports view (placeholder)
     })->name('user.reports');
 
-    Route::get('/user/settings', function () {
-        return view('user.settings.index'); // Settings view (placeholder)
-    })->name('user.settings');
+    Route::get('/user/settings', \App\Livewire\User\Settings::class)->name('user.settings');
 
     // Gamification Routes
     Route::get('/user/inventory', \App\Livewire\User\Inventory::class)->name('user.inventory');
@@ -73,6 +69,9 @@ Route::middleware('auth')->group(function () {
 
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\UserController; // Add this line
+use App\Http\Controllers\PaymentController; // Add this line
+
+Route::post('/payment/cryptomus/callback', [PaymentController::class, 'cryptomusCallback'])->name('payment.cryptomus.callback');
 
 Route::middleware('auth')->group(function () {
     // ... (existing auth routes)

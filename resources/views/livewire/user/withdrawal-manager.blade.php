@@ -21,8 +21,10 @@
                 @error('paymentMethod') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
             </div>
             <div class="flex items-center justify-between">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Talep Oluştur
+                <button type="submit" wire:loading.attr="disabled" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-75 disabled:cursor-not-allowed flex items-center gap-2">
+                    <span wire:loading.remove wire:target="createWithdrawalRequest">Talep Oluştur</span>
+                    <span wire:loading wire:target="createWithdrawalRequest" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                    <span wire:loading wire:target="createWithdrawalRequest">Oluşturuluyor...</span>
                 </button>
             </div>
         </form>

@@ -2,9 +2,18 @@
     <div class="max-w-4xl mx-auto">
         <div class="flex justify-center mb-8">
             <div class="bg-surface-light dark:bg-surface-dark p-1.5 rounded-lg shadow-sm flex items-center gap-2">
-                <button wire:click="$set('filter', 'all_time')" class="px-4 py-2 text-sm font-semibold rounded-md {{ $filter === 'all_time' ? 'bg-primary text-white' : 'text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors">Tüm Zamanlar</button>
-                <button wire:click="$set('filter', 'monthly')" class="px-4 py-2 text-sm font-semibold rounded-md {{ $filter === 'monthly' ? 'bg-primary text-white' : 'text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors">Aylık</button>
-                <button wire:click="$set('filter', 'weekly')" class="px-4 py-2 text-sm font-semibold rounded-md {{ $filter === 'weekly' ? 'bg-primary text-white' : 'text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors">Haftalık</button>
+                <button wire:click="$set('filter', 'all_time')" class="px-4 py-2 text-sm font-semibold rounded-md {{ $filter === 'all_time' ? 'bg-primary text-white' : 'text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors flex items-center gap-2">
+                    <span wire:loading wire:target="$set('filter', 'all_time')" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                    Tüm Zamanlar
+                </button>
+                <button wire:click="$set('filter', 'monthly')" class="px-4 py-2 text-sm font-semibold rounded-md {{ $filter === 'monthly' ? 'bg-primary text-white' : 'text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors flex items-center gap-2">
+                    <span wire:loading wire:target="$set('filter', 'monthly')" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                    Aylık
+                </button>
+                <button wire:click="$set('filter', 'weekly')" class="px-4 py-2 text-sm font-semibold rounded-md {{ $filter === 'weekly' ? 'bg-primary text-white' : 'text-muted-light dark:text-muted-dark hover:bg-gray-100 dark:hover:bg-gray-700' }} transition-colors flex items-center gap-2">
+                    <span wire:loading wire:target="$set('filter', 'weekly')" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                    Haftalık
+                </button>
             </div>
         </div>
 
