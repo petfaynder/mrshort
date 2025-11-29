@@ -97,17 +97,27 @@ class ReportsManager extends Component
         $this->totalEarnings = $clicks->sum('cpm_rate') / 1000; // CPM oranına göre toplam kazanç
 
         // Ülkelere göre tıklama dağılımı
-        $clicksByCountry = $clicks->groupBy('country_id')->map(function ($group, $countryId) {
-            $countryModel = \App\Models\Country::find($countryId); // Country modelini doğrudan ID ile çek
-            $countryName = $countryModel ? $countryModel->iso_code : 'Bilinmiyor';
+        $clicksByCountry = $clicks->groupBy(function ($click) {
+            // ISO kodunu öncelikle 'country' sütunundan al, yoksa ilişkiden çek
+            if (!empty($click->country)) {
+                return $click->country;
+            }
+            if ($click->country_id && $click->relationLoaded('country') && $click->country) {
+                 return $click->country->iso_code;
+            }
+            return 'Bilinmiyor';
+        })->map(function ($group, $isoCode) {
+            // ISO koduna göre modeli bul (Flag veya isim gösterimi için gerekebilir)
+            $countryModel = \App\Models\Country::where('iso_code', $isoCode)->first();
             return [
                 'country' => $countryModel,
+                'iso_code' => $isoCode,
                 'total' => $group->count(),
             ];
         })->sortByDesc('total');
 
         $this->clicksByCountryChartData = [
-            'labels' => $clicksByCountry->pluck('country.iso_code')->map(fn($iso) => $iso ?? 'Bilinmiyor')->toArray(),
+            'labels' => $clicksByCountry->keys()->toArray(),
             'data' => $clicksByCountry->pluck('total')->toArray(),
         ];
 
