@@ -23,22 +23,38 @@ class AnnouncementResource extends Resource
 {
     protected static ?string $model = Announcement::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-megaphone';
+    
+    protected static ?string $navigationGroup = 'Destek';
+    
+    protected static ?string $navigationLabel = 'Duyurular';
+    
+    protected static ?string $modelLabel = 'Duyuru';
+    
+    protected static ?string $pluralModelLabel = 'Duyurular';
+    
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('title')
+                    ->label('Başlık')
                     ->required()
                     ->maxLength(255),
                 Textarea::make('content')
+                    ->label('İçerik')
                     ->required()
                     ->columnSpanFull(),
-                DateTimePicker::make('published_at'),
-                DateTimePicker::make('expires_at'),
-                Checkbox::make('is_active'),
-                Checkbox::make('is_notification'),
+                DateTimePicker::make('published_at')
+                    ->label('Yayın Tarihi'),
+                DateTimePicker::make('expires_at')
+                    ->label('Bitiş Tarihi'),
+                Checkbox::make('is_active')
+                    ->label('Aktif'),
+                Checkbox::make('is_notification')
+                    ->label('Bildirim Olarak Gönder'),
             ]);
     }
 

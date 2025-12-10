@@ -1,653 +1,836 @@
 <!DOCTYPE html>
-<html class="dark" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Link Monetizer</title>
-@vite(['resources/css/app.css', 'resources/js/app.js'])
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>MrShort - Monetize Your Links | Highest CPM Rates</title>
+    <meta name="description" content="Turn your links into revenue with MrShort. Get the highest CPM rates in the industry, instant payouts, and powerful analytics."/>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-white font-display">
-<header class="fixed top-0 left-0 right-0 z-50 bg-hero-bg/80 backdrop-blur-md border-b border-gray-800">
-<nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-<div class="flex items-center justify-between h-20">
-<div class="flex items-center">
-<a class="flex-shrink-0" href="{{ url('/') }}">
-<span class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-bright-magenta">{{ config('app.name', 'Link Monetizer') }}</span>
-</a>
-</div>
-<div class="hidden md:block">
-<div class="ml-10 flex items-baseline space-x-4">
-<a class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium" href="#">Features</a>
-<a class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium" href="#">Rates</a>
-<a class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium" href="#">Partners</a>
-<a class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium" href="{{ route('user.contact') }}">Contact</a>
-</div>
-</div>
-<div class="flex items-center">
-@auth
-    <a class="hidden md:block text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium" href="{{ route('dashboard') }}">Dashboard</a>
-@else
-    <a class="hidden md:block text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium" href="{{ route('login') }}">Login</a>
-    <a class="ml-4 inline-block bg-gradient-to-r from-electric-blue to-bright-magenta text-white font-bold py-2 px-4 rounded-full hover:scale-105 transition-transform duration-300 text-sm" href="{{ route('register') }}">Sign Up</a>
-@endauth
-</div>
-</div>
-</nav>
-</header>
-<div class="relative min-h-screen w-full flex flex-col lg:flex-row overflow-hidden pt-20 hero-section">
-<video autoplay="" id="hero-video" loop="" muted="" playsinline="">
-<source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-background-of-digital-binary-code-42867-large.mp4" type="video/mp4"/>
-</video>
-<div class="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 lg:p-16 text-center lg:text-left z-10 relative">
-<div class="w-full max-w-md">
-<h1 class="text-4xl md:text-6xl font-bold tracking-tighter leading-tight mb-4 text-gray-50">
-                    Shrink. Share. <span class="text-electric-blue">Earn.</span>
-</h1>
-<p class="text-lg md:text-xl text-gray-300 mb-8">
-                    Transform your links into a revenue stream. Get paid for every click with our industry-leading CPM rates.
-                </p>
-<div class="relative">
-<form method="POST" action="{{ route('links.store') }}" class="flex">
-    @csrf
-    <input name="long_url" class="w-full h-16 bg-gray-800/50 border-2 border-gray-700 rounded-full pl-6 pr-40 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-electric-blue transition-all duration-300" placeholder="Paste your long URL here" type="text" required/>
-    <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 w-32 h-12 bg-gradient-to-r from-electric-blue to-bright-magenta rounded-full text-white font-bold flex items-center justify-center hover:scale-105 transition-transform duration-300">
-        <span class="truncate">Monetize</span>
-    </button>
-</form>
-</div>
-</div>
-</div>
-<div class="w-full lg:w-1/2 flex items-center justify-center p-8 relative z-10">
-<div class="absolute inset-0 z-0">
-<img class="w-full h-full object-cover opacity-30" data-alt="Abstract 3D rendering of a network globe with glowing lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYDhH8zvhdxlYu3sC8S5ZuWkvA1Md3Ikht6pUwL1kYtRRvoC0fOFWXsk1HkUyJFaK1R-nP1DXcKNG0JgzAEORNlzH2Rln6pyli9-Aw3iZAcULHm2EM1Y5ttUIwj5YEErTabe3wz-aFPur0hxQ5cxMh2RAjNoT6H2qFc3K2On9-ov9goeEmR9B9N1m-KNwPGlaUo67CiKw4vyBbhhxVwnB7xozd51bdsrQp11ZqBGePLDIg-x298lNlr5c0oU62SeRkgaWcSmqs"/>
-</div>
-<div class="relative z-10 w-full max-w-lg space-y-6">
-<div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 bg-gray-900/50 backdrop-blur-sm border border-gray-800">
-<p class="text-white text-base font-medium leading-normal flex items-center gap-2"><span class="material-symbols-outlined text-electric-blue">public</span> Links Shortened Today</p>
-<p class="text-white tracking-light text-3xl font-bold leading-tight">1,234,567</p>
-</div>
-<div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 bg-gray-900/50 backdrop-blur-sm border border-gray-800">
-<p class="text-white text-base font-medium leading-normal flex items-center gap-2"><span class="material-symbols-outlined text-electric-blue">ads_click</span> Total Clicks</p>
-<p class="text-white tracking-light text-3xl font-bold leading-tight">10,987,654</p>
-</div>
-<div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl p-6 bg-gray-900/50 backdrop-blur-sm border border-gray-800">
-<p class="text-white text-base font-medium leading-normal flex items-center gap-2"><span class="material-symbols-outlined text-bright-magenta">payments</span> Potential Earnings</p>
-<p class="text-white tracking-light text-3xl font-bold leading-tight">$1,234.56</p>
-</div>
-</div>
-</div>
-</div>
-<div class="bg-background-dark py-20 sm:py-24 px-4 sm:px-8" id="stats-section">
-<div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl p-8 flex flex-col items-center justify-center">
-<span class="material-symbols-outlined text-5xl text-electric-blue mb-4">link</span>
-<h3 class="text-2xl font-bold text-gray-300 mb-2">Total Links Shortened</h3>
-<p class="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-bright-magenta" id="links-counter">0</p>
-</div>
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl p-8 flex flex-col items-center justify-center">
-<span class="material-symbols-outlined text-5xl text-bright-magenta mb-4">paid</span>
-<h3 class="text-2xl font-bold text-gray-300 mb-2">Total Platform Earnings</h3>
-<p class="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-bright-magenta to-electric-blue"><span id="earnings-prefix">$</span><span id="earnings-counter">0</span></p>
-</div>
-</div>
-</div>
-<div class="bg-dark-gray/50 py-20 sm:py-24 px-4 sm:px-8">
-<div class="max-w-7xl mx-auto">
-<div class="text-center mb-16">
-<h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-4 text-shadow-lg">Why Choose Us?</h2>
-<p class="text-lg text-gray-300 max-w-3xl mx-auto">Our platform is built to empower your earnings with cutting-edge features and unparalleled support.</p>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl p-6 text-center transform hover:-translate-y-2 transition-transform duration-300">
-<span class="material-symbols-outlined text-5xl bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-bright-magenta mb-4">monetization_on</span>
-<h3 class="text-2xl font-bold text-white mb-2">Easy Monetization</h3>
-<p class="text-gray-400">Start earning with just a few clicks. Our intuitive platform makes link monetization accessible to everyone.</p>
-</div>
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl p-6 text-center transform hover:-translate-y-2 transition-transform duration-300">
-<span class="material-symbols-outlined text-5xl bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-bright-magenta mb-4">analytics</span>
-<h3 class="text-2xl font-bold text-white mb-2">Detailed Analytics</h3>
-<p class="text-gray-400">Track your performance with our comprehensive dashboard. Understand your audience and optimize your strategy.</p>
-</div>
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl p-6 text-center transform hover:-translate-y-2 transition-transform duration-300">
-<span class="material-symbols-outlined text-5xl bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-bright-magenta mb-4">public</span>
-<h3 class="text-2xl font-bold text-white mb-2">Global Reach</h3>
-<p class="text-gray-400">Earn from a worldwide audience. Our platform supports traffic from all countries with competitive rates.</p>
-</div>
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl p-6 text-center transform hover:-translate-y-2 transition-transform duration-300">
-<span class="material-symbols-outlined text-5xl bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-bright-magenta mb-4">trending_up</span>
-<h3 class="text-2xl font-bold text-white mb-2">High CPMs</h3>
-<p class="text-gray-400">We offer some of the most competitive CPM rates in the industry to maximize your earning potential.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="bg-background-dark py-20 sm:py-24 px-4 sm:px-8">
-<div class="max-w-7xl mx-auto">
-<div class="text-center mb-16">
-<h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-4 text-shadow-lg">How It Works</h2>
-<p class="text-lg text-gray-300 max-w-3xl mx-auto">Start earning in just a few simple steps. Our process is designed to be straightforward and efficient.</p>
-</div>
-<div class="relative">
-<div class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gray-800"></div>
-<div class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-electric-blue to-bright-magenta animate-pulse-slow"></div>
-<div class="relative grid grid-cols-1 md:grid-cols-3 gap-12">
-<div class="flex flex-col items-center text-center">
-<div class="flex items-center justify-center w-24 h-24 rounded-full bg-gray-900/50 border-2 border-electric-blue mb-6 relative z-10 shadow-[0_0_20px_rgba(0,191,255,0.5)]">
-<span class="material-symbols-outlined text-5xl text-electric-blue">create</span>
-</div>
-<h3 class="text-2xl font-bold text-white mb-2">1. Create an Account</h3>
-<p class="text-gray-400">Sign up for a free account in seconds. All you need is an email to get started.</p>
-</div>
-<div class="flex flex-col items-center text-center">
-<div class="flex items-center justify-center w-24 h-24 rounded-full bg-gray-900/50 border-2 border-electric-blue mb-6 relative z-10 shadow-[0_0_20px_rgba(0,191,255,0.5)]">
-<span class="material-symbols-outlined text-5xl text-electric-blue">link</span>
-</div>
-<h3 class="text-2xl font-bold text-white mb-2">2. Shorten Your Link</h3>
-<p class="text-gray-400">Paste your long URL into our tool to create a shortened, monetized link instantly.</p>
-</div>
-<div class="flex flex-col items-center text-center">
-<div class="flex items-center justify-center w-24 h-24 rounded-full bg-gray-900/50 border-2 border-bright-magenta mb-6 relative z-10 shadow-[0_0_20px_rgba(255,0,255,0.5)]">
-<span class="material-symbols-outlined text-5xl text-bright-magenta">paid</span>
-</div>
-<h3 class="text-2xl font-bold text-white mb-2">3. Earn Money</h3>
-<p class="text-gray-400">Share your new link and get paid for every click based on our high CPM rates.</p>
-</div>
-</div>
-</div>
-<div class="mt-20 text-center">
-<a class="inline-block bg-gradient-to-r from-electric-blue to-bright-magenta text-white font-bold py-4 px-10 rounded-full hover:scale-105 transition-transform duration-300 text-lg shadow-[0_0_20px_rgba(0,191,255,0.5),_0_0_20px_rgba(255,0,255,0.5)] group" href="#">
-                    Start Monetizing Now
-                    <span class="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">→</span>
-</a>
-</div>
-</div>
-</div>
-<div class="bg-dark-gray/50 py-20 sm:py-24 px-4 sm:px-8">
-<div class="max-w-7xl mx-auto">
-<div class="text-center mb-16">
-<h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-4 text-shadow-lg">What Our Users Say</h2>
-<p class="text-lg text-gray-300 max-w-3xl mx-auto">Trusted by creators worldwide. Here's how our platform has helped them succeed.</p>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl p-8 flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
-<span class="material-symbols-outlined text-5xl text-electric-blue mb-6">format_quote</span>
-<p class="text-gray-300 flex-grow">"This is hands-down the best link monetization service I've ever used. The CPM rates are fantastic, and the dashboard is incredibly intuitive. I saw my earnings double in the first month!"</p>
-<div class="flex items-center mt-6">
-<img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-electric-blue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUA-JqtWZLz752Xs5rAxzxIPHcGqikmXdoUr2DdCIL6cZRZ067lEMc7HP5vjx_41MyK29dOzneCCOPJF_htoEHsEKOLkkWZqv6NaZigLi-BmU3G5t1TD-AbzgUnYL3aEvOx8Y2mZEY_pJ4E7obYCWLmtPYynTR0_nlKEExjq7odZu7XtEkM3lSRSrT0BfaIE_GG9jxdYq5yl_umK5lQQVQEZM63p3nSdG0VhvMdM5dS6_yF99E3UBTLMDJt1dS1zyPddPLLbgY"/>
-<div>
-<p class="font-bold text-white">Sarah J.</p>
-<p class="text-sm text-gray-400">Content Creator</p>
-</div>
-</div>
-</div>
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl p-8 flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
-<span class="material-symbols-outlined text-5xl text-bright-magenta mb-6">format_quote</span>
-<p class="text-gray-300 flex-grow">"The API integration was a breeze. We've automated our entire link shortening process and it's been a game-changer for our business. Reliable, fast, and profitable."</p>
-<div class="flex items-center mt-6">
-<img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-bright-magenta" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1xjircuAW9GDYcKX8HKmJv2_qFhZoDPQcIy5quRBbtaDQDCnWzhLdJV1vb7b0aRS5LEQXwEhQ1YvfXhbRn4fXXdSpVQFvlEkDvEKW4vw7K3X7tBN5nEli0lSMK0PXQE47GxwlvW90njRyD2wvhWJesfrHHF025GlrzNs_yuWdrXxScWgedCLai3n45-XMrwZT73wP7wVkb9fSya_MyYsmokITzB_Pd2gYwG_m0LniDN_KHaxAUETbbVtBEECChpMC5r3b877h"/>
-<div>
-<p class="font-bold text-white">Mike R.</p>
-<p class="text-sm text-gray-400">App Developer</p>
-</div>
-</div>
-</div>
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl p-8 flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
-<span class="material-symbols-outlined text-5xl text-electric-blue mb-6">format_quote</span>
-<p class="text-gray-300 flex-grow">"I love the global reach and competitive rates for my country. Payouts are always on time, and the support team is genuinely helpful. Highly recommended for anyone looking to monetize their traffic."</p>
-<div class="flex items-center mt-6">
-<img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-electric-blue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfNnaC4Spa9QmjB_AYXhcX-LhOgKO33Up1x47Wk-PP097jgAVzQ3FEi9OhNaOyWPUAcgGQV-LrqgpA0FVGIl70bPA-E1rL5OUVVhwzt1Ax5ufO5lTkJxec-JRbsiDN5Lii-L62c7KEIqJxSBiOLSehLGAiYwJQkYloKgIwRNcU7EdvrHPZBytw0a8FZ8W9ueYg9By-bYeECd_BpI02YxwYa67Z2ACsZTpx4cgyJ4leZbHenlRs0vzbdrjHaKAWdvKFortt3d2D"/>
-<div>
-<p class="font-bold text-white">Aisha K.</p>
-<p class="text-sm text-gray-400">Blogger</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="bg-background-dark py-20 sm:py-24 px-4 sm:px-8 relative overflow-hidden">
-<div class="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-background-dark to-transparent z-10"></div>
-<div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background-dark to-transparent z-10"></div>
-<div class="max-w-4xl mx-auto relative">
-<div class="text-center mb-16">
-<h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-4 text-shadow-lg">Frequently Asked Questions</h2>
-<p class="text-lg text-gray-300 max-w-3xl mx-auto">Find quick answers to common questions about our service. If you can't find your answer here, feel free to contact us.</p>
-</div>
-<div class="space-y-6" x-data="{ open: 0 }">
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden">
-<button @click="open = open === 1 ? 0 : 1" class="w-full text-left p-6 flex justify-between items-center hover:bg-gray-800/50 transition-colors duration-300">
-<h3 class="text-xl font-semibold text-white">What is a monetized link shortener?</h3>
-<span :class="{'rotate-45': open === 1}" class="material-symbols-outlined text-electric-blue transform transition-transform duration-300">add</span>
-</button>
-<div class="px-6 pb-6 pt-2 text-gray-400" x-collapse="" x-show="open === 1">
-<p>A monetized link shortener is a service that transforms your long URLs into shorter, more manageable links. When a user clicks on this new link, they are shown a brief advertisement before being redirected to the original destination. You, as the link creator, earn a portion of the advertising revenue for each valid click.</p>
-</div>
-</div>
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden">
-<button @click="open = open === 2 ? 0 : 2" class="w-full text-left p-6 flex justify-between items-center hover:bg-gray-800/50 transition-colors duration-300">
-<h3 class="text-xl font-semibold text-white">How much can I earn?</h3>
-<span :class="{'rotate-45': open === 2}" class="material-symbols-outlined text-bright-magenta transform transition-transform duration-300">add</span>
-</button>
-<div class="px-6 pb-6 pt-2 text-gray-400" x-collapse="" x-show="open === 2">
-<p>Your earnings depend on several factors, primarily the CPM (Cost Per Mille, or per 1000 views) rate for the country where the click originates. We offer competitive rates for traffic from all over the world. Higher traffic from countries like the USA, UK, and Canada generally yields higher earnings. You can use our Earning Potential Calculator to get an estimate.</p>
-</div>
-</div>
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden">
-<button @click="open = open === 3 ? 0 : 3" class="w-full text-left p-6 flex justify-between items-center hover:bg-gray-800/50 transition-colors duration-300">
-<h3 class="text-xl font-semibold text-white">What are the payment methods and schedule?</h3>
-<span :class="{'rotate-45': open === 3}" class="material-symbols-outlined text-electric-blue transform transition-transform duration-300">add</span>
-</button>
-<div class="px-6 pb-6 pt-2 text-gray-400" x-collapse="" x-show="open === 3">
-<p>We offer a variety of payment methods including PayPal, Payoneer, and Bank Transfer. Payments are processed on a monthly basis, typically within the first week of the month, as long as you have reached the minimum payout threshold of $5.00.</p>
-</div>
-</div>
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden">
-<button @click="open = open === 4 ? 0 : 4" class="w-full text-left p-6 flex justify-between items-center hover:bg-gray-800/50 transition-colors duration-300">
-<h3 class="text-xl font-semibold text-white">Are there any restrictions on the type of links I can share?</h3>
-<span :class="{'rotate-45': open === 4}" class="material-symbols-outlined text-bright-magenta transform transition-transform duration-300">add</span>
-</button>
-<div class="px-6 pb-6 pt-2 text-gray-400" x-collapse="" x-show="open === 4">
-<p>Yes. We strictly prohibit the shortening of links that point to adult content, malware, hate speech, illegal activities, or any other content that violates our Terms of Service. Violating these rules will result in an immediate account ban and forfeiture of all earnings.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[30rem] z-0 overflow-hidden pointer-events-none">
-<div class="w-full h-full flex flex-col justify-around animate-scroll-up">
-<div class="flex flex-col gap-4">
-<div class="flex items-center gap-4 bg-gray-900/50 border border-gray-800 rounded-full px-4 py-2 self-start ml-[10%]">
-<span class="material-symbols-outlined text-electric-blue">link</span>
-<p class="text-sm text-gray-300"><span class="font-bold text-white">User from Germany</span> just shortened a link</p>
-</div>
-<div class="flex items-center gap-4 bg-gray-900/50 border border-gray-800 rounded-full px-4 py-2 self-end mr-[5%]">
-<span class="material-symbols-outlined text-bright-magenta">payments</span>
-<p class="text-sm text-gray-300"><span class="font-bold text-white">User from USA</span> just earned <span class="font-semibold text-bright-magenta">$0.05</span></p>
-</div>
-<div class="flex items-center gap-4 bg-gray-900/50 border border-gray-800 rounded-full px-4 py-2 self-start ml-[20%]">
-<span class="material-symbols-outlined text-electric-blue">link</span>
-<p class="text-sm text-gray-300"><span class="font-bold text-white">User from Australia</span> just shortened a link</p>
-</div>
-<div class="flex items-center gap-4 bg-gray-900/50 border border-gray-800 rounded-full px-4 py-2 self-end mr-[15%]">
-<span class="material-symbols-outlined text-green-400">account_balance_wallet</span>
-<p class="text-sm text-gray-300">Payout of <span class="font-bold text-green-400">$52.10</span> processed for <span class="font-bold text-white">User from India</span></p>
-</div>
-<div class="flex items-center gap-4 bg-gray-900/50 border border-gray-800 rounded-full px-4 py-2 self-start ml-[12%]">
-<span class="material-symbols-outlined text-bright-magenta">payments</span>
-<p class="text-sm text-gray-300"><span class="font-bold text-white">User from Nigeria</span> just earned <span class="font-semibold text-bright-magenta">$0.08</span></p>
-</div>
-</div>
-<div aria-hidden="true" class="flex flex-col gap-4">
-<div class="flex items-center gap-4 bg-gray-900/50 border border-gray-800 rounded-full px-4 py-2 self-start ml-[10%]">
-<span class="material-symbols-outlined text-electric-blue">link</span>
-<p class="text-sm text-gray-300"><span class="font-bold text-white">User from Germany</span> just shortened a link</p>
-</div>
-<div class="flex items-center gap-4 bg-gray-900/50 border border-gray-800 rounded-full px-4 py-2 self-end mr-[5%]">
-<span class="material-symbols-outlined text-bright-magenta">payments</span>
-<p class="text-sm text-gray-300"><span class="font-bold text-white">User from USA</span> just earned <span class="font-semibold text-bright-magenta">$0.05</span></p>
-</div>
-<div class="flex items-center gap-4 bg-gray-900/50 border border-gray-800 rounded-full px-4 py-2 self-start ml-[20%]">
-<span class="material-symbols-outlined text-electric-blue">link</span>
-<p class="text-sm text-gray-300"><span class="font-bold text-white">User from Australia</span> just shortened a link</p>
-</div>
-<div class="flex items-center gap-4 bg-gray-900/50 border border-gray-800 rounded-full px-4 py-2 self-end mr-[15%]">
-<span class="material-symbols-outlined text-green-400">account_balance_wallet</span>
-<p class="text-sm text-gray-300">Payout of <span class="font-bold text-green-400">$52.10</span> processed for <span class="font-bold text-white">User from India</span></p>
-</div>
-<div class="flex items-center gap-4 bg-gray-900/50 border border-gray-800 rounded-full px-4 py-2 self-start ml-[12%]">
-<span class="material-symbols-outlined text-bright-magenta">payments</span>
-<p class="text-sm text-gray-300"><span class="font-bold text-white">User from Nigeria</span> just earned <span class="font-semibold text-bright-magenta">$0.08</span></p>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="bg-background-dark py-24 sm:py-32 px-4 sm:px-8 relative overflow-hidden">
-<div class="absolute top-0 left-0 -translate-x-1/3 -translate-y-1/3 w-[800px] h-[800px] bg-[radial-gradient(ellipse_at_center,_rgba(0,191,255,0.2)_0%,rgba(0,191,255,0)_60%)]"></div>
-<div class="absolute bottom-0 right-0 translate-x-1/3 translate-y-1/3 w-[800px] h-[800px] bg-[radial-gradient(ellipse_at_center,_rgba(255,0,255,0.2)_0%,rgba(255,0,255,0)_60%)]"></div>
-<div class="max-w-7xl mx-auto relative z-10">
-<div class="text-center mb-16">
-<h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-4 text-shadow-lg">Global CPM Rates</h2>
-<p class="text-lg text-gray-300 max-w-3xl mx-auto">Explore your earning potential across the globe. We offer competitive rates in every country, ensuring you maximize your income.</p>
-</div>
-<div class="flex justify-center items-center mb-12">
-<div class="bg-dark-gray/50 backdrop-blur-sm border border-medium-gray rounded-full p-1 flex space-x-1">
-<button class="px-6 py-2 rounded-full text-white bg-electric-blue font-semibold transition">Highest Paying</button>
-<button class="px-6 py-2 rounded-full text-gray-400 hover:bg-medium-gray/50 transition">Europe</button>
-<button class="px-6 py-2 rounded-full text-gray-400 hover:bg-medium-gray/50 transition">Asia</button>
-<button class="px-6 py-2 rounded-full text-gray-400 hover:bg-medium-gray/50 transition">Americas</button>
-</div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-<div class="bg-dark-gray/70 backdrop-blur-md border border-medium-gray rounded-xl p-6 flex flex-col items-center text-center transform hover:scale-105 hover:border-electric-blue transition-all duration-300 shadow-2xl shadow-black/30">
-<img alt="USA Flag" class="w-16 h-16 rounded-full mb-4 border-2 border-medium-gray" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB36LEZG5NJPwq3JeMdX-dRnXO0orRW1ppC3wPdN364UdS2ZZCnZspD7QF_lvFm35oWfaiUbGpvvKN9QVLN5UkIA1WZWG9ooVaifE8aN-DiAhxU9nBBMy_YIG24PcpXdVGm8MlZQim_OJ384B2Y3PzfwCFVKOTk4G-Yfh8YUMrkZ6BkbZl_maa7cTcyFE7FSJxqVPZGrsxEr2HtBWxkq2pw36joQ0hznZwwMjgrCByIisqe4iG8H5DnY73oO_agQ5tySh1rZcic"/>
-<h3 class="text-2xl font-bold text-white mb-1">United States</h3>
-<p class="text-gray-400 text-sm mb-4">North America</p>
-<p class="text-4xl font-bold text-electric-blue mb-1">$22.00</p>
-<p class="text-sm text-gray-400">per 1000 views</p>
-</div>
-<div class="bg-dark-gray/70 backdrop-blur-md border border-medium-gray rounded-xl p-6 flex flex-col items-center text-center transform hover:scale-105 hover:border-electric-blue transition-all duration-300 shadow-2xl shadow-black/30" style="animation-delay: 100ms;">
-<img alt="UK Flag" class="w-16 h-16 rounded-full mb-4 border-2 border-medium-gray" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjYfKSA8fyYbWtqxmI_FOaUJas6LxI6oOKbRi4JoNkuRhm0q-GAYmuIg3PeBe_aeeOPZLuQKMKecaVwuMESAZkHgOiWKrXPOdiEDw1Wg0-8xBg1FS1lIg9ffeZZf33wevLeRWxkscdmeqdTpUsf8Bt7FihZ3dSUO_aWnQX1McfNls2GpgpE4gTYL3KNmeloMDSRA39kOTbr7tF9ufm8iP70xNgBZ7OscSwXIzMvslzUIp9RWxCC1f-LwqFmy6xyQk3DL0NvIVE"/>
-<h3 class="text-2xl font-bold text-white mb-1">United Kingdom</h3>
-<p class="text-gray-400 text-sm mb-4">Europe</p>
-<p class="text-4xl font-bold text-electric-blue mb-1">$20.50</p>
-<p class="text-sm text-gray-400">per 1000 views</p>
-</div>
-<div class="bg-dark-gray/70 backdrop-blur-md border border-medium-gray rounded-xl p-6 flex flex-col items-center text-center transform hover:scale-105 hover:border-electric-blue transition-all duration-300 shadow-2xl shadow-black/30" style="animation-delay: 200ms;">
-<img alt="Canada Flag" class="w-16 h-16 rounded-full mb-4 border-2 border-medium-gray" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBARHsCvKGP9ufOUTJ-TB7NvjNHbAw6_qA8uJPmujKzBLBYfFHsYSd17Ka-UEP3tpO0dfEeEpEMvAyqwZc-_OLUvy70mfImLZFL0cf_Z9zXjnZM1XpOSDcUSTNoaJMO9QaYVXChCqGqTrAsJbi60ol0ZEN1VQRZR5UKSm3NHQj5jokPS8YqL4KiHl3b8BoWG2RcBwSQzlufprT1fIzUGqD_BG5FN0qaTuIGMdxpfkh8szFEaF32D54fXnWXnPwqYS7m4Unzy3nLMr"/>
-<h3 class="text-2xl font-bold text-white mb-1">Canada</h3>
-<p class="text-gray-400 text-sm mb-4">North America</p>
-<p class="text-4xl font-bold text-electric-blue mb-1">$19.80</p>
-<p class="text-sm text-gray-400">per 1000 views</p>
-</div>
-<div class="bg-dark-gray/70 backdrop-blur-md border border-medium-gray rounded-xl p-6 flex flex-col items-center text-center transform hover:scale-105 hover:border-bright-magenta transition-all duration-300 shadow-2xl shadow-black/30" style="animation-delay: 300ms;">
-<img alt="Australia Flag" class="w-16 h-16 rounded-full mb-4 border-2 border-medium-gray" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_djSQTStACYqcTPZyzR0ipIYvwfybzF3Tf7z8RueAWiRq9jsKC1eEq4TBEWAfQXm70CpIfPgQkkxVKq291izhVj1BDRKUWM6NNKMXGUTir8Q1Si2sDhaU5aG5mUujSBRxH7ptMjaSeULfRZdQkjlx8zw7ly8X3LKPN2FivFosaOI7AhCq2N9z0_FcVq6dVDFdfnhx3HnkBS2FFI2Ox8jp6o0QnZISUgfehZsR6mfKuxsQcz0FrPgdjO6qW0CNmaeGJW8rn9mk"/>
-<h3 class="text-2xl font-bold text-white mb-1">Australia</h3>
-<p class="text-gray-400 text-sm mb-4">Oceania</p>
-<p class="text-4xl font-bold text-bright-magenta mb-1">$18.75</p>
-<p class="text-sm text-gray-400">per 1000 views</p>
-</div>
-<div class="bg-dark-gray/70 backdrop-blur-md border border-medium-gray rounded-xl p-6 flex flex-col items-center text-center transform hover:scale-105 hover:border-bright-magenta transition-all duration-300 shadow-2xl shadow-black/30" style="animation-delay: 400ms;">
-<img alt="Germany Flag" class="w-16 h-16 rounded-full mb-4 border-2 border-medium-gray" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBULFscPSsvHPVohwvMNpun6qcd-Z9uzi4Q-xlF3A4lgli2cqspvh6z5U8noLwxVm84BvHEU9GZhoELLLdeaomuLY7TWZv16fs8YvzdFZHlrwMRnbaXX8fM4fwjYAZfSHb8vFXCfpwQhfyy7a3Iw-ZlkVCUXw0RVYqoOL_dVGPzM2c_0WYcP2QcKsBv5AvkYnfJaR4BWGbFH_D89_FyfQeYJaKyubdcK-d3LVJMZ84Pah2TtzAnlmn-qPhqX4kCiYKMVv1cJOht"/>
-<h3 class="text-2xl font-bold text-white mb-1">Germany</h3>
-<p class="text-gray-400 text-sm mb-4">Europe</p>
-<p class="text-4xl font-bold text-bright-magenta mb-1">$16.40</p>
-<p class="text-sm text-gray-400">per 1000 views</p>
-</div>
-<div class="bg-dark-gray/70 backdrop-blur-md border border-medium-gray rounded-xl p-6 flex flex-col items-center text-center transform hover:scale-105 hover:border-bright-magenta transition-all duration-300 shadow-2xl shadow-black/30" style="animation-delay: 500ms;">
-<img alt="France Flag" class="w-16 h-16 rounded-full mb-4 border-2 border-medium-gray" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAEklEQVR42mNkYAAAAAYAAjCB0C8y7joAAAAASUVORK5CYII=" style="background: url('image-c052ac5c5930438681534015f8c6b653') center/cover;"/>
-<h3 class="text-2xl font-bold text-white mb-1">France</h3>
-<p class="text-gray-400 text-sm mb-4">Europe</p>
-<p class="text-4xl font-bold text-bright-magenta mb-1">$15.90</p>
-<p class="text-sm text-gray-400">per 1000 views</p>
-</div>
-<div class="bg-dark-gray/70 backdrop-blur-md border border-medium-gray rounded-xl p-6 flex flex-col items-center text-center transform hover:scale-105 hover:border-gray-500 transition-all duration-300 shadow-2xl shadow-black/30" style="animation-delay: 600ms;">
-<img alt="Japan Flag" class="w-16 h-16 rounded-full mb-4 border-2 border-medium-gray" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAEklEQVR42mNkYAAAAAYAAjCB0C8y7joAAAAASUVORK5CYII=" style="background: url('image-23c2a38c20554c20845353594892795f') center/cover;"/>
-<h3 class="text-2xl font-bold text-white mb-1">Japan</h3>
-<p class="text-gray-400 text-sm mb-4">Asia</p>
-<p class="text-4xl font-bold text-gray-300 mb-1">$12.30</p>
-<p class="text-sm text-gray-400">per 1000 views</p>
-</div>
-<div class="bg-dark-gray/70 backdrop-blur-md border border-medium-gray rounded-xl p-6 flex flex-col items-center text-center transform hover:scale-105 hover:border-gray-500 transition-all duration-300 shadow-2xl shadow-black/30" style="animation-delay: 700ms;">
-<img alt="Brazil Flag" class="w-16 h-16 rounded-full mb-4 border-2 border-medium-gray" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFk_arbyXvcPaGsxEoSgwJndRaNJ2jMoDkQApG-QvYgJaFWV141CO5N8CebREhNYCvRuPa54NqIY2WL6blu6E8vKxGPFsvsfV1ti1VZhf1jhAMdI_hy9w7GrjH8u8ckAuyq37FtEFHVrUXUS8UE1XekAp94Tm02-nUHBy06xz5l6ubDFv1ATw7EizSEbCcvzx4AOQ5jE_Jvkme-Pa4AfRItBCVue4m7Nse3W8NQfhmKA9_MDUR2sNk8kq3uLi-SYsLztNyweav"/>
-<h3 class="text-2xl font-bold text-white mb-1">Brazil</h3>
-<p class="text-gray-400 text-sm mb-4">South America</p>
-<p class="text-4xl font-bold text-gray-300 mb-1">$8.50</p>
-<p class="text-sm text-gray-400">per 1000 views</p>
-</div>
-</div>
-<div class="mt-16 text-center">
-<a class="inline-block bg-gradient-to-r from-electric-blue to-bright-magenta text-white font-bold py-3 px-8 rounded-full hover:scale-105 transition-transform duration-300 group" href="#">
-Explore All Countries <span class="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">→</span>
-</a>
-</div>
-</div>
-</div>
-<div class="bg-background-dark py-20 px-8">
-<div class="max-w-5xl mx-auto">
-<div class="text-center mb-16">
-<h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-4">Calculate Your Earning Potential</h2>
-<p class="text-lg text-gray-400 max-w-3xl mx-auto">Use our interactive calculator to estimate how much you could earn with our platform. Just slide to adjust the number of clicks your links receive.</p>
-</div>
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl p-8 md:p-12">
-<div class="grid md:grid-cols-2 gap-12 items-center">
-<div>
-<label class="block text-lg text-gray-300 mb-4" for="clicks-slider">Your Monthly Clicks:</label>
-<input class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer range-lg" id="clicks-slider" max="50000" min="1000" step="1000" type="range" value="10000"/>
-<div class="flex justify-between text-sm text-gray-400 mt-2">
-<span>1,000</span>
-<span class="font-bold text-electric-blue text-2xl">10,000</span>
-<span>50,000</span>
-</div>
-</div>
-<div class="text-center">
-<p class="text-gray-400 text-lg mb-2">Estimated Monthly Earnings</p>
-<p class="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-bright-magenta">$50.00</p>
-</div>
-</div>
-<div class="mt-12 text-center">
-<a class="inline-block bg-gradient-to-r from-electric-blue to-bright-magenta text-white font-bold py-4 px-10 rounded-full hover:scale-105 transition-transform duration-300 text-lg" href="#">Start Earning Now</a>
-</div>
-</div>
-</div>
-</div>
-<div class="bg-background-light dark:bg-background-dark py-20 px-8">
-<div class="max-w-5xl mx-auto">
-<div class="text-center mb-12">
-<h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-4">Powerful Features, Seamlessly Integrated</h2>
-<p class="text-lg text-gray-400 max-w-3xl mx-auto">Discover our powerful features that help you get the most out of your links, all wrapped in a sleek, intuitive interface.</p>
-</div>
-<div class="grid md:grid-cols-3 gap-8">
-<div class="flex flex-col gap-3 rounded-xl border border-gray-800 bg-gray-900/50 p-6 text-center items-center hover:border-electric-blue transition-colors duration-300">
-<span class="material-symbols-outlined text-5xl text-electric-blue mb-4">monetization_on</span>
-<h3 class="text-2xl font-bold">Monetization</h3>
-<p class="text-gray-400">Turn your links into a passive revenue stream. Effortlessly.</p>
-</div>
-<div class="flex flex-col gap-3 rounded-xl border border-gray-800 bg-gray-900/50 p-6 text-center items-center hover:border-electric-blue transition-colors duration-300">
-<span class="material-symbols-outlined text-5xl text-electric-blue mb-4">monitoring</span>
-<h3 class="text-2xl font-bold">Real-time Analytics</h3>
-<p class="text-gray-400">Track every click and analyze your performance with a stunning visual dashboard.</p>
-</div>
-<div class="flex flex-col gap-3 rounded-xl border border-gray-800 bg-gray-900/50 p-6 text-center items-center hover:border-electric-blue transition-colors duration-300">
-<span class="material-symbols-outlined text-5xl text-electric-blue mb-4">security</span>
-<h3 class="text-2xl font-bold">Ironclad Security</h3>
-<p class="text-gray-400">Your links are protected with our robust, cutting-edge security measures.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="bg-background-dark py-20 px-8">
-<div class="max-w-5xl mx-auto">
-<div class="text-center mb-16">
-<h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-4">Partnership Opportunities</h2>
-<p class="text-lg text-gray-400 max-w-3xl mx-auto">Collaborate with us to unlock new possibilities. We're actively seeking partners to grow with.</p>
-</div>
-<div class="grid md:grid-cols-2 gap-8">
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl p-8 hover:border-electric-blue transition-colors duration-300 flex flex-col items-start">
-<span class="material-symbols-outlined text-5xl text-electric-blue mb-4">campaign</span>
-<h3 class="text-2xl font-bold mb-3">Affiliate Program</h3>
-<p class="text-gray-400 mb-6 flex-grow">Join our affiliate program and earn commissions by referring new users to our platform. Get access to marketing materials and a dedicated support team.</p>
-<a class="font-bold text-electric-blue hover:text-bright-magenta transition-colors duration-300 flex items-center group mt-auto" href="#">
-                    Become an Affiliate <span class="material-symbols-outlined ml-2 transition-transform group-hover:translate-x-1">arrow_forward</span>
-</a>
-</div>
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl p-8 hover:border-bright-magenta transition-colors duration-300 flex flex-col items-start">
-<span class="material-symbols-outlined text-5xl text-bright-magenta mb-4">business_center</span>
-<h3 class="text-2xl font-bold mb-3">API Integration</h3>
-<p class="text-gray-400 mb-6 flex-grow">Integrate our powerful link monetization engine into your own application or service with our flexible and robust API. Perfect for developers and businesses.</p>
-<a class="font-bold text-electric-blue hover:text-bright-magenta transition-colors duration-300 flex items-center group mt-auto" href="#">
-                    Explore API Docs <span class="material-symbols-outlined ml-2 transition-transform group-hover:translate-x-1">arrow_forward</span>
-</a>
-</div>
-</div>
-</div>
-</div>
-<div class="bg-gray-900/50 py-20 px-8">
-<div class="max-w-5xl mx-auto text-center">
-<h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-4">Your Security is Our Priority</h2>
-<p class="text-lg text-gray-400 max-w-3xl mx-auto mb-12">We employ state-of-the-art security and privacy measures to protect your links, your earnings, and your data. Trust and safety are at the core of our service.</p>
-<div class="grid md:grid-cols-3 gap-8 text-left">
-<div class="bg-dark-gray p-6 rounded-xl border border-medium-gray hover:border-electric-blue transition-all duration-300 transform hover:-translate-y-2">
-<span class="material-symbols-outlined text-4xl text-electric-blue mb-4">lock</span>
-<h3 class="text-xl font-bold mb-2">End-to-End Encryption</h3>
-<p class="text-gray-400">All data transmitted through our service is secured with industry-standard encryption protocols.</p>
-</div>
-<div class="bg-dark-gray p-6 rounded-xl border border-medium-gray hover:border-bright-magenta transition-all duration-300 transform hover:-translate-y-2">
-<span class="material-symbols-outlined text-4xl text-bright-magenta mb-4">shield</span>
-<h3 class="text-xl font-bold mb-2">Fraud Detection</h3>
-<p class="text-gray-400">Our advanced systems actively monitor for and prevent fraudulent activity to protect your earnings.</p>
-</div>
-<div class="bg-dark-gray p-6 rounded-xl border border-medium-gray hover:border-electric-blue transition-all duration-300 transform hover:-translate-y-2">
-<span class="material-symbols-outlined text-4xl text-electric-blue mb-4">privacy_tip</span>
-<h3 class="text-xl font-bold mb-2">Privacy by Design</h3>
-<p class="text-gray-400">We are committed to GDPR and CCPA compliance, ensuring your privacy is respected at every step.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="bg-background-dark py-20 px-8">
-<div class="max-w-4xl mx-auto">
-<div class="text-center mb-12">
-<h2 class="text-4xl md:text-5xl font-bold tracking-tighter mb-4">Contact Us</h2>
-<p class="text-lg text-gray-400 max-w-2xl mx-auto">Have questions? Our team is here to help. Reach out to us and we'll get back to you as soon as possible.</p>
-</div>
-<div class="bg-gray-900/50 border border-gray-800 rounded-xl p-8 md:p-12">
-<form action="#" class="space-y-6">
-<div class="grid md:grid-cols-2 gap-6">
-<div>
-<label class="block text-sm font-medium text-gray-300 mb-2" for="name">Name</label>
-<input class="w-full bg-dark-gray border-2 border-medium-gray rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-electric-blue transition-all duration-300" id="name" name="name" placeholder="Your Name" type="text"/>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-300 mb-2" for="email">Email</label>
-<input class="w-full bg-dark-gray border-2 border-medium-gray rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-electric-blue transition-all duration-300" id="email" name="email" placeholder="your@email.com" type="email"/>
-</div>
-</div>
-<div>
-<label class="block text-sm font-medium text-gray-300 mb-2" for="message">Message</label>
-<textarea class="w-full bg-dark-gray border-2 border-medium-gray rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-electric-blue transition-all duration-300" id="message" name="message" placeholder="How can we help you?" rows="4"></textarea>
-</div>
-<div class="text-center">
-<button class="inline-block bg-gradient-to-r from-electric-blue to-bright-magenta text-white font-bold py-3 px-8 rounded-full hover:scale-105 transition-transform duration-300 group" type="submit">
-                        Send Message <span class="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">→</span>
-</button>
-</div>
-</form>
-</div>
-</div>
-</div>
-<footer class="bg-dark-gray/50 border-t border-gray-800 py-12 px-4 sm:px-6 lg:px-8">
-<div class="max-w-7xl mx-auto">
-<div class="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0">
-<div class="flex flex-col items-center md:items-start">
-<a class="flex-shrink-0 mb-4" href="{{ url('/') }}">
-<span class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-bright-magenta">{{ config('app.name', 'Link Monetizer') }}</span>
-</a>
-<p class="text-gray-400 text-sm max-w-xs text-center md:text-left">
-                    Monetize your links and maximize your earnings with our powerful and intuitive platform.
-                </p>
-</div>
-<div class="flex flex-col items-center md:items-end">
-<div class="flex space-x-6 mb-6">
-<a class="text-gray-400 hover:text-white transition-colors duration-300" href="#">
-<svg aria-hidden="true" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-<path clip-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" fill-rule="evenodd"></path>
-</svg>
-</a>
-<a class="text-gray-400 hover:text-white transition-colors duration-300" href="#">
-<svg aria-hidden="true" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-<path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
-</svg>
-</a>
-<a class="text-gray-400 hover:text-white transition-colors duration-300" href="#">
-<svg aria-hidden="true" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-<path clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12.011c0 4.237 2.636 7.828 6.258 9.243.457.084.624-.198.624-.44v-1.55c-2.558.556-3.1-1.234-3.1-1.234-.415-1.054-1.012-1.334-1.012-1.334-.828-.567.062-.556.062-.556.915.064 1.396.938 1.396.938.813 1.394 2.132.992 2.652.758.083-.59.318-1.003.58-1.234-2.023-.23-4.148-1.013-4.148-4.503 0-.996.356-1.81.938-2.448-.094-.23-.406-1.158.09-2.415 0 0 .765-.245 2.5 1.013a8.672 8.672 0 012.274-.306c.767 0 1.54.103 2.274.306 1.735-1.258 2.5-1.013 2.5-1.013.496 1.257.184 2.185.09 2.415.582.638.938 1.452.938 2.448 0 3.5-2.129 4.27-4.158 4.496.327.28.62.836.62 1.684v2.483c0 .244.167.527.625.44C19.364 19.839 22 16.248 22 12.011 22 6.477 17.523 2 12 2z" fill-rule="evenodd"></path>
-</svg>
-</a>
-</div>
-<div class="flex space-x-6 text-sm">
-<a class="text-gray-400 hover:text-white transition-colors duration-300" href="#">Terms of Service</a>
-<a class="text-gray-400 hover:text-white transition-colors duration-300" href="#">Privacy Policy</a>
-<a class="text-gray-400 hover:text-white transition-colors duration-300" href="#">Disclaimer</a>
-</div>
-</div>
-</div>
-<div class="mt-8 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
-<p>© 2024 Link Monetizer. All rights reserved.</p>
-</div>
-</div>
-</footer>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        gsap.registerPlugin(ScrollTrigger);
-        const counters = {
-            links: 0,
-            earnings: 0
-        };
-        const linksCounter = document.getElementById('links-counter');
-        const earningsCounter = document.getElementById('earnings-counter');
-        const tl = gsap.timeline({
-            scrollTrigger: {
-                trigger: "#stats-section",
-                start: "top 80%", 
-                toggleActions: "play none none none"
-            }
-        });
-        tl.to(counters, {
-            duration: 2.5,
-            links: 28453987,
-            onUpdate: () => linksCounter.innerHTML = Math.round(counters.links).toLocaleString(),
-            ease: "power2.out"
-        }, 0);
-        tl.to(counters, {
-            duration: 2.5,
-            earnings: 142269.93,
-            onUpdate: () => earningsCounter.innerHTML = counters.earnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-            ease: "power2.out"
-        }, 0.2); 
+<body class="bg-[#050505] text-white font-display overflow-x-hidden">
+    @include('partials.header')
 
-        // Generic form submission loading animation
-        const forms = document.querySelectorAll('form');
-        forms.forEach(form => {
-            form.addEventListener('submit', function(event) {
-                const submitButton = form.querySelector('button[type="submit"]');
-                if (submitButton) {
-                    submitButton.disabled = true;
-                    submitButton.innerHTML = '<span class="spinner"></span><span class="ml-2">Processing...</span>';
+    <!-- Hero Section (Minimalist & Typography) -->
+    <div class="relative h-screen w-full flex flex-col justify-center items-center hero-section bg-[#050505] overflow-hidden">
+        
+        <!-- Subtle Background Grid -->
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        
+        <!-- Center Spotlight -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-electric-blue/10 rounded-full blur-[150px]"></div>
+
+        <div class="relative z-10 w-full max-w-5xl px-4 flex flex-col items-center text-center">
+            
+            <!-- Badge -->
+            <div class="inline-flex items-center px-5 py-2 rounded-full border border-gray-800 bg-gray-900/50 backdrop-blur-sm mb-8 gsap-hero-element">
+                <span class="text-sm font-mono text-gray-400 tracking-wider">THE #1 URL SHORTENER</span>
+            </div>
+
+            <!-- Massive Typography -->
+            <h1 class="text-7xl md:text-9xl font-bold tracking-tighter leading-none mb-8 text-white gsap-hero-element">
+                SHRINK.<br/>
+                <span class="text-gray-600 transition-colors duration-500 hover:text-white cursor-default">SHARE.</span><br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-electric-blue to-bright-magenta animate-gradient-x">EARN.</span>
+            </h1>
+
+            <p class="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl font-light gsap-hero-element">
+                Monetize your traffic with the highest paying rates in the market. Simple, fast, and secure.
+            </p>
+
+            <!-- Minimalist Form (Functional) -->
+            <div x-data="{ 
+                url: '', 
+                shortened: '', 
+                loading: false, 
+                error: '',
+                copied: false,
+                submit() {
+                    if(!this.url) return;
+                    this.loading = true;
+                    this.error = '';
+                    this.shortened = '';
+                    this.copied = false;
+                    fetch('{{ route('guest.shorten') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ url: this.url })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        this.loading = false;
+                        if (data.success) {
+                            this.shortened = data.short_link;
+                        } else {
+                            this.error = data.message || 'Something went wrong';
+                        }
+                    })
+                    .catch(err => {
+                        this.loading = false;
+                        this.error = 'Network error. Please try again.';
+                        console.error(err);
+                    });
+                },
+                copyToClipboard() {
+                    navigator.clipboard.writeText(this.shortened);
+                    this.copied = true;
+                    setTimeout(() => { this.copied = false; }, 2000);
                 }
+            }" class="w-full max-w-2xl mx-auto lg:mx-0 gsap-hero-element relative z-30">
+                
+                <div class="bg-white/5 border border-white/10 p-2 rounded-full backdrop-blur-md shadow-2xl hover:border-white/20 transition-colors duration-300">
+                    <form @submit.prevent="submit" class="flex w-full relative">
+                        <input x-model="url" type="url" placeholder="Paste your long link here..." required 
+                            class="flex-grow bg-transparent border-none text-white placeholder-gray-500 text-lg px-8 py-4 focus:outline-none focus:ring-0" />
+                        <button type="submit" :disabled="loading" 
+                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-black hover:bg-gray-200 font-bold text-lg py-3 px-8 rounded-full transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]">
+                            <span x-show="!loading">Shorten</span>
+                            <span x-show="loading" class="inline-block animate-spin rounded-full h-5 w-5 border-2 border-gray-600 border-t-black"></span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Result Display -->
+                <div x-show="shortened" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform -translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0"
+                     class="mt-4 p-4 bg-green-500/10 border border-green-500/20 rounded-2xl flex items-center justify-between backdrop-blur-md">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <span class="material-symbols-outlined text-green-400">check_circle</span>
+                        <a :href="shortened" target="_blank" class="text-green-400 font-mono font-bold text-lg truncate hover:underline" x-text="shortened"></a>
+                    </div>
+                    <button @click="copyToClipboard()" class="p-2 hover:bg-green-500/20 rounded-lg transition-colors text-green-400 flex items-center gap-2" title="Copy to Clipboard">
+                        <span x-show="!copied" class="material-symbols-outlined">content_copy</span>
+                        <span x-show="copied" class="material-symbols-outlined">check</span>
+                        <span x-show="copied" class="text-sm font-medium">Copied!</span>
+                    </button>
+                </div>
+                
+                <!-- Error Display -->
+                <div x-show="error" x-transition class="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm flex items-center gap-3 backdrop-blur-md">
+                    <span class="material-symbols-outlined">error</span>
+                    <span x-text="error"></span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Stats Section (Minimalist Ghost Numbers) -->
+    <div class="bg-[#050505] py-24 sm:py-32 px-4 sm:px-8 relative border-t border-white/5" id="stats-section">
+        <!-- Background Grid -->
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-50"></div>
+        
+        <div class="max-w-7xl mx-auto px-8 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 text-center md:text-left">
+                <div class="gsap-reveal">
+                    <p class="text-sm font-mono text-gray-500 mb-4 tracking-[0.2em] uppercase">Total Links Shortened</p>
+                    <p class="text-6xl md:text-9xl font-bold text-white tracking-tighter" id="links-counter">28M+</p>
+                </div>
+                <div class="gsap-reveal" style="transition-delay: 100ms;">
+                    <p class="text-sm font-mono text-gray-500 mb-4 tracking-[0.2em] uppercase">Paid to Creators</p>
+                    <p class="text-6xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-electric-blue to-bright-magenta tracking-tighter" id="earnings-counter">$1.2M+</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Everything You Need (Bento Grid) -->
+    <div class="bg-[#050505] relative py-24 sm:py-32 px-4 sm:px-8 overflow-hidden">
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="mb-24 text-left gsap-reveal">
+                 <h2 class="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 leading-none">
+                    EVERYTHING<br/>
+                    <span class="text-gray-700">YOU NEED.</span>
+                </h2>
+                <p class="text-xl text-gray-400 max-w-2xl font-light">
+                    A suite of powerful tools designed to maximize your revenue and simplify your workflow.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Item 1 -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal flex flex-col justify-between h-full">
+                    <div>
+                        <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 group-hover:scale-110 transition-transform">monetization_on</span>
+                        <h3 class="text-3xl font-bold text-white mb-4">Maximum Monetization</h3>
+                        <p class="text-gray-400 text-lg leading-relaxed">We offer the highest CPM rates in the industry, optimized for every country and device type. Smart algorithms ensure you get the best paying ads.</p>
+                    </div>
+                </div>
+                
+                <!-- Item 2 -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group relative overflow-hidden gsap-reveal flex flex-col justify-between h-full" style="transition-delay: 100ms;">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-bright-magenta/20 blur-[100px]"></div>
+                    <div>
+                        <span class="material-symbols-outlined text-5xl text-bright-magenta mb-6 group-hover:scale-110 transition-transform relative z-10">analytics</span>
+                        <h3 class="text-3xl font-bold text-white mb-4 relative z-10">Real-Time Analytics</h3>
+                        <p class="text-gray-400 relative z-10 text-lg leading-relaxed">Detailed insights into your traffic sources, device types, and earnings in real-time. Make data-driven decisions.</p>
+                    </div>
+                </div>
+                
+                <!-- Item 3 -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal" style="transition-delay: 200ms;">
+                    <span class="material-symbols-outlined text-5xl text-gray-300 mb-6 group-hover:text-white transition-colors">bolt</span>
+                    <h3 class="text-2xl font-bold text-white mb-3">Fast Payouts</h3>
+                    <p class="text-gray-400 leading-relaxed">Daily withdrawals via PayPal, Crypto, and more. No more waiting for your hard-earned money.</p>
+                </div>
+                
+                <!-- Item 4 -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal" style="transition-delay: 300ms;">
+                    <span class="material-symbols-outlined text-5xl text-gray-300 mb-6 group-hover:text-white transition-colors">api</span>
+                    <h3 class="text-2xl font-bold text-white mb-3">Developer API</h3>
+                    <p class="text-gray-400 leading-relaxed">Robust API for seamless integration into your applications. Automate your workflow effortlessly.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works (Steps) -->
+    <div class="bg-[#050505] py-24 sm:py-32 px-4 sm:px-8 relative border-t border-white/5">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-20 text-left gsap-reveal">
+                 <h2 class="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 leading-none">
+                    SIMPLE<br/>
+                    <span class="text-gray-700">STEPS.</span>
+                </h2>
+            </div>
+            
+            <div class="relative">
+                <!-- Connecting Line for Desktop -->
+                <div class="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gray-800 z-0"></div>
+                <div class="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-electric-blue to-bright-magenta z-0 opacity-50"></div>
+                
+                <div class="relative grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <!-- Step 1 -->
+                    <div class="flex flex-col items-center text-center group gsap-reveal">
+                        <div class="relative mb-8">
+                            <div class="absolute inset-0 bg-electric-blue blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-300 rounded-full"></div>
+                            <div class="flex items-center justify-center w-24 h-24 rounded-full bg-gray-900 border-2 border-electric-blue relative z-10 shadow-[0_0_15px_rgba(0,191,255,0.3)] group-hover:scale-110 transition-transform duration-300">
+                                <span class="material-symbols-outlined text-5xl text-electric-blue">create</span>
+                            </div>
+                            <div class="absolute -top-2 -right-2 w-8 h-8 bg-electric-blue rounded-full flex items-center justify-center text-black font-bold border-2 border-gray-900 z-20">1</div>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-3">Create an Account</h3>
+                        <p class="text-gray-400 leading-relaxed px-4">Sign up for a free account in seconds. All you need is an email to get started.</p>
+                    </div>
+                    
+                    <!-- Step 2 -->
+                    <div class="flex flex-col items-center text-center group gsap-reveal" style="transition-delay: 200ms;">
+                        <div class="relative mb-8">
+                            <div class="absolute inset-0 bg-white blur-xl opacity-10 group-hover:opacity-30 transition-opacity duration-300 rounded-full"></div>
+                            <div class="flex items-center justify-center w-24 h-24 rounded-full bg-gray-900 border-2 border-white/50 relative z-10 shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform duration-300">
+                                <span class="material-symbols-outlined text-5xl text-white">link</span>
+                            </div>
+                            <div class="absolute -top-2 -right-2 w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-bold border-2 border-gray-900 z-20">2</div>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-3">Shorten Your Link</h3>
+                        <p class="text-gray-400 leading-relaxed px-4">Paste your long URL into our tool to create a shortened, monetized link instantly.</p>
+                    </div>
+                    
+                    <!-- Step 3 -->
+                    <div class="flex flex-col items-center text-center group gsap-reveal" style="transition-delay: 400ms;">
+                        <div class="relative mb-8">
+                            <div class="absolute inset-0 bg-bright-magenta blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-300 rounded-full"></div>
+                            <div class="flex items-center justify-center w-24 h-24 rounded-full bg-gray-900 border-2 border-bright-magenta relative z-10 shadow-[0_0_15px_rgba(255,0,255,0.3)] group-hover:scale-110 transition-transform duration-300">
+                                <span class="material-symbols-outlined text-5xl text-bright-magenta">paid</span>
+                            </div>
+                            <div class="absolute -top-2 -right-2 w-8 h-8 bg-bright-magenta rounded-full flex items-center justify-center text-white font-bold border-2 border-gray-900 z-20">3</div>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-3">Earn Money</h3>
+                        <p class="text-gray-400 leading-relaxed px-4">Share your new link and get paid for every click based on our high CPM rates.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-20 text-center gsap-reveal">
+                <a class="inline-flex items-center gap-2 bg-gradient-to-r from-electric-blue to-bright-magenta text-white font-bold py-4 px-10 rounded-full hover:scale-105 hover:shadow-[0_0_20px_rgba(0,191,255,0.5)] transition-all duration-300 text-lg group" href="{{ route('register') }}">
+                    <span>Start Monetizing Now</span>
+                    <span class="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ad Formats -->
+    <div class="bg-[#050505] py-24 sm:py-32 px-8 relative border-t border-white/5">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-50"></div>
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="mb-16 text-left gsap-reveal">
+                 <h2 class="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 leading-none">
+                    AD<br/>
+                    <span class="text-gray-700">FORMATS.</span>
+                </h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Interstitial -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal">
+                    <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 group-hover:scale-110 transition-transform">aspect_ratio</span>
+                    <h3 class="text-2xl font-bold text-white mb-4">Interstitial</h3>
+                    <p class="text-gray-400 leading-relaxed">Full-page ads that appear between page transitions. High CPM, high engagement.</p>
+                </div>
+                <!-- Banner -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal" style="transition-delay: 100ms;">
+                    <span class="material-symbols-outlined text-5xl text-bright-magenta mb-6 group-hover:scale-110 transition-transform">ad_units</span>
+                    <h3 class="text-2xl font-bold text-white mb-4">Banner Ads</h3>
+                    <p class="text-gray-400 leading-relaxed">Traditional banner ads in various sizes. Non-intrusive and user-friendly.</p>
+                </div>
+                <!-- Pop-under -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal" style="transition-delay: 200ms;">
+                    <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 group-hover:scale-110 transition-transform">open_in_new</span>
+                    <h3 class="text-2xl font-bold text-white mb-4">Pop-under</h3>
+                    <p class="text-gray-400 leading-relaxed">Ads that open in a new window behind the current browser window.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Testimonials Section -->
+    <div class="bg-[#050505] relative py-24 sm:py-32 px-4 sm:px-8 border-t border-white/5">
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="mb-16 text-left gsap-reveal">
+                 <h2 class="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 leading-none">
+                    USER<br/>
+                    <span class="text-gray-700">STORIES.</span>
+                </h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Card 1 -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal">
+                    <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 opacity-80 group-hover:scale-110 transition-transform">format_quote</span>
+                    <p class="text-gray-400 flex-grow italic leading-relaxed text-lg mb-6">"This is hands-down the best link monetization service I've ever used. The CPM rates are fantastic, and the dashboard is incredibly intuitive. I saw my earnings double in the first month!"</p>
+                    <div class="flex items-center pt-6 border-t border-white/5">
+                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-electric-blue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUA-JqtWZLz752Xs5rAxzxIPHcGqikmXdoUr2DdCIL6cZRZ067lEMc7HP5vjx_41MyK29dOzneCCOPJF_htoEHsEKOLkkWZqv6NaZigLi-BmU3G5t1TD-AbzgUnYL3aEvOx8Y2mZEY_pJ4E7obYCWLmtPYynTR0_nlKEExjq7odZu7XtEkM3lSRSrT0BfaIE_GG9jxdYq5yl_umK5lQQVQEZM63p3nSdG0VhvMdM5dS6_yF99E3UBTLMDJt1dS1zyPddPLLbgY"/>
+                        <div>
+                            <p class="font-bold text-white">Sarah J.</p>
+                            <p class="text-sm text-gray-500">Content Creator</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal" style="transition-delay: 100ms;">
+                    <span class="material-symbols-outlined text-5xl text-bright-magenta mb-6 opacity-80 group-hover:scale-110 transition-transform">format_quote</span>
+                    <p class="text-gray-400 flex-grow italic leading-relaxed text-lg mb-6">"The API integration was a breeze. We've automated our entire link shortening process and it's been a game-changer for our business. Reliable, fast, and profitable."</p>
+                    <div class="flex items-center pt-6 border-t border-white/5">
+                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-bright-magenta" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1xjircuAW9GDYcKX8HKmJv2_qFhZoDPQcIy5quRBbtaDQDCnWzhLdJV1vb7b0aRS5LEQXwEhQ1YvfXhbRn4fXXdSpVQFvlEkDvEKW4vw7K3X7tBN5nEli0lSMK0PXQE47GxwlvW90njRyD2wvhWJesfrHHF025GlrzNs_yuWdrXxScWgedCLai3n45-XMrwZT73wP7wVkb9fSya_MyYsmokITzB_Pd2gYwG_m0LniDN_KHaxAUETbbVtBEECChpMC5r3b877h"/>
+                        <div>
+                            <p class="font-bold text-white">Mike R.</p>
+                            <p class="text-sm text-gray-500">App Developer</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 3 -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal" style="transition-delay: 200ms;">
+                    <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 opacity-80 group-hover:scale-110 transition-transform">format_quote</span>
+                    <p class="text-gray-400 flex-grow italic leading-relaxed text-lg mb-6">"I love the global reach and competitive rates for my country. Payouts are always on time, and the support team is genuinely helpful. Highly recommended for anyone looking to monetize their traffic."</p>
+                    <div class="flex items-center pt-6 border-t border-white/5">
+                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-electric-blue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfNnaC4Spa9QmjB_AYXhcX-LhOgKO33Up1x47Wk-PP097jgAVzQ3FEi9OhNaOyWPUAcgGQV-LrqgpA0FVGIl70bPA-E1rL5OUVVhwzt1Ax5ufO5lTkJxec-JRbsiDN5Lii-L62c7KEIqJxSBiOLSehLGAiYwJQkYloKgIwRNcU7EdvrHPZBytw0a8FZ8W9ueYg9By-bYeECd_BpI02YxwYa67Z2ACsZTpx4cgyJ4leZbHenlRs0vzbdrjHaKAWdvKFortt3d2D"/>
+                        <div>
+                            <p class="font-bold text-white">Aisha K.</p>
+                            <p class="text-sm text-gray-500">Blogger</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Slant Divider -->
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20">
+            <svg class="relative block w-[calc(100%+1.3px)] h-[50px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M1200 120L0 16.48 0 0 1200 0 1200 120z" class="fill-background-dark"></path>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Live Activity Feed (Marquee) -->
+    <div class="bg-background-dark py-12 relative overflow-hidden border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4">
+             <div class="flex items-center gap-4 mb-8 justify-center opacity-70">
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                <span class="text-sm font-mono text-green-400 uppercase tracking-widest">Live Activity</span>
+            </div>
+        </div>
+        
+        <div class="relative w-full overflow-hidden">
+            <div class="flex gap-8 animate-scroll-left w-max hover:pause">
+                <!-- Duplicated items for infinite scroll effect -->
+                @for ($i = 0; $i < 4; $i++)
+                    <div class="flex items-center gap-4 bg-gray-900/50 border border-gray-800 rounded-full px-6 py-3 whitespace-nowrap">
+                        <span class="material-symbols-outlined text-electric-blue">link</span>
+                        <p class="text-sm text-gray-300"><span class="font-bold text-white">User from Germany</span> just shortened a link</p>
+                    </div>
+                    <div class="flex items-center gap-4 bg-gray-900/50 border border-gray-800 rounded-full px-6 py-3 whitespace-nowrap">
+                        <span class="material-symbols-outlined text-bright-magenta">payments</span>
+                        <p class="text-sm text-gray-300"><span class="font-bold text-white">User from USA</span> just earned <span class="font-semibold text-bright-magenta">$0.05</span></p>
+                    </div>
+                    <div class="flex items-center gap-4 bg-gray-900/50 border border-gray-800 rounded-full px-6 py-3 whitespace-nowrap">
+                        <span class="material-symbols-outlined text-electric-blue">link</span>
+                        <p class="text-sm text-gray-300"><span class="font-bold text-white">User from Australia</span> just shortened a link</p>
+                    </div>
+                    <div class="flex items-center gap-4 bg-gray-900/50 border border-gray-800 rounded-full px-6 py-3 whitespace-nowrap">
+                        <span class="material-symbols-outlined text-green-400">account_balance_wallet</span>
+                        <p class="text-sm text-gray-300">Payout of <span class="font-bold text-green-400">$52.10</span> processed</p>
+                    </div>
+                @endfor
+            </div>
+        </div>
+    </div>
+
+    <!-- Global CPM Rates (Data Terminal) -->
+    <div class="bg-[#050505] py-24 sm:py-32 px-4 sm:px-8 relative border-t border-white/5">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-50"></div>
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="mb-16 text-left gsap-reveal">
+                 <h2 class="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 leading-none">
+                    GLOBAL<br/>
+                    <span class="text-gray-700">RATES.</span>
+                </h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 gsap-reveal">
+                <!-- Country Card 1 -->
+                <div class="flex items-center justify-between p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-electric-blue/30 transition-all duration-300 group">
+                    <div class="flex items-center gap-4">
+                        <span class="fi fi-us fis rounded-lg shadow-lg grayscale group-hover:grayscale-0 transition-all duration-300" style="width: 40px; height: 30px;"></span>
+                        <div>
+                            <h4 class="text-white font-bold text-lg">United States</h4>
+                            <p class="text-gray-500 text-sm">North America</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-2xl font-bold text-electric-blue">$22.00</p>
+                        <p class="text-xs text-gray-500 tracking-wider">PER 1000</p>
+                    </div>
+                </div>
+
+                <!-- Country Card 2 -->
+                <div class="flex items-center justify-between p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-electric-blue/30 transition-all duration-300 group">
+                    <div class="flex items-center gap-4">
+                        <span class="fi fi-gb fis rounded-lg shadow-lg grayscale group-hover:grayscale-0 transition-all duration-300" style="width: 40px; height: 30px;"></span>
+                        <div>
+                            <h4 class="text-white font-bold text-lg">United Kingdom</h4>
+                            <p class="text-gray-500 text-sm">Europe</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-2xl font-bold text-electric-blue">$20.50</p>
+                        <p class="text-xs text-gray-500 tracking-wider">PER 1000</p>
+                    </div>
+                </div>
+
+                <!-- Country Card 3 -->
+                <div class="flex items-center justify-between p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-electric-blue/30 transition-all duration-300 group">
+                    <div class="flex items-center gap-4">
+                        <span class="fi fi-ca fis rounded-lg shadow-lg grayscale group-hover:grayscale-0 transition-all duration-300" style="width: 40px; height: 30px;"></span>
+                        <div>
+                            <h4 class="text-white font-bold text-lg">Canada</h4>
+                            <p class="text-gray-500 text-sm">North America</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-2xl font-bold text-electric-blue">$19.80</p>
+                        <p class="text-xs text-gray-500 tracking-wider">PER 1000</p>
+                    </div>
+                </div>
+
+                <!-- Country Card 4 -->
+                <div class="flex items-center justify-between p-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-bright-magenta/30 transition-all duration-300 group">
+                    <div class="flex items-center gap-4">
+                        <span class="fi fi-au fis rounded-lg shadow-lg grayscale group-hover:grayscale-0 transition-all duration-300" style="width: 40px; height: 30px;"></span>
+                        <div>
+                            <h4 class="text-white font-bold text-lg">Australia</h4>
+                            <p class="text-gray-500 text-sm">Oceania</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-2xl font-bold text-bright-magenta">$18.75</p>
+                        <p class="text-xs text-gray-500 tracking-wider">PER 1000</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center gsap-reveal">
+                <a class="inline-block border border-white/20 hover:bg-white/10 text-white font-bold py-4 px-10 rounded-full transition-all duration-300 tracking-wider text-sm" href="{{ route('payout.rates') }}">
+                    VIEW ALL COUNTRIES
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Earning Potential Calculator -->
+    <div class="bg-[#050505] py-24 sm:py-32 px-8 relative overflow-hidden border-t border-white/5">
+        <div class="max-w-5xl mx-auto relative z-10">
+            <div class="mb-16 text-left gsap-reveal">
+                 <h2 class="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 leading-none">
+                    ESTIMATE<br/>
+                    <span class="text-gray-700">EARNINGS.</span>
+                </h2>
+            </div>
+            
+            <div class="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-md border border-gray-700/50 rounded-3xl p-8 md:p-12 shadow-2xl gsap-reveal">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <label class="block text-lg text-gray-300 mb-6 font-medium" for="clicks-slider">Monthly Clicks</label>
+                        <div class="relative">
+                            <input class="w-full h-3 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-electric-blue" id="clicks-slider" max="50000" min="1000" step="1000" type="range" value="10000"/>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-500 mt-4 font-mono">
+                            <span>1,000</span>
+                            <span class="font-bold text-electric-blue text-xl" id="clicks-display">10,000</span>
+                            <span>50,000+</span>
+                        </div>
+                    </div>
+                    <div class="text-center bg-gray-900/50 rounded-2xl p-8 border border-gray-700/30">
+                        <p class="text-gray-400 text-lg mb-2 uppercase tracking-widest text-xs">Estimated Monthly Earnings</p>
+                        <p class="text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-electric-blue to-bright-magenta tracking-tight" id="calculator-earnings">$50.00</p>
+                    </div>
+                </div>
+                <div class="mt-12 text-center border-t border-gray-700/50 pt-8">
+                    <a class="inline-block bg-white text-gray-900 font-bold py-4 px-10 rounded-full hover:bg-gray-200 hover:scale-105 transition-all duration-300 text-lg shadow-lg" href="{{ route('register') }}">Start Earning Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Powerful Features -->
+    <div class="bg-[#050505] py-24 sm:py-32 px-8 relative border-t border-white/5">
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="mb-16 text-left gsap-reveal">
+                 <h2 class="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 leading-none">
+                    POWERFUL<br/>
+                    <span class="text-gray-700">FEATURES.</span>
+                </h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Card 1 -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal">
+                    <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 group-hover:scale-110 transition-transform">monetization_on</span>
+                    <h3 class="text-2xl font-bold text-white mb-4">Monetization</h3>
+                    <p class="text-gray-400 leading-relaxed">Turn your links into a passive revenue stream. Effortlessly monetize every click with our smart ad technology.</p>
+                </div>
+                <!-- Card 2 -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal" style="transition-delay: 100ms;">
+                    <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 group-hover:scale-110 transition-transform">monitoring</span>
+                    <h3 class="text-2xl font-bold text-white mb-4">Real-time Analytics</h3>
+                    <p class="text-gray-400 leading-relaxed">Track every click and analyze your performance with a stunning visual dashboard. Data at your fingertips.</p>
+                </div>
+                <!-- Card 3 -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal" style="transition-delay: 200ms;">
+                    <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 group-hover:scale-110 transition-transform">security</span>
+                    <h3 class="text-2xl font-bold text-white mb-4">Ironclad Security</h3>
+                    <p class="text-gray-400 leading-relaxed">Your links are protected with our robust, cutting-edge security measures. Safety first, always.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Partnership Opportunities -->
+    <div class="bg-[#050505] py-24 sm:py-32 px-8 relative border-t border-white/5">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-50"></div>
+        <div class="max-w-5xl mx-auto relative z-10">
+            <div class="mb-16 text-left gsap-reveal">
+                 <h2 class="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 leading-none">
+                    PARTNER<br/>
+                    <span class="text-gray-700">WITH US.</span>
+                </h2>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Affiliate Card -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 flex flex-col items-start group gsap-reveal">
+                    <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 group-hover:scale-110 transition-transform">campaign</span>
+                    <h3 class="text-2xl font-bold mb-3 text-white">Affiliate Program</h3>
+                    <p class="text-gray-400 mb-6 flex-grow leading-relaxed">Join our affiliate program and earn commissions by referring new users to our platform. Get access to marketing materials and a dedicated support team.</p>
+                    <a class="font-bold text-electric-blue hover:text-white transition-colors duration-300 flex items-center group mt-auto" href="{{ route('register') }}">
+                        Become an Affiliate <span class="material-symbols-outlined ml-2 transition-transform group-hover:translate-x-1">arrow_forward</span>
+                    </a>
+                </div>
+                <!-- API Card -->
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 flex flex-col items-start group gsap-reveal" style="transition-delay: 100ms;">
+                    <span class="material-symbols-outlined text-5xl text-bright-magenta mb-6 group-hover:scale-110 transition-transform">business_center</span>
+                    <h3 class="text-2xl font-bold mb-3 text-white">API Integration</h3>
+                    <p class="text-gray-400 mb-6 flex-grow leading-relaxed">Integrate our powerful link monetization engine into your own application or service with our flexible and robust API. Perfect for developers and businesses.</p>
+                    <a class="font-bold text-bright-magenta hover:text-white transition-colors duration-300 flex items-center group mt-auto" href="{{ route('api.documentation') }}">
+                        Explore API Docs <span class="material-symbols-outlined ml-2 transition-transform group-hover:translate-x-1">arrow_forward</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="bg-[#050505] py-24 sm:py-32 px-4 sm:px-8 relative overflow-hidden border-t border-white/5">
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="mb-16 text-left gsap-reveal">
+                 <h2 class="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 leading-none">
+                    COMMON<br/>
+                    <span class="text-gray-700">QUESTIONS.</span>
+                </h2>
+            </div>
+            <div class="space-y-6 gsap-reveal" x-data="{ open: 0 }">
+                <div class="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-700">
+                    <button @click="open = open === 1 ? 0 : 1" class="w-full text-left p-6 flex justify-between items-center hover:bg-gray-800/50 transition-colors duration-300">
+                        <h3 class="text-xl font-semibold text-white">What is a monetized link shortener?</h3>
+                        <span :class="{'rotate-45': open === 1}" class="material-symbols-outlined text-electric-blue transform transition-transform duration-300">add</span>
+                    </button>
+                    <div class="px-6 pb-6 pt-2 text-gray-400" x-show="open === 1" x-collapse>
+                        <p>A monetized link shortener is a service that transforms your long URLs into shorter, more manageable links. When a user clicks on this new link, they are shown a brief advertisement before being redirected to the original destination. You, as the link creator, earn a portion of the advertising revenue for each valid click.</p>
+                    </div>
+                </div>
+                <div class="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-700">
+                    <button @click="open = open === 2 ? 0 : 2" class="w-full text-left p-6 flex justify-between items-center hover:bg-gray-800/50 transition-colors duration-300">
+                        <h3 class="text-xl font-semibold text-white">How much can I earn?</h3>
+                        <span :class="{'rotate-45': open === 2}" class="material-symbols-outlined text-bright-magenta transform transition-transform duration-300">add</span>
+                    </button>
+                    <div class="px-6 pb-6 pt-2 text-gray-400" x-show="open === 2" x-collapse>
+                        <p>Your earnings depend on several factors, primarily the CPM (Cost Per Mille, or per 1000 views) rate for the country where the click originates. We offer competitive rates for traffic from all over the world.</p>
+                    </div>
+                </div>
+                <div class="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-700">
+                    <button @click="open = open === 3 ? 0 : 3" class="w-full text-left p-6 flex justify-between items-center hover:bg-gray-800/50 transition-colors duration-300">
+                        <h3 class="text-xl font-semibold text-white">What are the payment methods?</h3>
+                        <span :class="{'rotate-45': open === 3}" class="material-symbols-outlined text-electric-blue transform transition-transform duration-300">add</span>
+                    </button>
+                    <div class="px-6 pb-6 pt-2 text-gray-400" x-show="open === 3" x-collapse>
+                        <p>We offer a variety of payment methods including PayPal, Payoneer, and Bank Transfer. Payments are processed on a monthly basis.</p>
+                    </div>
+                </div>
+                 <div class="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-700">
+                    <button @click="open = open === 4 ? 0 : 4" class="w-full text-left p-6 flex justify-between items-center hover:bg-gray-800/50 transition-colors duration-300">
+                        <h3 class="text-xl font-semibold text-white">Are there any restrictions on links?</h3>
+                        <span :class="{'rotate-45': open === 4}" class="material-symbols-outlined text-bright-magenta transform transition-transform duration-300">add</span>
+                    </button>
+                    <div class="px-6 pb-6 pt-2 text-gray-400" x-show="open === 4" x-collapse>
+                        <p>Yes. We strictly prohibit the shortening of links that point to adult content, malware, hate speech, illegal activities, or any other content that violates our Terms of Service.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Section -->
+    <div class="bg-[#050505] py-24 px-8 border-t border-white/5 relative">
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-50"></div>
+        <div class="max-w-5xl mx-auto text-left gsap-reveal relative z-10">
+            <div class="mb-16">
+                 <h2 class="text-6xl md:text-8xl font-bold tracking-tighter text-white mb-6 leading-none">
+                    SECURE<br/>
+                    <span class="text-gray-700">PLATFORM.</span>
+                </h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6 text-left">
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal">
+                    <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 group-hover:scale-110 transition-transform">lock</span>
+                    <h3 class="text-2xl font-bold text-white mb-4">Encryption</h3>
+                    <p class="text-gray-400 leading-relaxed">All data is secured with industry-standard TLS encryption protocols.</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal" style="transition-delay: 100ms;">
+                    <span class="material-symbols-outlined text-5xl text-bright-magenta mb-6 group-hover:scale-110 transition-transform">shield</span>
+                    <h3 class="text-2xl font-bold text-white mb-4">Fraud Protection</h3>
+                    <p class="text-gray-400 leading-relaxed">Advanced AI systems actively monitor and prevent fraudulent activities.</p>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-3xl p-10 hover:border-white/20 transition-all duration-300 group gsap-reveal" style="transition-delay: 200ms;">
+                    <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 group-hover:scale-110 transition-transform">privacy_tip</span>
+                    <h3 class="text-2xl font-bold text-white mb-4">Privacy First</h3>
+                    <p class="text-gray-400 leading-relaxed">Fully GDPR and CCPA compliant. Your privacy is our top priority.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Methods -->
+    <div class="bg-[#050505] py-12 border-t border-white/5 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-8">
+            <p class="text-center text-sm font-mono text-gray-600 mb-8 uppercase tracking-widest">Withdraw Your Money Via</p>
+            <div class="flex flex-wrap justify-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                <div class="flex items-center gap-2 text-xl md:text-2xl font-bold text-white hover:text-electric-blue transition-colors cursor-default"><span class="material-symbols-outlined">payments</span> PayPal</div>
+                <div class="flex items-center gap-2 text-xl md:text-2xl font-bold text-white hover:text-electric-blue transition-colors cursor-default"><span class="material-symbols-outlined">currency_bitcoin</span> Bitcoin</div>
+                <div class="flex items-center gap-2 text-xl md:text-2xl font-bold text-white hover:text-electric-blue transition-colors cursor-default"><span class="material-symbols-outlined">attach_money</span> USDT</div>
+                <div class="flex items-center gap-2 text-xl md:text-2xl font-bold text-white hover:text-electric-blue transition-colors cursor-default"><span class="material-symbols-outlined">account_balance</span> Payoneer</div>
+            </div>
+        </div>
+    </div>
+
+    @include('partials.footer')
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Hero Animation (Minimalist)
+            gsap.from(".gsap-hero-element", {
+                duration: 1,
+                y: 50,
+                opacity: 0,
+                stagger: 0.2,
+                ease: "power3.out",
+                delay: 0.2
+            });
+
+            // Section Scroll Animations
+            gsap.utils.toArray('.gsap-reveal').forEach(section => {
+                gsap.from(section, {
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 85%",
+                        toggleActions: "play none none reverse"
+                    },
+                    y: 50,
+                    opacity: 0,
+                    duration: 1,
+                    ease: "power3.out"
+                });
+            });
+
+            // Counters
+            const counters = { links: 0, earnings: 0 };
+            const linksCounter = document.getElementById('links-counter');
+            const earningsCounter = document.getElementById('earnings-counter');
+            
+            if(linksCounter && earningsCounter) {
+                ScrollTrigger.create({
+                    trigger: "#stats-section",
+                    start: "top 80%",
+                    once: true,
+                    onEnter: () => {
+                         gsap.to(counters, {
+                            duration: 2.5,
+                            links: 28453987,
+                            onUpdate: () => linksCounter.innerHTML = Math.round(counters.links).toLocaleString(),
+                            ease: "power2.out"
+                        });
+                        gsap.to(counters, {
+                            duration: 2.5,
+                            earnings: 142269.93,
+                            onUpdate: () => earningsCounter.innerHTML = counters.earnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                            ease: "power2.out"
+                        });
+                    }
+                });
+            }
+
+            // Slider Logic
+            const slider = document.getElementById('clicks-slider');
+            const clicksDisplay = document.getElementById('clicks-display');
+            const earningsDisplay = document.getElementById('calculator-earnings');
+            
+            if(slider) {
+                slider.addEventListener('input', (e) => {
+                    const clicks = parseInt(e.target.value);
+                    const earnings = (clicks / 1000) * 5; // Assuming $5 average CPM
+                    
+                    clicksDisplay.innerText = clicks.toLocaleString();
+                    earningsDisplay.innerText = '$' + earnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                });
+            }
+            
+            // Generic form loading
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                // Skip Alpine.js handled forms to avoid conflicts
+                if (form.hasAttribute('x-data') || form.closest('[x-data]')) return;
+
+                form.addEventListener('submit', function() {
+                    const btn = form.querySelector('button[type="submit"]');
+                    if(btn) {
+                        btn.disabled = true;
+                        btn.innerHTML = 'Processing...';
+                        btn.classList.add('opacity-75', 'cursor-not-allowed');
+                    }
+                });
             });
         });
-    });
-</script>
-<script defer="" src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-<style>
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            background: #00BFFF;
-            cursor: pointer;
-            border-radius: 9999px;
-            box-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF;
+    </script>
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
         }
-        input[type="range"]::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            background: #00BFFF;
-            cursor: pointer;
-            border-radius: 9999px;
-            box-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF;
+        @keyframes float-1 {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-25px) rotate(10deg); }
         }
+        @keyframes float-2 {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(20px) translateX(10px); }
+        }
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        .animate-float-1 {
+            animation: float-1 5s ease-in-out infinite;
+        }
+        .animate-float-2 {
+            animation: float-2 7s ease-in-out infinite;
+        }
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        @keyframes gradient-x {
+            0%, 100% {
+                background-size: 200% 200%;
+                background-position: left center;
+            }
+            50% {
+                background-size: 200% 200%;
+                background-position: right center;
+            }
+        }
+        .animate-gradient-x {
+            animation: gradient-x 15s ease infinite;
+        }
+        
         @keyframes scroll-left {
             from { transform: translateX(0); }
             to { transform: translateX(-100%); }
         }
         .animate-scroll-left {
-            animation: scroll-left 40s linear infinite;
+            animation: scroll-left 30s linear infinite;
         }
-        @keyframes pulse-slow {
-            0%, 100% { transform: scale(1); opacity: 0.2; }
-            50% { transform: scale(1.05); opacity: 0.3; }
+        .pause:hover {
+            animation-play-state: paused;
         }
-       .animate-pulse-slow {
-            animation: pulse-slow 8s ease-in-out infinite;
-       }
-       .text-shadow-lg {
-        text-shadow: 0px 0px 15px rgba(0, 191, 255, 0.5), 0px 0px 30px rgba(255, 0, 255, 0.3);
-       }
-       [x-cloak] { display: none !important; }
-       .transition-transform {
-            transition: transform 0.3s ease;
-       }
-       .rotate-45 {
-            transform: rotate(45deg);
-       }
-       .x-collapse {
-           overflow: hidden;
-           transition: height 0.3s ease-in-out;
-       }
+        
+        .animate-pulse-slow {
+             animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151; 
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4B5563; 
+        }
+
+        /* Gradient Text Helper */
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #00BFFF, #FF00FF);
+        }
     </style>
-</body></html>
+</body>
+</html>

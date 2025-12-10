@@ -17,7 +17,17 @@ class LevelConfigurationResource extends Resource
 {
     protected static ?string $model = LevelConfiguration::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-trending-up';
+    
+    protected static ?string $navigationGroup = 'Gamification';
+    
+    protected static ?string $navigationLabel = 'Seviye Ayarları';
+    
+    protected static ?string $modelLabel = 'Seviye';
+    
+    protected static ?string $pluralModelLabel = 'Seviyeler';
+    
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {

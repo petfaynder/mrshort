@@ -65,7 +65,84 @@
                     </div>
                 </div>
             </div>
-            <div class="flex flex-col gap-8 p-4">
+            
+            {{-- Streak Milestones Section --}}
+            @if(count($streakMilestones) > 0)
+            <div class="p-4 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-orange-400" style="font-size: 28px;">local_fire_department</span>
+                        <h3 class="text-white text-xl font-bold">Seri Ödülleri</h3>
+                    </div>
+                    <div class="flex items-center gap-2 bg-orange-500/20 px-4 py-2 rounded-full">
+                        <span class="material-symbols-outlined text-orange-400">whatshot</span>
+                        <span class="text-orange-400 font-bold">{{ $currentStreak }} Günlük Seri</span>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                    @foreach($streakMilestones as $milestone)
+                        <div class="relative rounded-xl p-4 transition-all duration-300 hover:scale-105
+                            {{ $milestone['claimed'] 
+                                ? 'bg-green-900/30 border border-green-500/40' 
+                                : ($milestone['reachable'] 
+                                    ? 'bg-orange-900/30 border-2 border-orange-500/60 shadow-lg shadow-orange-500/20' 
+                                    : 'bg-slate-800/50 border border-slate-700') }}">
+                            
+                            {{-- Days Badge --}}
+                            <div class="text-center mb-3">
+                                <div class="inline-flex items-center justify-center w-14 h-14 rounded-full mb-2
+                                    {{ $milestone['claimed'] 
+                                        ? 'bg-green-500/20 text-green-400' 
+                                        : ($milestone['reachable'] 
+                                            ? 'bg-orange-500/20 text-orange-400 animate-pulse' 
+                                            : 'bg-slate-700/50 text-slate-500') }}">
+                                    <span class="text-2xl">🔥</span>
+                                </div>
+                                <div class="text-2xl font-black {{ $milestone['claimed'] ? 'text-green-400' : ($milestone['reachable'] ? 'text-orange-400' : 'text-slate-400') }}">
+                                    {{ $milestone['days'] }}
+                                </div>
+                                <div class="text-xs text-slate-500 font-medium">GÜN</div>
+                            </div>
+                            
+                            {{-- Reward Info --}}
+                            <div class="text-center text-sm mb-3">
+                                <div class="text-white font-semibold">+{{ number_format($milestone['points']) }}</div>
+                                <div class="text-slate-400 text-xs">Puan</div>
+                                @if($milestone['bonus_type'] === 'streak_freeze')
+                                    <div class="text-cyan-400 text-xs mt-1">+{{ $milestone['bonus_value'] }} Streak Freeze 🧊</div>
+                                @elseif($milestone['bonus_type'] === 'xp_boost')
+                                    <div class="text-purple-400 text-xs mt-1">+{{ $milestone['bonus_value'] }}% XP Boost 🚀</div>
+                                @endif
+                            </div>
+                            
+                            {{-- Status / Claim Button --}}
+                            @if($milestone['claimed'])
+                                <div class="flex items-center justify-center gap-1 text-green-400 text-xs font-bold">
+                                    <span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span>
+                                    <span>Alındı</span>
+                                </div>
+                            @elseif($milestone['reachable'])
+                                <button 
+                                    wire:click="claimStreakMilestone({{ $milestone['id'] }})"
+                                    wire:loading.attr="disabled"
+                                    class="w-full py-2 bg-orange-500 hover:bg-orange-400 text-white text-xs font-bold rounded-lg transition shadow-lg shadow-orange-500/30">
+                                    <span wire:loading.remove wire:target="claimStreakMilestone({{ $milestone['id'] }})">Ödülü Al</span>
+                                    <span wire:loading wire:target="claimStreakMilestone({{ $milestone['id'] }})" class="material-symbols-outlined animate-spin" style="font-size: 14px;">progress_activity</span>
+                                </button>
+                            @else
+                                <div class="w-full">
+                                    <div class="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-slate-500 transition-all duration-500" style="width: {{ $milestone['progress'] }}%"></div>
+                                    </div>
+                                    <div class="text-center text-xs text-slate-500 mt-1">%{{ $milestone['progress'] }}</div>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
                 <div class="flex flex-col gap-4">
                     <div class="flex items-center justify-between">
                         <h3 class="text-white text-2xl font-bold tracking-tight">Özel Başarım Koleksiyonları</h3>

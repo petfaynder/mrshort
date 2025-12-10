@@ -20,7 +20,9 @@ class AdCampaigns extends Component
     {
         $campaign = AdCampaign::where('user_id', auth()->id())->findOrFail($campaignId);
         $campaign->delete();
-        session()->flash('success', 'Reklam kampanyası başarıyla silindi.');
+        
+        // Redirect with flash message
+        return redirect()->route('user.ads.index')->with('success', 'Reklam kampanyası başarıyla silindi.');
     }
 
     public function updatingSearch()

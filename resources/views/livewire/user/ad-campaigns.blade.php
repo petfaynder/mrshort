@@ -92,10 +92,28 @@
                         </td>
                         <td class="p-4 whitespace-nowrap text-right text-sm font-medium">
                             <a href="{{ route('user.ads.edit', $campaign) }}" class="text-primary hover:underline mr-3">{{ __('Edit') }}</a>
-                            <button wire:click="deleteCampaign({{ $campaign->id }})" wire:loading.attr="disabled" onclick="confirm('Are you sure you want to delete this campaign?') || event.stopImmediatePropagation()" class="text-red-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 float-right">
+                            <button 
+                                type="button"
+                                x-data
+                                @click="$dispatch('open-confirm-modal', { 
+                                    id: 'delete-campaign-{{ $campaign->id }}', 
+                                    onConfirm: () => $wire.deleteCampaign({{ $campaign->id }}) 
+                                })"
+                                wire:loading.attr="disabled" 
+                                class="text-red-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 float-right"
+                            >
                                 <span wire:loading.remove wire:target="deleteCampaign({{ $campaign->id }})">{{ __('Delete') }}</span>
                                 <span wire:loading wire:target="deleteCampaign({{ $campaign->id }})" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
                             </button>
+                            <x-confirm-modal 
+                                id="delete-campaign-{{ $campaign->id }}"
+                                title="Delete Campaign"
+                                message="Are you sure you want to delete this campaign?"
+                                confirmText="Delete"
+                                cancelText="Cancel"
+                                confirmColor="red"
+                                icon="delete"
+                            />
                         </td>
                     </tr>
                 @empty

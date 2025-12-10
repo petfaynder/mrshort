@@ -38,9 +38,9 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 </head>
-<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
-<div class="flex h-screen">
-    <aside class="w-64 bg-card-light dark:bg-card-dark flex flex-col p-4 border-r border-border-light dark:border-border-dark">
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark overflow-hidden">
+<div class="flex h-screen overflow-hidden">
+    <aside class="w-64 bg-card-light dark:bg-card-dark flex flex-col p-4 border-r border-border-light dark:border-border-dark overflow-y-auto">
         <div class="flex items-center gap-2 px-4 py-2 mb-8">
             <span class="material-symbols-outlined text-primary text-3xl">link</span>
             <h1 class="text-2xl font-bold text-heading-light dark:text-heading-dark">Linkly</h1>
@@ -54,7 +54,7 @@
                     </a>
                 </li>
                 <li class="mb-2">
-                    <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.links.*') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.links.index') }}">
+                    <a data-tutorial="nav-links" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.links.*') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.links.index') }}">
                         <span class="material-symbols-outlined">link</span>
                         Links
                     </a>
@@ -68,38 +68,74 @@
                     </ul>
                 </li>
                 <li class="mb-2">
-                    <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.withdrawals') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.withdrawals') }}">
+                    <a data-tutorial="nav-withdrawals" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.withdrawals') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.withdrawals') }}">
                         <span class="material-symbols-outlined">payments</span>
                         Withdrawals
                     </a>
                 </li>
                 <li class="mb-2">
-                    <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.tools') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.tools') }}">
+                    <a data-tutorial="nav-tools" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.tools') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.tools') }}">
                         <span class="material-symbols-outlined">construction</span>
                         Tools
                     </a>
                 </li>
                 <li class="mb-2">
-                    <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.ads.*') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.ads.index') }}">
+                    <a data-tutorial="nav-campaigns" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.ads.*') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.ads.index') }}">
                         <span class="material-symbols-outlined">campaign</span>
                         Campaigns
                     </a>
                 </li>
                 <li class="mb-2">
-                    <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.referrals') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.referrals') }}">
+                    <a data-tutorial="nav-referrals" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.referrals') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.referrals') }}">
                         <span class="material-symbols-outlined">group</span>
                         Referrals
                     </a>
                 </li>
                 <li class="mb-2">
-                    <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.reports') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.reports') }}">
+                    <a data-tutorial="nav-reports" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.reports') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.reports') }}">
                         <span class="material-symbols-outlined">analytics</span>
                         Reports
                     </a>
                 </li>
-                <li class="mb-2">
+                <li class="mb-2" data-tutorial="nav-gamification">
                     <span class="px-4 text-xs font-semibold text-gray-500 uppercase">Gamification</span>
                     <ul class="mt-2 space-y-1">
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.daily-spin') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.daily-spin') }}">
+                                <span class="material-symbols-outlined">casino</span>
+                                Daily Spin
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.mystery-boxes') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.mystery-boxes') }}">
+                                <span class="material-symbols-outlined">redeem</span>
+                                Mystery Boxes
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.competition') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.competition') }}">
+                                <span class="material-symbols-outlined">trophy</span>
+                                Competition
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.battle-pass') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.battle-pass') }}">
+                                <span class="material-symbols-outlined">military_tech</span>
+                                Battle Pass
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.teams') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.teams') }}">
+                                <span class="material-symbols-outlined">groups</span>
+                                Teams
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.vip') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.vip') }}">
+                                <span class="material-symbols-outlined">star</span>
+                                VIP Status
+                            </a>
+                        </li>
                         <li>
                             <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.achievements') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.achievements') }}">
                                 <span class="material-symbols-outlined">emoji_events</span>
@@ -121,7 +157,7 @@
                     </ul>
                 </li>
                 <li class="mb-2">
-                    <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.contact') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.contact') }}">
+                    <a data-tutorial="nav-contact" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.contact') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.contact') }}">
                         <span class="material-symbols-outlined">contact_support</span>
                         Contact Us
                     </a>
@@ -129,7 +165,7 @@
             </ul>
         </nav>
         <div>
-            <a class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark" href="{{ route('user.settings') }}">
+            <a data-tutorial="nav-settings" class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark" href="{{ route('user.settings') }}">
                 <span class="material-symbols-outlined">settings</span>
                 Settings
             </a>
@@ -142,16 +178,16 @@
             </form>
         </div>
     </aside>
-    <main class="flex-1 p-8 overflow-y-auto">
+    <main class="flex-1 p-8 overflow-auto">
         @if (isset($header))
             {{ $header }}
         @else
-            <header class="flex justify-between items-center mb-8">
+            <header data-tutorial="header" class="flex justify-between items-center mb-8">
                 <div>
                     <h2 class="text-3xl font-bold text-heading-light dark:text-heading-dark">Dashboard Overview</h2>
                     <p class="text-text-light dark:text-text-dark">Welcome back, let's see your progress!</p>
                 </div>
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-6">
                     <livewire:user.notifications />
                     <div class="flex items-center gap-3">
                         <img alt="User avatar" class="w-10 h-10 rounded-full" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&size=40&background=0D8ABC&color=fff"/>
@@ -173,5 +209,14 @@
 </div>
 @livewireScripts
 @stack('scripts')
+
+{{-- Interactive Tutorial Initialization --}}
+@if(auth()->check() && auth()->user()->shouldShowTutorial())
+<script>
+    window.showTutorial = true;
+    window.tutorialCompleteUrl = '{{ route("tutorial.complete") }}';
+    window.csrfToken = '{{ csrf_token() }}';
+</script>
+@endif
 </body>
 </html>

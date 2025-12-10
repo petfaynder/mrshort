@@ -17,7 +17,27 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
+    
+    protected static ?string $navigationGroup = 'Kullanıcı Yönetimi';
+    
+    protected static ?string $navigationLabel = 'Kullanıcılar';
+    
+    protected static ?string $modelLabel = 'Kullanıcı';
+    
+    protected static ?string $pluralModelLabel = 'Kullanıcılar';
+    
+    protected static ?int $navigationSort = 1;
+    
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::whereDate('created_at', today())->count() ?: null;
+    }
+    
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'success';
+    }
 
     public static function form(Form $form): Form
     {
@@ -147,23 +167,59 @@ class UserResource extends Resource
                     ->requiresConfirmation(), // Silmeden önce onay iste
                 Tables\Actions\Action::make('deactivateAccount')
                     ->label('Hesabı Deaktif Et')
-                    ->icon('heroicon-o-x-circle') // İkonu değiştirdim
+                    ->icon('heroicon-o-x-circle')
                     ->color('warning')
                     ->action(function (User $record): void {
-                        // Kullanıcının hesabını deaktif etme mantığı buraya gelecek
-                        // Örneğin: $record->update(['status' => 'deactivated']);
+                        $record->update(['status' => 'deactivated']);
+                        \Filament\Notifications\Notification::make()
+                            ->title('Hesap deaktif edildi')
+                            ->success()
+                            ->send();
                     })
-                    ->requiresConfirmation(), // Deaktif etmeden önce onay iste
+                    ->requiresConfirmation()
+                    ->modalHeading('Hesabı Deaktif Et')
+                    ->modalDescription('Bu kullanıcının hesabını deaktif etmek istediğinizden emin misiniz?')
+                    ->visible(fn (User $record): bool => $record->status !== 'deactivated'),
+                Tables\Actions\Action::make('activateAccount')
+                    ->label('Hesabı Aktif Et')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->action(function (User $record): void {
+                        $record->update(['status' => 'active']);
+                        \Filament\Notifications\Notification::make()
+                            ->title('Hesap aktif edildi')
+                            ->success()
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->visible(fn (User $record): bool => $record->status === 'deactivated'),
                 Tables\Actions\Action::make('sendMessage')
                     ->label('Mesaj Gönder')
                     ->icon('heroicon-o-envelope')
-                    ->action(function (User $record): void {
-                        // Mesaj gönderme modalını açacak veya ilgili işlemi yapacak kod buraya gelecek
-                        // Şimdilik sadece bir placeholder
-                        \Illuminate\Support\Facades\Notification::route('mail', $record->email)
-                            ->notify(new \App\Notifications\AdminMessage($record, 'Test Mesajı')); // Örnek bildirim gönderme
+                    ->form([
+                        Forms\Components\TextInput::make('subject')
+                            ->label('Konu')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\Textarea::make('message')
+                            ->label('Mesaj')
+                            ->required()
+                            ->rows(5),
+                    ])
+                    ->action(function (User $record, array $data): void {
+                        \Illuminate\Support\Facades\Mail::to($record->email)->send(
+                            new \Illuminate\Mail\Mailable(function ($message) use ($record, $data) {
+                                $message->subject($data['subject'])
+                                    ->html("<p>Merhaba {$record->name},</p><p>{$data['message']}</p>");
+                            })
+                        );
+                        \Filament\Notifications\Notification::make()
+                            ->title('Mesaj gönderildi')
+                            ->body("{$record->email} adresine mesaj gönderildi.")
+                            ->success()
+                            ->send();
                     })
-                    ->requiresConfirmation(), // Mesaj göndermeden önce onay iste
+                    ->modalHeading('Kullanıcıya Mesaj Gönder'),
                 Tables\Actions\Action::make('viewReports')
                     ->label('Raporları Görüntüle')
                     ->url(fn (User $record): string => static::getUrl('reports', ['record' => $record]))

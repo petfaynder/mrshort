@@ -17,7 +17,17 @@ class UserRewardResource extends Resource
 {
     protected static ?string $model = UserReward::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-gift';
+    
+    protected static ?string $navigationGroup = 'Kullanıcı Yönetimi';
+    
+    protected static ?string $navigationLabel = 'Kullanıcı Ödülleri';
+    
+    protected static ?string $modelLabel = 'Kullanıcı Ödülü';
+    
+    protected static ?string $pluralModelLabel = 'Kullanıcı Ödülleri';
+    
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {

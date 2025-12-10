@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\LinkClick;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Services\GamificationService; // Add this line
+use App\Services\GamificationService;
+use App\Services\DailyActivityService;
 
 class Link extends Model
 {
@@ -17,7 +18,7 @@ class Link extends Model
         'title',
         'expires_at',
         'is_hidden',
-        'campaign_template_id', // Add this field
+        'campaign_template_id',
     ];
 
     protected static function boot()
@@ -25,9 +26,28 @@ class Link extends Model
         parent::boot();
 
         static::created(function ($link) {
-            if ($link->user_id) {
-                $gamificationService = app(GamificationService::class);
-                $gamificationService->updateGoalProgress($link->user, 'shorten_links', 1);
+            if ($link->user_id && $link->user) {
+                try {
+                    // Update gamification goals (existing system)
+                    $gamificationService = app(GamificationService::class);
+                    $gamificationService->updateGoalProgress($link->user, 'shorten_links', 1);
+
+                    // Update daily challenges and streak via centralized service
+                    $activityService = new DailyActivityService();
+                    $activityService->recordActivity($link->user, 'shorten_links', 1);
+
+                    // Update competition score
+                    $competitionService = new \App\Services\CompetitionService();
+                    $competitionService->updateScore($link->user, 'links', 1);
+
+                    // Mystery Box trigger - her 50 linkte Bronze Box
+                    $linkCount = Link::where('user_id', $link->user_id)->count();
+                    if ($linkCount > 0 && $linkCount % 50 === 0) {
+                        UserMysteryBox::giveBox($link->user_id, 'bronze', 'link_milestone_' . $linkCount);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Link gamification update failed: ' . $e->getMessage());
+                }
             }
         });
     }

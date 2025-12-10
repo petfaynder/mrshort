@@ -17,7 +17,17 @@ class UserAchievementResource extends Resource
 {
     protected static ?string $model = UserAchievement::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-trophy';
+    
+    protected static ?string $navigationGroup = 'Kullanıcı Yönetimi';
+    
+    protected static ?string $navigationLabel = 'Kullanıcı Başarımları';
+    
+    protected static ?string $modelLabel = 'Kullanıcı Başarımı';
+    
+    protected static ?string $pluralModelLabel = 'Kullanıcı Başarımları';
+    
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {

@@ -18,7 +18,28 @@ class TicketResource extends Resource
 {
     protected static ?string $model = Ticket::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-ticket';
+    
+    protected static ?string $navigationGroup = 'Destek';
+    
+    protected static ?string $navigationLabel = 'Destek Talepleri';
+    
+    protected static ?string $modelLabel = 'Destek Talebi';
+    
+    protected static ?string $pluralModelLabel = 'Destek Talepleri';
+    
+    protected static ?int $navigationSort = 1;
+    
+    public static function getNavigationBadge(): ?string
+    {
+        $count = static::getModel()::where('status', 'open')->count();
+        return $count > 0 ? (string) $count : null;
+    }
+    
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'danger';
+    }
 
     public static function form(Form $form): Form
     {

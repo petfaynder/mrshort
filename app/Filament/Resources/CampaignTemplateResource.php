@@ -441,7 +441,9 @@ class CampaignTemplateResource extends Resource
                             ->numeric()
                             ->prefix('$')
                             ->default(100.00)
-                            ->helperText('Şablonu kullanan kampanyalar için varsayılan günlük bütçe.'),
+                            ->minValue(0)
+                            ->maxValue(99999999.99)
+                            ->helperText('Şablonu kullanan kampanyalar için varsayılan günlük bütçe (max: $99,999,999.99).'),
 
                         TextInput::make('estimated_ctr')
                             ->label('Tahmini Tıklama Oranı (CTR)')

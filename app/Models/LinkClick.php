@@ -28,8 +28,50 @@ class LinkClick extends Model
 
         static::created(function ($linkClick) {
             if ($linkClick->link && $linkClick->link->user_id) {
-                $gamificationService = app(GamificationService::class);
-                $gamificationService->updateGoalProgress($linkClick->link->user, 'clicks', 1);
+                $userId = $linkClick->link->user_id;
+                $user = $linkClick->link->user;
+
+                try {
+                    // Update gamification goals
+                    $gamificationService = app(GamificationService::class);
+                    $gamificationService->updateGoalProgress($user, 'clicks', 1);
+
+                    // Update daily challenges
+                    $todayChallenge = \App\Models\UserDailyChallenge::where('user_id', $userId)
+                        ->where('challenge_date', now()->toDateString())
+                        ->first();
+
+                    if ($todayChallenge) {
+                        // Update click progress
+                        $todayChallenge->updateProgress('get_clicks', 1);
+
+                        // Track unique countries for "different_countries" challenge
+                        if ($linkClick->country) {
+                            $countriesKey = 'daily_countries_' . $userId . '_' . now()->toDateString();
+                            $countries = cache()->get($countriesKey, []);
+                            
+                            if (!in_array($linkClick->country, $countries)) {
+                                $countries[] = $linkClick->country;
+                                cache()->put($countriesKey, $countries, now()->endOfDay());
+                                
+                                // Update unique country count
+                                $todayChallenge->updateProgress('different_countries', 1);
+                            }
+                        }
+                    }
+
+                    // Update competition score
+                    $competitionService = new \App\Services\CompetitionService();
+                    $competitionService->updateScore($user, 'clicks', 1);
+
+                    // Mystery Box trigger - her 1000 tıklamada Silver Box
+                    $userTotalClicks = LinkClick::whereHas('link', fn($q) => $q->where('user_id', $user->id))->count();
+                    if ($userTotalClicks > 0 && $userTotalClicks % 1000 === 0) {
+                        \App\Models\UserMysteryBox::giveBox($user->id, 'silver', 'click_milestone_' . $userTotalClicks);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('LinkClick gamification update failed: ' . $e->getMessage());
+                }
             }
         });
     }

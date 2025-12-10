@@ -17,27 +17,52 @@
     {{-- Duyurular --}}
     <livewire:user.announcements />
 
-    {{-- URL Kısaltma Formu --}}
-    <livewire:user.quick-shortener />
+    {{-- Gamification Widgets --}}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {{-- Streak Display --}}
+        <livewire:user.streak-display />
+        
+        {{-- Daily Challenges --}}
+        <livewire:user.daily-challenges />
 
-    <div class="flex justify-end mb-4">
+        {{-- Weekly Competition --}}
+        <livewire:user.weekly-competition />
+    </div>
+
+    {{-- Milestone Modal (Global) --}}
+    <livewire:user.milestone-modal />
+
+    {{-- URL Kısaltma Formu --}}
+    <div data-tutorial="shortener">
+        <livewire:user.quick-shortener />
+    </div>
+
+    <div data-tutorial="date-filter" class="flex justify-end mb-4">
         <livewire:user.stats-date-filter />
     </div>
 
     {{-- İstatistik Kartları --}}
-    <livewire:user.dashboard-stats />
+    <div data-tutorial="stats">
+        <livewire:user.dashboard-stats />
+    </div>
     
     {{-- İstatistik Grafiği ve Tablosu --}}
-    <livewire:user.earnings-chart />
+    <div data-tutorial="chart">
+        <livewire:user.earnings-chart />
+    </div>
 
     {{-- Hedef ve Ülkeler --}}
-    <livewire:user.performance-overview />
+    <div data-tutorial="performance">
+        <livewire:user.performance-overview />
+    </div>
 
     {{-- Link Yöneticisi --}}
-    <livewire:user.recent-links />
+    <div data-tutorial="recent-links">
+        <livewire:user.recent-links />
+    </div>
 
-    {{-- Optimized Link Suggestions (Placeholder - kept static as requested to not touch yet) --}}
-    <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-md mb-8">
+    {{-- Optimized Link Suggestions --}}
+    <div data-tutorial="suggestions" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-md mb-8">
         <h3 class="text-xl font-semibold text-heading-light dark:text-heading-dark mb-4">Optimized Link Suggestions</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="flex items-start gap-4 p-4 bg-background-light dark:bg-background-dark rounded-lg">
@@ -58,7 +83,7 @@
     </div>
 
     {{-- Payment Info & Recent Activity --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+    <div data-tutorial="payment-activity" class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         <livewire:user.payment-summary />
         <livewire:user.recent-activity />
     </div>

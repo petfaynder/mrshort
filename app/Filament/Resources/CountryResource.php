@@ -17,21 +17,34 @@ class CountryResource extends Resource
 {
     protected static ?string $model = Country::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
+    
+    protected static ?string $navigationGroup = 'Sistem Ayarları';
+    
+    protected static ?string $navigationLabel = 'Ülkeler';
+    
+    protected static ?string $modelLabel = 'Ülke';
+    
+    protected static ?string $pluralModelLabel = 'Ülkeler';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Ülke Adı')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('iso_code')
+                    ->label('ISO Kodu')
                     ->required()
                     ->maxLength(2)
                     ->unique(ignoreRecord: true),
                 Forms\Components\Select::make('cpm_tier_id')
+                    ->label('CPM Seviyesi')
                     ->relationship('cpmTier', 'name')
+                    ->searchable()
+                    ->preload()
                     ->nullable(),
             ]);
     }

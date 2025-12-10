@@ -17,7 +17,17 @@ class GamificationSettingResource extends Resource
 {
     protected static ?string $model = GamificationSetting::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cog';
+    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+    
+    protected static ?string $navigationGroup = 'Gamification';
+    
+    protected static ?string $navigationLabel = 'Ayarlar';
+    
+    protected static ?string $modelLabel = 'Gamification Ayarı';
+    
+    protected static ?string $pluralModelLabel = 'Gamification Ayarları';
+    
+    protected static ?int $navigationSort = 15;
 
     public static function form(Form $form): Form
     {

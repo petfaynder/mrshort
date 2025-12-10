@@ -60,11 +60,28 @@
             <div class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 dark:border-gray-800 dark:bg-gray-900">
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ count($selectedLinks) }} links selected</span>
                 <div class="flex items-center gap-2">
-                    <button wire:click="deleteSelected" wire:loading.attr="disabled" onclick="confirm('Are you sure you want to delete selected links?') || event.stopImmediatePropagation()" class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-500/10 disabled:opacity-75 disabled:cursor-not-allowed">
+                    <button 
+                        x-data
+                        @click="$dispatch('open-confirm-modal', { 
+                            id: 'delete-selected-links', 
+                            onConfirm: () => $wire.deleteSelected() 
+                        })"
+                        wire:loading.attr="disabled" 
+                        class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-500/10 disabled:opacity-75 disabled:cursor-not-allowed"
+                    >
                         <span wire:loading.remove wire:target="deleteSelected" class="material-symbols-outlined text-sm">delete</span>
                         <span wire:loading wire:target="deleteSelected" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
                         Delete Selected
                     </button>
+                    <x-confirm-modal 
+                        id="delete-selected-links"
+                        title="Delete Selected Links"
+                        message="Are you sure you want to delete selected links? This action cannot be undone."
+                        confirmText="Delete All"
+                        cancelText="Cancel"
+                        confirmColor="red"
+                        icon="delete"
+                    />
                 </div>
             </div>
             @endif
@@ -136,11 +153,28 @@
                                                 <button wire:click="editLink({{ $link->id }})" class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
                                                     <span class="material-symbols-outlined text-sm">settings</span> Details
                                                 </button>
-                                                <button wire:click="deleteLink({{ $link->id }})" wire:loading.attr="disabled" onclick="confirm('Are you sure you want to delete this link?') || event.stopImmediatePropagation()" class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-500/10 disabled:opacity-75 disabled:cursor-not-allowed">
+                                                <button 
+                                                    x-data
+                                                    @click="$dispatch('open-confirm-modal', { 
+                                                        id: 'delete-link-{{ $link->id }}', 
+                                                        onConfirm: () => $wire.deleteLink({{ $link->id }}) 
+                                                    })"
+                                                    wire:loading.attr="disabled" 
+                                                    class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-500/10 disabled:opacity-75 disabled:cursor-not-allowed"
+                                                >
                                                     <span wire:loading.remove wire:target="deleteLink({{ $link->id }})" class="material-symbols-outlined text-sm">delete</span>
                                                     <span wire:loading wire:target="deleteLink({{ $link->id }})" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
                                                     Delete
                                                 </button>
+                                                <x-confirm-modal 
+                                                    id="delete-link-{{ $link->id }}"
+                                                    title="Delete Link"
+                                                    message="Are you sure you want to delete this link?"
+                                                    confirmText="Delete"
+                                                    cancelText="Cancel"
+                                                    confirmColor="red"
+                                                    icon="delete"
+                                                />
                                             </div>
                                         </td>
                                     </tr>

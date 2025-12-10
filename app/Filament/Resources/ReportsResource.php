@@ -18,7 +18,10 @@ class ReportsResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
 
-    protected static ?string $navigationGroup = 'Reports';
+    protected static ?string $navigationGroup = 'Raporlar';
+    
+    // Bu resource boş olduğu için navigasyondan gizliyoruz
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function form(Form $form): Form
     {

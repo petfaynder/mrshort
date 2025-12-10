@@ -1,0 +1,356 @@
+# Viral Özellikler - Detaylı Implementasyon Planı
+
+## 💰 Para Birimi: Sadece PUAN
+Puanlar paraya çevrilebilir. Sistemde coin yok.
+
+---
+
+## 🏅 Rozet Vitrin Sistemi
+
+### Dashboard Üst Kısım
+- Tüm rozetler **sönük (gri)** gösterilir
+- Kazanılınca **renkli ve parlak** olur
+- Hover'da tooltip: rozet adı + nasıl kazanıldığı
+- Kategoriler: Streak, Yarışma, Referral, Sezon, VIP
+
+### Rewards Sayfası (`/rewards`)
+- Tüm ödüller ve kazanma koşulları
+- Her rozet için görsel + açıklama + ilerleme çubuğu
+
+---
+
+## 🎉 Milestone Kutlama Sistemi
+
+```
+1. Overlay (ekran kararır)
+2. Modal açılır
+3. Konfeti patlaması (canvas-confetti)
+4. Rozet parıldama animasyonu
+5. Ses efekti (opsiyonel)
+6. Paylaşım: Twitter, Facebook, Instagram, LinkedIn, WhatsApp, Telegram
+7. "Harika!" butonu
+```
+
+---
+
+## 1. 🎰 Daily Spin (Günlük Şans Çarkı)
+
+### Veritabanı
+```sql
+daily_spin_prizes: id, name, type, value, probability, color, icon, is_jackpot, is_active
+user_spins: id, user_id, prize_id, created_at
+```
+
+### Ödül Tablosu
+| Dilim | Ödül | Olasılık | Renk |
+|-------|------|----------|------|
+| 1 | 10 Puan | %30 | Gri |
+| 2 | 25 Puan | %25 | Mavi |
+| 3 | 50 Puan | %20 | Yeşil |
+| 4 | 100 Puan | %12 | Mor |
+| 5 | 150 Puan | %8 | Turuncu |
+| 6 | 250 Puan (Jackpot) | %4 | Altın |
+| 7 | Streak Freeze | %1 | Kırmızı |
+
+### Admin Panel - `DailySpinPrizeResource`
+- `daily_spin_enabled` - Aç/Kapa
+- `spin_cooldown_hours` - Bekleme süresi
+- `vip_extra_spins` - VIP'lere extra
+- Dilim CRUD: ödül, olasılık, renk, ikon
+
+---
+
+## 2. 🔥 Streak System (Seri Sistemi)
+
+### Streak Nedir?
+Ardışık gün aktivite = streak artar. Bir gün atla = sıfırlanır.
+
+### Veritabanı
+```sql
+ALTER TABLE users ADD:
+- current_streak INT DEFAULT 0
+- longest_streak INT DEFAULT 0
+- last_streak_date DATE
+- streak_freeze_available INT DEFAULT 0
+```
+
+### Milestone Ödül Tablosu
+| Streak | Puan | Rozet | Bonus |
+|--------|------|-------|-------|
+| 3 gün | 100 | - | - |
+| 7 gün | 300 | "Haftalık Seri" | %5 XP boost (24h) |
+| 14 gün | 600 | - | %10 XP boost (24h) |
+| 30 gün | 1500 | "Aylık Seri" | Streak Freeze x2 |
+| 60 gün | 3000 | - | %15 XP boost (48h) |
+| 100 gün | 5000 | "Yüzlük" | Streak Freeze x5 |
+| 365 gün | 25000 | "Link Legend" Ünvanı | Kalıcı %10 bonus |
+
+### Admin Panel
+- `streak_enabled`, `streak_reset_hour`
+- Milestone CRUD: gün, puan, rozet, bonus
+
+---
+
+## 3. 🎯 Daily Challenges (Günlük Görevler)
+
+### Veritabanı
+```sql
+daily_challenge_pool: id, title, description, type, target_value, difficulty, points_reward, is_active
+user_daily_challenges: id, user_id, date, challenge_ids (JSON), completed_ids (JSON), bonus_claimed
+```
+
+### Görev Tablosu
+| Görev | Hedef | Zorluk | Ödül |
+|-------|-------|--------|------|
+| Link Kısalt | 5 link | Kolay | 50 Puan |
+| Tıklama Al | 100 tıklama | Orta | 100 Puan |
+| Farklı Ülke | 10 ülke | Zor | 200 Puan |
+| Sosyal Paylaş | 3 link | Kolay | 40 Puan |
+| **3/3 Bonus** | Tümünü tamamla | - | **150 Puan** |
+
+### Admin Panel - `DailyChallengePoolResource`
+- `daily_challenges_enabled`
+- `challenge_count` - Günlük kaç görev
+- Görev CRUD: başlık, tür, hedef, zorluk, ödül
+
+---
+
+## 4. ⚔️ Weekly Competitions (Haftalık Yarışmalar)
+
+### Veritabanı
+```sql
+competitions: id, title, type (clicks/links/referrals), start_at, end_at, prizes (JSON), is_active
+competition_entries: id, competition_id, user_id, score, rank, prize_claimed
+```
+
+### Ödül Tablosu
+| Sıra | Puan | Rozet |
+|------|------|-------|
+| 1. | 10000 | "Hafta Şampiyonu" |
+| 2. | 6000 | "2. Lig" |
+| 3. | 4000 | "3. Lig" |
+| 4-10 | 1000 | - |
+| 11-50 | 300 | - |
+| 51-100 | 100 | - |
+
+### Admin Panel - `CompetitionResource`
+- `competitions_enabled`
+- Yarışma CRUD: başlık, tür, tarih, ödüller (JSON)
+
+---
+
+## 5. 🎁 Mystery Boxes (Gizem Kutuları)
+
+### Veritabanı
+```sql
+mystery_boxes: id, name, rarity, image_path, is_active
+mystery_box_contents: id, box_id, content_type, content_value, probability
+user_mystery_boxes: id, user_id, box_id, obtained_at, opened_at, content_won
+```
+
+### Kutu Tablosu
+| Kutu | Kazanma Koşulu | Puan Aralığı | Rozet Şansı |
+|------|----------------|--------------|-------------|
+| Bronze | Her 50 link kısaltmada | 50-200 | - |
+| Silver | Her 1000 tıklamada | 150-500 | %10 |
+| Gold | Haftalık tüm görevler | 300-1000 | %30 |
+| Diamond | Aylık top 10 | 1000-5000 | %100 (Nadir) |
+
+### Admin Panel - `MysteryBoxResource`
+- `mystery_boxes_enabled`
+- Kutu CRUD: isim, nadirlık, görsel
+- İçerik CRUD: tür, değer, olasılık
+
+---
+
+## 6. 📱 Social Sharing (Sosyal Paylaşım)
+
+### Veritabanı
+```sql
+user_shares: id, user_id, share_type, platform, created_at
+```
+
+### Platformlar
+Twitter, Facebook, Instagram, LinkedIn, WhatsApp, Telegram, Link Kopyala
+
+### Ödül Tablosu
+| Paylaşım Türü | Ödül | Limit |
+|---------------|------|-------|
+| Haftalık İstatistik | 50 Puan | 1/hafta |
+| Milestone | 100 Puan | 1/milestone |
+| Yarışma Sıralaması | 75 Puan | 1/yarışma |
+
+### Admin Panel
+- `social_sharing_enabled`
+- `share_cooldown_hours`
+
+---
+
+## 7. 🤝 Referral Challenges (Davet Hedefleri)
+
+### Mevcut `GamificationGoal` tablosu kullanılır (type: referrals)
+
+### Hedef Tablosu
+| Hedef | Referral Sayısı | Puan | Rozet |
+|-------|-----------------|------|-------|
+| İlk Davet | 1 | 200 | "Recruiter" |
+| Takım Kurucu | 10 | 1000 | - |
+| Network Master | 25 | 3000 | "Network" |
+| Influencer | 50 | 7500 | - |
+| Ambassador | 100 | 20000 | "Ambassador" |
+| Legend | 250 | 50000 | "Legend" Ünvanı |
+
+### Admin Panel
+- Mevcut `GamificationGoalResource`
+- `referral_bonus_per_signup`
+
+---
+
+## 8. 🏆 Seasons & Battle Pass
+
+### Veritabanı
+```sql
+seasons: id, name, theme, start_at, end_at, premium_price_points, is_active
+season_rewards: id, season_id, level, is_premium, reward_type, reward_value, reward_name
+user_season_progress: id, user_id, season_id, xp, current_level, has_premium
+```
+
+### XP Kazanma (Suistimal Önlemeli)
+| Aktivite | XP | Günlük Limit |
+|----------|-----|--------------|
+| Link kısaltma | 5 XP | Max 100 XP (20 link) |
+| 10 tıklama | 10 XP | Limitsiz |
+| Günlük giriş | 25 XP | 1 kez |
+| Günlük görev | 50 XP | 3 görev |
+| Referral (aktif) | 100 XP | Referral en az 10 tıklama getirmeli |
+| Haftalık yarışma | 75 XP | 1 kez |
+| Mystery Box açma | 30 XP | Kutu başına |
+
+### Seviye XP Gereksinimleri
+- Seviye 1-10: 100 XP/seviye
+- Seviye 11-20: 200 XP/seviye
+- Seviye 21-30: 300 XP/seviye
+
+### Free Pass Ödülleri
+| Seviye | Ödül |
+|--------|------|
+| 1 | 50 Puan |
+| 3 | 100 Puan |
+| 5 | 200 Puan |
+| 7 | Bronze Box |
+| 10 | 400 Puan + "Sezon Yolcusu" Rozeti |
+| 15 | Silver Box |
+| 20 | 750 Puan + Gold Box |
+| 25 | 1000 Puan |
+| 30 | 2000 Puan + Sezon Rozeti |
+
+### Premium Pass (5000 Puan VEYA $50 Kredi Kartı)
+| Seviye | Ekstra Ödül |
+|--------|-------------|
+| 1 | +50 Puan (toplam 100) |
+| 5 | +200 Puan + Avatar Çerçevesi |
+| 10 | +400 Puan + Premium Rozet |
+| 15 | +Gold Box |
+| 20 | +1000 Puan + Profil Teması |
+| 25 | +Diamond Box |
+| 30 | +3000 Puan + Legendary Rozet + Ünvan |
+
+### Premium Avantajlar
+- Her seviyede 2x ödül
+- Özel rozetler ve avatarlar
+- Premium-only profil temaları
+- Sezon sonu Diamond Box garantisi
+
+### Admin Panel - `SeasonResource`
+- `seasons_enabled`, `current_season_id`
+- Sezon CRUD: isim, tema, tarihler, fiyat
+- Ödül CRUD: seviye, tür, değer, premium mi
+
+---
+
+## 9. 👥 Teams/Clans (Takımlar)
+
+### Veritabanı
+```sql
+teams: id, name, description, logo_path, leader_id, member_count, total_points, is_public
+team_members: id, team_id, user_id, role (leader/officer/member), joined_at
+team_messages: id, team_id, user_id, message, created_at
+team_invites: id, team_id, user_id, invited_by, status
+```
+
+### Takım Özellikleri
+- **Kurma Maliyeti:** 1000 Puan veya Seviye 15+
+- **Max Üye:** 20
+- **Roller:** Lider (1), Yönetici (3 max), Üye
+
+### Takım Sohbeti
+- Gerçek zamanlı (Laravel Echo + Pusher)
+- Max 200 karakter/mesaj
+- Emoji desteği
+- Son 100 mesaj görünür
+- Takım duyuruları (sadece lider/yönetici)
+
+### Haftalık Takım Yarışması
+| Sıra | Ödül (tüm üyelere) |
+|------|---------------------|
+| 1. | 1000 Puan + Takım Rozeti |
+| 2. | 500 Puan |
+| 3. | 250 Puan |
+
+### Admin Panel - `TeamResource`
+- `teams_enabled`, `max_team_members`, `team_creation_cost`
+- Takım listesi, onay/red/silme
+- Şikayet yönetimi
+
+---
+
+## 10. 🌟 VIP Levels (Aylık Sistem)
+
+### Veritabanı
+```sql
+vip_levels: id, name, min_earnings, max_earnings, cpm_bonus, spin_extra, benefits (JSON)
+user_vip_history: id, user_id, month, earnings, vip_level_id
+```
+
+### VIP Nasıl Çalışır?
+- O ayki kazanca göre seviye belirlenir
+- Her ayın 1'inde sıfırlanır
+- Önceki ay Diamond = Minimum Silver'dan başlar
+- Önceki ay Platinum = Minimum Bronze'dan başlar
+
+### VIP Seviye Tablosu
+| Seviye | Aylık Kazanç | CPM Bonus | Extra Spin | Diğer |
+|--------|--------------|-----------|------------|-------|
+| Bronze | $0-24 | - | - | Standart |
+| Silver | $25-99 | +5% | 1 | - |
+| Gold | $100-249 | +10% | 2 | Hızlı çekim |
+| Platinum | $250-499 | +15% | 3 | Öncelikli destek |
+| Diamond | $500+ | +20% | 5 | Özel rozet, VIP sohbet |
+
+### Admin Panel - `VipLevelResource`
+- `vip_enabled`
+- Seviye CRUD: isim, kazanç aralığı, bonuslar
+
+---
+
+## Dosya Listesi
+
+### Migrations
+- `create_daily_spin_tables.php`
+- `add_streak_fields_to_users.php`
+- `create_daily_challenges_tables.php`
+- `create_competitions_tables.php`
+- `create_mystery_boxes_tables.php`
+- `create_user_shares_table.php`
+- `create_seasons_tables.php`
+- `create_teams_tables.php`
+- `create_vip_levels_table.php`
+
+### Models
+`DailySpinPrize`, `UserSpin`, `DailyChallenge`, `UserDailyChallenge`, `Competition`, `CompetitionEntry`, `MysteryBox`, `MysteryBoxContent`, `UserMysteryBox`, `UserShare`, `Season`, `SeasonReward`, `UserSeasonProgress`, `Team`, `TeamMember`, `TeamMessage`, `VipLevel`
+
+### Filament Resources
+`DailySpinPrizeResource`, `DailyChallengePoolResource`, `CompetitionResource`, `MysteryBoxResource`, `SeasonResource`, `TeamResource`, `VipLevelResource`
+
+### Livewire Components
+`DailySpin`, `StreakDisplay`, `DailyChallenges`, `Competitions`, `MysteryBoxOpener`, `ShareCard`, `BattlePass`, `TeamManager`, `TeamChat`, `VipProgress`, `MilestoneModal`, `BadgeShowcase`, `RewardsPage`

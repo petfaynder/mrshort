@@ -1,0 +1,290 @@
+/**
+ * MrShort.io Dashboard Tutorial Styles
+ * Custom styling for Shepherd.js tour - Dark mode compatible
+ */
+
+/* Modal Overlay */
+.shepherd-modal-overlay-container {
+    fill: rgba(0, 0, 0, 0.65);
+}
+
+/* Tour Element Container */
+.shepherd-element {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    border: none;
+    max-width: 380px;
+    min-width: 320px;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.dark .shepherd-element {
+    background-color: #1e293b;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Header - Gradient Background */
+.shepherd-header {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    padding: 16px 20px 12px 20px;
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+}
+
+.shepherd-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.shepherd-cancel-icon {
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 18px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.shepherd-cancel-icon:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.25);
+    transform: scale(1.1);
+}
+
+/* Content */
+.shepherd-text {
+    padding: 20px;
+    color: #374151;
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+.dark .shepherd-text {
+    color: #e2e8f0;
+}
+
+.shepherd-text p {
+    margin-bottom: 0;
+}
+
+.shepherd-text ul {
+    margin: 10px 0;
+    padding-left: 0;
+    list-style-position: inside;
+}
+
+.shepherd-text li {
+    color: #4b5563;
+    margin-bottom: 6px;
+    line-height: 1.5;
+}
+
+.dark .shepherd-text li {
+    color: #cbd5e1;
+}
+
+.shepherd-text strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.dark .shepherd-text strong {
+    color: #ffffff;
+}
+
+/* Footer */
+.shepherd-footer {
+    padding: 12px 20px 20px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+}
+
+/* Buttons */
+.shepherd-button {
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    white-space: nowrap;
+}
+
+.shepherd-button-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+}
+
+.shepherd-button-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.45);
+    transform: translateY(-1px);
+}
+
+.shepherd-button-secondary {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+.dark .shepherd-button-secondary {
+    background-color: #334155;
+    color: #cbd5e1;
+}
+
+.shepherd-button-secondary:hover {
+    background-color: #e2e8f0;
+}
+
+.dark .shepherd-button-secondary:hover {
+    background-color: #475569;
+}
+
+/* Skip button styling */
+.shepherd-button-skip {
+    background-color: transparent;
+    color: #94a3b8;
+    font-size: 0.8rem;
+    padding: 8px 12px;
+    font-weight: 500;
+}
+
+.shepherd-button-skip:hover {
+    background-color: #fef2f2;
+    color: #ef4444;
+}
+
+.dark .shepherd-button-skip:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+}
+
+/* Arrow */
+.shepherd-arrow,
+.shepherd-arrow::before {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: inherit;
+}
+
+.shepherd-arrow {
+    visibility: hidden;
+}
+
+.shepherd-arrow::before {
+    visibility: visible;
+    content: '';
+    transform: rotate(45deg);
+    background: #3b82f6;
+}
+
+.shepherd-element[data-popper-placement^='bottom'] .shepherd-arrow::before {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+}
+
+.shepherd-element[data-popper-placement^='top'] .shepherd-arrow::before,
+.shepherd-element[data-popper-placement^='left'] .shepherd-arrow::before,
+.shepherd-element[data-popper-placement^='right'] .shepherd-arrow::before {
+    background: #ffffff;
+}
+
+.dark .shepherd-element[data-popper-placement^='top'] .shepherd-arrow::before,
+.dark .shepherd-element[data-popper-placement^='left'] .shepherd-arrow::before,
+.dark .shepherd-element[data-popper-placement^='right'] .shepherd-arrow::before {
+    background: #1e293b;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .shepherd-element {
+        max-width: calc(100vw - 24px);
+        min-width: auto;
+        margin: 0 12px;
+    }
+
+    .shepherd-footer {
+        flex-wrap: wrap;
+    }
+
+    .shepherd-button {
+        flex: 1;
+        text-align: center;
+        min-width: 80px;
+    }
+
+    .shepherd-button-skip {
+        flex: 0 0 auto;
+        order: -1;
+        width: 100%;
+        margin-bottom: 8px;
+    }
+}
+
+/* Animation */
+.shepherd-element {
+    animation: shepherdSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes shepherdSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-15px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Modal Opening Animation */
+.shepherd-modal-overlay-container.shepherd-modal-is-visible {
+    animation: shepherdModalFadeIn 0.3s ease-out;
+}
+
+@keyframes shepherdModalFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Highlighted element - prevent shifting */
+.shepherd-target {
+    position: relative !important;
+}
+
+/* Ensure smooth transitions between steps */
+.shepherd-element.shepherd-has-title .shepherd-content .shepherd-header {
+    padding: 16px 20px 12px 20px;
+}
+
+/* Fix for element selection area */
+.shepherd-modal-overlay-container {
+    pointer-events: none;
+}
+
+.shepherd-modal-overlay-container path {
+    pointer-events: all;
+}

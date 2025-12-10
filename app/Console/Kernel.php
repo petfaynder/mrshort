@@ -20,6 +20,11 @@ class Kernel extends ConsoleKernel
         $schedule->job(new WeeklyGoalResetJob())->weekly();
         $schedule->job(new LevelUpCheckJob())->everyMinute(); // Sık kontrol için her dakika
         $schedule->job(new LeaderboardCacheJob())->hourly(); // Saatlik önbellek yenileme
+
+        // Gamification scheduled tasks
+        $schedule->command('competition:end')->hourly();
+        $schedule->command('vip:monthly-reset')->monthlyOn(1, '00:00');
+        $schedule->command('team:weekly-reset')->weeklyOn(1, '00:00');
     }
 
     /**

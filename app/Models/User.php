@@ -31,13 +31,24 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
+        'email_verified_at',
+        'google_id',
+        'avatar',
         'earnings',
         'link_earnings',
         'referral_earnings',
         'gamification_points', // Gamification puanları
         'virtual_currency',    // Sanal para birimi
+        'vip_level_id',        // VIP seviyesi
+        'monthly_earnings',    // Aylık kazanç
+        'current_streak',      // Streak sistemi
+        'longest_streak',
+        'last_streak_date',
+        'streak_freeze_available',
         'referral_code',
         'referred_by_user_id',
         'payment_method',
@@ -45,6 +56,8 @@ class User extends Authenticatable
         'theme_preference',
         'allow_analytics',
         'allow_personalized_ads',
+        'tutorial_completed_at',
+        'last_login_at',
     ];
 
     /**
@@ -65,6 +78,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'tutorial_completed_at' => 'datetime',
+            'last_login_at' => 'datetime',
         ];
     }
 
@@ -116,6 +131,27 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserInventory::class);
     }
+
+    public function vipLevel(): BelongsTo
+    {
+        return $this->belongsTo(VipLevel::class);
+    }
+
+    public function teamMembership(): HasOne
+    {
+        return $this->hasOne(TeamMember::class);
+    }
+
+    public function team()
+    {
+        return $this->teamMembership?->team;
+    }
+
+    public function seasonProgress(): HasMany
+    {
+        return $this->hasMany(UserSeasonProgress::class);
+    }
+
     public function getLevelAttribute(): int
     {
         return $this->userLevel ? $this->userLevel->level : 1;
@@ -147,5 +183,26 @@ class User extends Authenticatable
         $currentLevel = $this->userLevel ? $this->userLevel->level : 1;
         $nextLevelConfig = LevelConfiguration::where('level', $currentLevel + 1)->first();
         return $nextLevelConfig ? $nextLevelConfig->required_experience : 0;
+    }
+
+    /**
+     * Check if the user should see the onboarding tutorial.
+     * Returns true if:
+     * - Tutorial was never completed, OR
+     * - User hasn't logged in for more than 30 days
+     */
+    public function shouldShowTutorial(): bool
+    {
+        // Show if tutorial was never completed
+        if ($this->tutorial_completed_at === null) {
+            return true;
+        }
+
+        // Show if last login was more than 30 days ago
+        if ($this->last_login_at && $this->last_login_at->diffInDays(now()) > 30) {
+            return true;
+        }
+
+        return false;
     }
 }

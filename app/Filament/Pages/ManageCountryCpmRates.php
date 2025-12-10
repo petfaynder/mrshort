@@ -34,7 +34,7 @@ class ManageCountryCpmRates extends Page implements HasForms
         // Initialize $this->data directly
         foreach ($this->countries as $country) {
             $cpmRate = CpmRate::where('country_id', $country->id)->first();
-            $this->data['country_rates'][$country->id]['publisher_rate'] = $cpmRate->rate ?? 0.0000;
+            $this->data['country_rates'][$country->id]['publisher_rate'] = $cpmRate->publisher_rate ?? 0.0000;
             $this->data['country_rates'][$country->id]['advertiser_rate'] = $cpmRate->advertiser_rate ?? 0.0000;
         }
 
@@ -58,7 +58,7 @@ class ManageCountryCpmRates extends Page implements HasForms
             CpmRate::updateOrCreate(
                 ['country_id' => $country->id],
                 [
-                    'rate' => $publisherRate,
+                    'publisher_rate' => $publisherRate,
                     'advertiser_rate' => $advertiserRate,
                 ]
             );

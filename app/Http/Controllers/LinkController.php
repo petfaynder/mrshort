@@ -157,8 +157,18 @@ class LinkController extends Controller
                 // CPM oranına göre kazancı hesapla (örneğin, 1000 gösterim başına $cpmRate)
                 $earning = $cpmRate / 1000; // Tek bir tıklama için kazanç
 
+                // VIP Bonus uygula
+                if ($user->vipLevel && $user->vipLevel->cpm_bonus_percent > 0) {
+                    $vipBonus = $earning * ($user->vipLevel->cpm_bonus_percent / 100);
+                    $earning += $vipBonus;
+                }
+
                 $user->link_earnings += $earning;
                 $user->earnings = $user->link_earnings + $user->referral_earnings;
+                
+                // VIP için aylık kazanç takibi
+                $user->increment('monthly_earnings', $earning);
+                
                 $user->save();
 
                 // Referans kazancını işle

@@ -17,7 +17,17 @@ class LinkClickResource extends Resource
 {
     protected static ?string $model = LinkClick::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-cursor-arrow-rays';
+    
+    protected static ?string $navigationGroup = 'Link Yönetimi';
+    
+    protected static ?string $navigationLabel = 'Tıklamalar';
+    
+    protected static ?string $modelLabel = 'Tıklama';
+    
+    protected static ?string $pluralModelLabel = 'Tıklamalar';
+    
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {

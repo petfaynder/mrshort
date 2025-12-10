@@ -19,7 +19,16 @@ class AdminLinkClickReportResource extends Resource
     protected static ?string $model = \App\Models\LinkClick::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
-    protected static ?string $navigationGroup = 'Reports';
+    
+    protected static ?string $navigationGroup = 'Raporlar';
+    
+    protected static ?string $navigationLabel = 'Tıklama Raporları';
+    
+    protected static ?string $modelLabel = 'Tıklama Raporu';
+    
+    protected static ?string $pluralModelLabel = 'Tıklama Raporları';
+    
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {

@@ -24,5 +24,8 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
+
+        // Register User Observer for referral rewards
+        \App\Models\User::observe(\App\Observers\UserObserver::class);
     }
 }

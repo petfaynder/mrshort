@@ -19,7 +19,17 @@ class AdSettingResource extends Resource
 {
     protected static ?string $model = AdSetting::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth'; // Ayarlar ikonu
+    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+    
+    protected static ?string $navigationGroup = 'Reklam Yönetimi';
+    
+    protected static ?string $navigationLabel = 'Reklam Ayarları';
+    
+    protected static ?string $modelLabel = 'Reklam Ayarı';
+    
+    protected static ?string $pluralModelLabel = 'Reklam Ayarları';
+    
+    protected static ?int $navigationSort = 10;
 
     public static function form(Form $form): Form
     {

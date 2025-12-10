@@ -17,7 +17,17 @@ class CpmTierResource extends Resource
 {
     protected static ?string $model = CpmTier::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+    
+    protected static ?string $navigationGroup = 'Finansal İşlemler';
+    
+    protected static ?string $navigationLabel = 'CPM Seviyeleri';
+    
+    protected static ?string $modelLabel = 'CPM Seviyesi';
+    
+    protected static ?string $pluralModelLabel = 'CPM Seviyeleri';
+    
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {

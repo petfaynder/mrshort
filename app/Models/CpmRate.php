@@ -9,7 +9,7 @@ class CpmRate extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['cpm_tier_id', 'country_id', 'rate', 'advertiser_rate'];
+    protected $fillable = ['cpm_tier_id', 'country_id', 'publisher_rate', 'advertiser_rate'];
 
     public function cpmTier()
     {

@@ -17,7 +17,17 @@ class GamificationGoalResource extends Resource
 {
     protected static ?string $model = GamificationGoal::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-flag';
+    
+    protected static ?string $navigationGroup = 'Gamification';
+    
+    protected static ?string $navigationLabel = 'Hedefler';
+    
+    protected static ?string $modelLabel = 'Hedef';
+    
+    protected static ?string $pluralModelLabel = 'Hedefler';
+    
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {

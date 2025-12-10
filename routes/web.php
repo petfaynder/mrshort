@@ -5,16 +5,53 @@ use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Filament\Http\Livewire\Auth\Login;
+use App\Http\Controllers\LinkController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\TutorialController;
+
 
 Route::post('/admin/login', Login::class)->name('filament.admin.auth.login');
+
+// Google OAuth Routes
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
 Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/payout-rates', function () {
+    return view('payout-rates');
+})->name('payout.rates');
+
+// Legal Pages
+Route::get('/privacy-policy', function () {
+    return view('pages.privacy-policy');
+})->name('privacy.policy');
+
+Route::get('/terms-of-service', function () {
+    return view('pages.terms-of-service');
+})->name('terms.of.service');
+
+Route::get('/cookie-policy', function () {
+    return view('pages.cookie-policy');
+})->name('cookie.policy');
+
+// API Documentation
+Route::get('/api-documentation', function () {
+    return view('pages.api-documentation');
+})->name('api.documentation');
+
 Route::get('/dashboard', function () {
     return view('user.dashboard.index');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', \App\Http\Middleware\UpdateLastLogin::class])->name('dashboard');
+
+// Tutorial completion route
+Route::post('/tutorial/complete', [TutorialController::class, 'complete'])
+    ->middleware(['auth'])
+    ->name('tutorial.complete');
 
 Route::middleware('auth')->group(function () {
     // Profile routes (already exist)
@@ -53,7 +90,14 @@ Route::middleware('auth')->group(function () {
     // Gamification Routes
     Route::get('/user/inventory', \App\Livewire\User\Inventory::class)->name('user.inventory');
     Route::get('/user/leaderboard', \App\Livewire\User\Leaderboard::class)->name('user.leaderboard');
-    Route::get('/user/inventory', \App\Livewire\User\Inventory::class)->name('user.inventory');
+    Route::get('/user/daily-spin', \App\Livewire\User\DailySpin::class)->name('user.daily-spin');
+    Route::get('/user/mystery-boxes', \App\Livewire\User\MysteryBoxes::class)->name('user.mystery-boxes');
+    Route::get('/user/competition', \App\Livewire\User\WeeklyCompetition::class)->name('user.competition');
+    
+    // New Gamification Routes
+    Route::get('/user/battle-pass', \App\Livewire\User\BattlePass::class)->name('user.battle-pass');
+    Route::get('/user/teams', \App\Livewire\User\TeamManager::class)->name('user.teams');
+    Route::get('/user/vip', \App\Livewire\User\VipProgress::class)->name('user.vip');
 });
 
 Route::middleware('auth')->group(function () {
@@ -66,10 +110,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/ads/create', \App\Livewire\User\CreateAdCampaign::class)->name('user.ads.create');
     Route::get('/user/ads/{adCampaign}/edit', \App\Livewire\User\EditAdCampaign::class)->name('user.ads.edit');
 });
-
-use App\Http\Controllers\LinkController;
-use App\Http\Controllers\UserController; // Add this line
-use App\Http\Controllers\PaymentController; // Add this line
 
 Route::post('/payment/cryptomus/callback', [PaymentController::class, 'cryptomusCallback'])->name('payment.cryptomus.callback');
 
@@ -87,6 +127,8 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 Route::post('/links', [LinkController::class, 'store'])->name('links.store');
+// Guest Shorten Route (Public)
+Route::post('/guest/shorten', [LinkController::class, 'apiStore'])->name('guest.shorten');
 
 Route::get('/{code}', [LinkController::class, 'redirect'])->name('shortlink.redirect');
 

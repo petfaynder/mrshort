@@ -25,9 +25,25 @@
                             <p class="font-semibold text-gray-800 dark:text-white">{{ $token->name }}</p>
                             <p class="text-sm text-text-light dark:text-subtext-dark font-mono break-all">{{ $token->token }}</p> {{-- Assuming token is visible or partial, but typically only visible on creation. If token value isn't stored in plain text, I can't show it here. The old code showed $token->name but seemingly not the token string unless it was just created. Ah, existing code: <span>{{ $token->name }}</span>. And flash message for new token. So I should probably not try to show the full token here if I don't have it. The design shows a token. I'll just show name and maybe created_at or ID if token is hashed. The design example shows a token. I'll show a masked version or just the name. --}}
                         </div>
-                        <button wire:click="deleteToken({{ $token->id }})" wire:confirm="Are you sure you want to delete this token?" class="text-text-light dark:text-subtext-dark hover:text-red-500 transition-colors">
+                        <button 
+                            x-data
+                            @click="$dispatch('open-confirm-modal', { 
+                                id: 'delete-token-{{ $token->id }}', 
+                                onConfirm: () => $wire.deleteToken({{ $token->id }}) 
+                            })"
+                            class="text-text-light dark:text-subtext-dark hover:text-red-500 transition-colors"
+                        >
                             <span class="material-symbols-outlined">delete</span>
                         </button>
+                        <x-confirm-modal 
+                            id="delete-token-{{ $token->id }}"
+                            title="Delete API Token"
+                            message="Are you sure you want to delete this token? Any applications using this token will no longer have access."
+                            confirmText="Delete"
+                            cancelText="Cancel"
+                            confirmColor="red"
+                            icon="delete"
+                        />
                     </div>
                     {{-- Optional stats section from design - I don't have this data in $token usually unless joined. I'll skip or use placeholders if needed. The design has click stats. --}}
                      <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600 flex justify-between items-center text-sm">

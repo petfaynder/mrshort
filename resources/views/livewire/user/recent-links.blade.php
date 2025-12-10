@@ -36,10 +36,28 @@
                                 <a href="{{ route('stats', $link->code) }}" class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700" title="Stats">
                                     <span class="material-symbols-outlined text-sm">bar_chart</span>
                                 </a>
-                                <button wire:click="deleteLink({{ $link->id }})" wire:loading.attr="disabled" onclick="confirm('Are you sure?') || event.stopImmediatePropagation()" class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed" title="Delete">
+                                <button 
+                                    x-data
+                                    @click="$dispatch('open-confirm-modal', { 
+                                        id: 'delete-recent-link-{{ $link->id }}', 
+                                        onConfirm: () => $wire.deleteLink({{ $link->id }}) 
+                                    })"
+                                    wire:loading.attr="disabled" 
+                                    class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                    title="Delete"
+                                >
                                     <span wire:loading.remove wire:target="deleteLink({{ $link->id }})" class="material-symbols-outlined text-sm text-red-500">delete</span>
                                     <span wire:loading wire:target="deleteLink({{ $link->id }})" class="material-symbols-outlined text-sm text-red-500 animate-spin">progress_activity</span>
                                 </button>
+                                <x-confirm-modal 
+                                    id="delete-recent-link-{{ $link->id }}"
+                                    title="Delete Link"
+                                    message="Are you sure you want to delete this link?"
+                                    confirmText="Delete"
+                                    cancelText="Cancel"
+                                    confirmColor="red"
+                                    icon="delete"
+                                />
                             </div>
                         </td>
                     </tr>

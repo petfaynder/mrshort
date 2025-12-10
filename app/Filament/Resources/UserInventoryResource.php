@@ -17,7 +17,17 @@ class UserInventoryResource extends Resource
 {
     protected static ?string $model = UserInventory::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-archive-box';
+    
+    protected static ?string $navigationGroup = 'Kullanıcı Yönetimi';
+    
+    protected static ?string $navigationLabel = 'Kullanıcı Envanteri';
+    
+    protected static ?string $modelLabel = 'Envanter Öğesi';
+    
+    protected static ?string $pluralModelLabel = 'Envanter Öğeleri';
+    
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
