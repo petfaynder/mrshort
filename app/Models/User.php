@@ -18,8 +18,10 @@ use App\Models\UserAchievement;
 use App\Models\UserReward;
 use App\Models\UserInventory;
 use Spatie\Permission\Traits\HasRoles;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens, HasRoles;
@@ -185,12 +187,6 @@ class User extends Authenticatable
         return $nextLevelConfig ? $nextLevelConfig->required_experience : 0;
     }
 
-    /**
-     * Check if the user should see the onboarding tutorial.
-     * Returns true if:
-     * - Tutorial was never completed, OR
-     * - User hasn't logged in for more than 30 days
-     */
     public function shouldShowTutorial(): bool
     {
         // Show if tutorial was never completed
@@ -201,6 +197,15 @@ class User extends Authenticatable
         // Show if last login was more than 30 days ago
         if ($this->last_login_at && $this->last_login_at->diffInDays(now()) > 30) {
             return true;
+        }
+
+        return false;
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if ($panel->getId() === 'admin') {
+            return $this->hasRole('admin') || $this->email === 'akartolga0@gmail.com';
         }
 
         return false;
