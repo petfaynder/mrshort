@@ -4,15 +4,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-use Filament\Http\Livewire\Auth\Login;
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\TutorialController;
-
-
-Route::post('/admin/login', Login::class)->name('filament.admin.auth.login');
 
 // Google OAuth Routes
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
@@ -197,7 +193,3 @@ Route::middleware(['auth'])->group(function () {
     })->name('admin.stop-impersonation');
 });
 
-
-Route::get('/test-ip', function () {
-    phpinfo();
-});
