@@ -16,6 +16,7 @@ use App\Models\CampaignTemplateStep; // Added
 use App\Models\CampaignTemplateAd; // Added
 use App\Enums\CampaignType;
 use App\Enums\FrequencyCapUnit; // Add this import
+use App\Services\VisitorDetectionService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
@@ -28,16 +29,30 @@ class LinkController extends Controller
         $request->validate([
             'original_url' => 'required|url',
         ]);
+        
+        // Validate URL against banned words, disallowed domains
+        $validator = app(\App\Services\LinkValidationService::class);
+        $errors = $validator->validate($request->input('original_url'));
+        
+        if (!empty($errors)) {
+            return redirect('/')->withErrors(['original_url' => $errors[0]]);
+        }
+        
+        $safetyErrors = $validator->checkUrlSafety($request->input('original_url'));
+        if (!empty($safetyErrors)) {
+            return redirect('/')->withErrors(['original_url' => $safetyErrors[0]]);
+        }
 
-        $code = Str::random(6); // Generate a random short code
+        $codeLength = setting('link_code_length', 6);
+        $code = Str::random($codeLength);
 
         $link = Link::create([
-            'user_id' => auth()->id(), // Assuming users are authenticated
+            'user_id' => auth()->id(),
             'original_url' => $request->input('original_url'),
             'code' => $code,
         ]);
 
-        return redirect('/')->with('success', 'Bağlantı kısaltıldı: ' . $link->shortLink());
+        return redirect('/')->with('success', 'Link shortened: ' . $link->shortLink());
     }
 
     public function apiStore(Request $request)
@@ -45,8 +60,22 @@ class LinkController extends Controller
         $request->validate([
             'url' => 'required|url',
         ]);
+        
+        // Validate URL
+        $validator = app(\App\Services\LinkValidationService::class);
+        $errors = $validator->validate($request->input('url'));
+        
+        if (!empty($errors)) {
+            return response()->json(['success' => false, 'message' => $errors[0]], 400);
+        }
+        
+        $safetyErrors = $validator->checkUrlSafety($request->input('url'));
+        if (!empty($safetyErrors)) {
+            return response()->json(['success' => false, 'message' => $safetyErrors[0]], 400);
+        }
 
-        $code = Str::random(6);
+        $codeLength = setting('link_code_length', 6);
+        $code = Str::random($codeLength);
 
         $link = Link::create([
             'user_id' => auth()->id(),
@@ -62,11 +91,71 @@ class LinkController extends Controller
         ]);
     }
 
+    /**
+     * Show captcha verification page for shortlink
+     * Now redirects to main shortlink route which has captcha overlay in interstitial
+     */
+    public function showCaptcha(string $code)
+    {
+        $link = Link::where('code', $code)->first();
+        
+        if (!$link) {
+            abort(404);
+        }
+        
+        // Redirect to the main shortlink route - captcha overlay is in interstitial page
+        return redirect()->route('shortlink.redirect', $code);
+    }
+    
+    /**
+     * Verify captcha and redirect to original link
+     */
+    public function verifyCaptcha(Request $request, string $code)
+    {
+        $link = Link::where('code', $code)->first();
+        
+        if (!$link) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Link not found'], 404);
+            }
+            abort(404);
+        }
+        
+        // Get redirect URL (from interstitial page)
+        $redirectTo = $request->input('redirect_to') ?: route('shortlink.redirect', $code);
+        
+        // Verify captcha
+        $captchaService = app(\App\Services\CaptchaService::class);
+        $tokenField = $captchaService->getTokenFieldName();
+        $token = $request->input($tokenField);
+        
+        if (!$captchaService->verify($token)) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Captcha verification failed. Please try again.']);
+            }
+            return redirect($redirectTo)
+                ->with('captcha_error', 'Captcha verification failed. Please try again.');
+        }
+        
+        // Store verification in session
+        session()->put('captcha_verified_' . $code, true);
+        
+        // Return JSON for AJAX or redirect for form
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+        
+        return redirect($redirectTo);
+    }
+
     public function redirect(Request $request, Agent $agent, string $code) // Inject Agent
     {
         $link = Link::where('code', $code)->first();
 
         if ($link) {
+            // Note: Captcha is now shown as overlay in interstitial page (ad_interstitial.blade.php)
+            // No redirect needed here - the interstitial view handles captcha display
+            
             $countryId = null;
             $countryIsoCode = null;
             $city = null;
@@ -79,33 +168,40 @@ class LinkController extends Controller
 
             // Get GeoIP information
             $clientIp = $this->getClientIp($request);
-            \Log::info('LinkController: Tespit edilen istemci IP adresi.', ['ip' => $clientIp]);
+            \Log::info('LinkController: Detected client IP address.', ['ip' => $clientIp]);
 
 
             $databasePath = storage_path('app/private/geoip/GeoLite2-Country.mmdb'); // Corrected path
-            \Log::info('GeoLite2-Country.mmdb kontrol ediliyor.', ['path' => $databasePath]);
+            \Log::info('Checking GeoLite2-Country.mmdb.', ['path' => $databasePath]);
 
             if (file_exists($databasePath)) {
                 try {
                     $reader = new Reader($databasePath);
-                    \Log::info('GeoIP lookup başlatılıyor.', ['ip' => $clientIp]);
+                    \Log::info('Starting GeoIP lookup.', ['ip' => $clientIp]);
                     $record = $reader->country($clientIp);
                     $countryIsoCode = $record->country->isoCode;
-                    \Log::info('GeoIP ülke kodu tespit edildi.', ['ip' => $clientIp, 'country_iso_code' => $countryIsoCode]);
+                    \Log::info('GeoIP country code detected.', ['ip' => $clientIp, 'country_iso_code' => $countryIsoCode]);
 
-                    // Ülke ISO koduna göre Country modelini bul
+                    // Find Country model by ISO code
                     $countryModel = \App\Models\Country::where('iso_code', $countryIsoCode)->first();
                     if ($countryModel) {
                         $countryId = $countryModel->id;
-                        \Log::info('Ülke veritabanında bulundu.', ['country_id' => $countryId, 'country_name' => $countryModel->name]);
+                        \Log::info('Country found in database.', ['country_id' => $countryId, 'country_name' => $countryModel->name]);
+                        
+                        // Get country-specific CPM rate (publisher rate)
+                        $countryCpmRate = \App\Models\CpmRate::where('country_id', $countryId)->first();
+                        if ($countryCpmRate && $countryCpmRate->publisher_rate > 0) {
+                            $cpmRate = (float) $countryCpmRate->publisher_rate;
+                            \Log::info('Using country-specific CPM rate.', ['country_id' => $countryId, 'cpm_rate' => $cpmRate]);
+                        }
                     } else {
-                        \Log::warning('Ülke veritabanında bulunamadı.', ['iso_code' => $countryIsoCode]);
+                        \Log::warning('Country not found in database.', ['iso_code' => $countryIsoCode]);
                     }
                 } catch (\Exception $e) {
-                    \Log::error('GeoIP sorgusu başarısız oldu.', ['ip' => $request->ip(), 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+                    \Log::error('GeoIP query failed.', ['ip' => $request->ip(), 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
                 }
             } else {
-                \Log::warning('GeoLite2-Country.mmdb dosyası bulunamadı.', ['path' => $databasePath]);
+                \Log::warning('GeoLite2-Country.mmdb file not found.', ['path' => $databasePath]);
             }
 
             // Determine device, OS, browser, and bot status using Jenssegers/Agent
@@ -131,66 +227,102 @@ class LinkController extends Controller
             //     ->where('created_at', '>=', Carbon::now()->subHours(24)) // Example: last 24 hours
             //     ->count();
 
-            // Eğer hala bir oran bulunamazsa, genel varsayılan bir oran kullan
-            if ($cpmRate == 0.0000) {
-                $cpmRate = 0.001; // Genel varsayılan CPM oranı (örneğin 1000 gösterim başına 1$)
+            // Check paid views per day limit from settings (SYSTEM-WIDE IP check)
+            // This ensures each unique IP can only generate paid views X times per day across ALL links
+            $paidViewsPerDay = (int) setting('paid_views_per_day', 1);
+            $todayClicksFromIp = LinkClick::where('ip_address', $clientIp)
+                ->whereDate('created_at', today())
+                ->count();
+            
+            $shouldPay = $todayClicksFromIp < $paidViewsPerDay;
+            
+            // Check if referrer is blocked
+            $blockedReferrers = array_filter(array_map('trim', explode(',', setting('block_referrer_domains', ''))));
+            $referrer = $request->header('referer');
+            if ($referrer && !empty($blockedReferrers)) {
+                $referrerHost = parse_url($referrer, PHP_URL_HOST);
+                foreach ($blockedReferrers as $blocked) {
+                    if ($referrerHost && stripos($referrerHost, $blocked) !== false) {
+                        $shouldPay = false;
+                        break;
+                    }
+                }
+            }
+            
+            // Don't pay for bot traffic
+            if ($isBot) {
+                $shouldPay = false;
             }
 
-            // Save detailed click information
-            $linkClick = $link->clicks()->create([
+            // Use default CPM from settings if not set
+            if ($cpmRate == 0.0000) {
+                $cpmRate = (float) setting('default_cpm_rate', 0.001);
+            }
+            
+            // Fallback: ensure minimum CPM rate if setting is 0+
+            if ($cpmRate <= 0) {
+                $cpmRate = 0.001; // Minimum fallback CPM rate
+                \Log::warning('CPM rate was 0 or negative, using fallback minimum.', ['cpmRate' => $cpmRate]);
+            }
+
+            // Store click data in session - will be recorded after all ad steps complete
+            $pendingClickData = [
+                'link_id' => $link->id,
                 'ip_address' => $clientIp,
                 'country_id' => $countryId,
-                'cpm_rate' => $cpmRate, // Hesaplanan CPM oranını kaydet
-                'country' => $countryIsoCode, // Eski 'country' sütununa ISO kodu kaydedelim
-                'city' => $city, // Will be null for Country database
-                'referrer' => $request->header('referer') ?? 'Doğrudan Erişim',
+                'country_iso_code' => $countryIsoCode,
+                'cpm_rate' => $shouldPay ? $cpmRate : 0,
+                'city' => $city,
+                'referrer' => $request->header('referer') ?? 'Direct Access',
                 'device_type' => $deviceType,
                 'os' => $os,
                 'browser' => $browser,
                 'is_bot' => $isBot,
-                'recent_click_count' => $recentClickCount + 1, // Mevcut tıklamayı da say
-            ]);
-
-            // Kullanıcının kazancını güncelle
-            if ($link->user) {
-                $user = $link->user;
-                // CPM oranına göre kazancı hesapla (örneğin, 1000 gösterim başına $cpmRate)
-                $earning = $cpmRate / 1000; // Tek bir tıklama için kazanç
-
-                // VIP Bonus uygula
-                if ($user->vipLevel && $user->vipLevel->cpm_bonus_percent > 0) {
-                    $vipBonus = $earning * ($user->vipLevel->cpm_bonus_percent / 100);
-                    $earning += $vipBonus;
-                }
-
-                $user->link_earnings += $earning;
-                $user->earnings = $user->link_earnings + $user->referral_earnings;
-                
-                // VIP için aylık kazanç takibi
-                $user->increment('monthly_earnings', $earning);
-                
-                $user->save();
-
-                // Referans kazancını işle
-                if ($user && $user->referred_by_user_id) {
-                    $referrerUser = \App\Models\User::find($user->referred_by_user_id);
-                    if ($referrerUser) {
-                        $referralCommissionRate = 0.15; // %15 referans komisyon oranı (ayarlardan alınabilir)
-                        $commissionAmount = $earning * $referralCommissionRate;
-
-                        $referrerUser->referral_earnings += $commissionAmount;
-                        $referrerUser->earnings = $referrerUser->link_earnings + $referrerUser->referral_earnings;
-                        $referrerUser->save();
-                    } // Closing if ($referrerUser)
-                } // Closing if ($user && $user->referred_by_user_id)
-            } // Closing if ($link->user)
+                'recent_click_count' => $recentClickCount + 1,
+                'should_pay' => $shouldPay,
+                'user_id' => $link->user_id,
+                'timestamp' => now()->toDateTimeString(),
+            ];
+            
+            session()->put('pending_click_' . $code, $pendingClickData);
 
             // Prioritize the campaign template associated with the link.
             $selectedCampaignTemplate = $link->campaignTemplate;
 
-            // If no campaign is assigned or the assigned one is inactive, find an active default.
+            // Detect visitor info for targeting
+            $visitorInfo = VisitorDetectionService::detect($request);
+            \Log::info('Visitor detected.', $visitorInfo);
+
+            // If no campaign is assigned or the assigned one is inactive, find a random active template matching targeting
             if (!$selectedCampaignTemplate || !$selectedCampaignTemplate->is_active) {
-                $selectedCampaignTemplate = CampaignTemplate::where('is_active', true)->first();
+                // Get all active templates and filter by targeting rules
+                $activeTemplates = CampaignTemplate::where('is_active', true)->get();
+                
+                $matchingTemplates = $activeTemplates->filter(function($template) use ($visitorInfo) {
+                    return VisitorDetectionService::matchesTargeting($visitorInfo, $template);
+                });
+                
+                // Select random from matching templates, or fallback to any active if none match
+                if ($matchingTemplates->isNotEmpty()) {
+                    $selectedCampaignTemplate = $matchingTemplates->random();
+                    \Log::info('Selected targeting-matched template.', ['template_id' => $selectedCampaignTemplate->id]);
+                } else {
+                    // Fallback: no targeting match, use any active template
+                    $selectedCampaignTemplate = $activeTemplates->random();
+                    \Log::info('No targeting match, using random template.', ['template_id' => $selectedCampaignTemplate?->id]);
+                }
+            } else {
+                // Verify assigned template matches targeting
+                if (!VisitorDetectionService::matchesTargeting($visitorInfo, $selectedCampaignTemplate)) {
+                    \Log::info('Assigned template does not match targeting, finding alternative.');
+                    $matchingTemplates = CampaignTemplate::where('is_active', true)
+                        ->get()
+                        ->filter(fn($t) => VisitorDetectionService::matchesTargeting($visitorInfo, $t));
+                    
+                    $selectedCampaignTemplate = $matchingTemplates->isNotEmpty() 
+                        ? $matchingTemplates->random() 
+                        : $selectedCampaignTemplate; // Keep original if no alternatives
+                }
             }
 
             if ($selectedCampaignTemplate) {
@@ -199,6 +331,7 @@ class LinkController extends Controller
                     'stepNumber' => 1, // Always start at step 1
                     'campaignTemplateId' => $selectedCampaignTemplate->id,
                 ];
+                
                 \Log::info('Redirecting to ad step.', ['routeParams' => $routeParams]);
                 return redirect()->route('link.ad_step', $routeParams);
             } else {
@@ -212,12 +345,95 @@ class LinkController extends Controller
     }
 
     /**
+     * Record click after all ad steps are completed and redirect to original URL.
+     * This ensures clicks are only counted when visitors complete the entire ad flow.
+     */
+    public function recordClickAndRedirect(Request $request, Link $link)
+    {
+        $code = $link->code;
+        $pendingClickData = session()->get('pending_click_' . $code);
+        
+        // Security: Only record if session has valid pending click data
+        if (!$pendingClickData || $pendingClickData['link_id'] !== $link->id) {
+            \Log::warning('recordClickAndRedirect: No valid pending click data found.', ['code' => $code]);
+            return Redirect::to($link->original_url);
+        }
+        
+        // Prevent duplicate recordings
+        session()->forget('pending_click_' . $code);
+        
+        // Record the click to database
+        $linkClick = $link->clicks()->create([
+            'ip_address' => $pendingClickData['ip_address'],
+            'country_id' => $pendingClickData['country_id'],
+            'cpm_rate' => $pendingClickData['cpm_rate'],
+            'country' => $pendingClickData['country_iso_code'],
+            'city' => $pendingClickData['city'],
+            'referrer' => $pendingClickData['referrer'],
+            'device_type' => $pendingClickData['device_type'],
+            'os' => $pendingClickData['os'],
+            'browser' => $pendingClickData['browser'],
+            'is_bot' => $pendingClickData['is_bot'],
+            'recent_click_count' => $pendingClickData['recent_click_count'],
+        ]);
+        
+        \Log::info('Click recorded after ad flow completion.', [
+            'link_id' => $link->id,
+            'click_id' => $linkClick->id,
+            'should_pay' => $pendingClickData['should_pay']
+        ]);
+        
+        // Update user earnings ONLY if this is a paid view
+        if ($pendingClickData['user_id'] && $pendingClickData['should_pay']) {
+            $user = \App\Models\User::find($pendingClickData['user_id']);
+            if ($user) {
+                $cpmRate = $pendingClickData['cpm_rate'];
+                $earning = $cpmRate / 1000; // Earning for a single click
+
+                // Apply VIP Bonus
+                if ($user->vipLevel && $user->vipLevel->cpm_bonus_percent > 0) {
+                    $vipBonus = $earning * ($user->vipLevel->cpm_bonus_percent / 100);
+                    $earning += $vipBonus;
+                }
+
+                $user->link_earnings += $earning;
+                $user->earnings = $user->link_earnings + $user->referral_earnings;
+                
+                // Track monthly earnings for VIP
+                $user->increment('monthly_earnings', $earning);
+                
+                $user->save();
+
+                // Process referral earnings if enabled
+                if ($user->referred_by_user_id && setting('enable_referrals', true)) {
+                    $referrerUser = \App\Models\User::find($user->referred_by_user_id);
+                    if ($referrerUser) {
+                        $referralCommissionRate = (float) setting('referral_commission_rate', 15) / 100;
+                        $commissionAmount = $earning * $referralCommissionRate;
+
+                        $referrerUser->referral_earnings += $commissionAmount;
+                        $referrerUser->earnings = $referrerUser->link_earnings + $referrerUser->referral_earnings;
+                        $referrerUser->save();
+                    }
+                }
+                
+                \Log::info('User earnings updated after ad completion.', [
+                    'user_id' => $user->id,
+                    'earning' => $earning
+                ]);
+            }
+        }
+        
+        // Redirect to the original destination URL
+        return Redirect::to($link->original_url);
+    }
+
+    /**
      * Reklam adımlarını gösterir.
      */
     public function showAdStep(Request $request, Link $link, int $stepNumber)
     {
         $campaignTemplateId = $request->query('campaignTemplateId');
-        $userPopupCampaignId = $request->query('userPopupCampaignId'); // Rastgele seçilen pop-up kampanya ID'si
 
         $adStepToDisplay = null;
         $campaignTemplate = null;
@@ -258,23 +474,132 @@ class LinkController extends Controller
         //     $campaignTemplate->increment('total_impressions');
         // }
 
-        // Reklam verilerini al (banner/interstitial)
-        $adsData = $adStepToDisplay->campaignTemplateAds; // Artık her zaman CampaignTemplateAds
+        // Reklam verilerini al (banner/interstitial) - popup hariç
+        $adsData = $adStepToDisplay->campaignTemplateAds->filter(function($ad) {
+            return $ad->ad_type !== \App\Enums\AdType::Popup;
+        });
 
-        // Kullanıcı tarafından oluşturulan pop-up reklamı al (rastgele seçilen kampanya üzerinden)
+        // === POPUP SELECTION LOGIC ===
+        // Priority: JS popup + URL popup can coexist. Only URL vs URL needs weighted selection.
+        $popupsToShow = [];
+        
+        // 1. Check for JS popup code (from campaign template ads)
+        $jsPopupCode = null;
+        if ($adStepToDisplay->show_popup || $adStepToDisplay->show_linked_popup) {
+            $jsPopupAd = $adStepToDisplay->campaignTemplateAds
+                ->where('ad_type', \App\Enums\AdType::Popup)
+                ->filter(fn($ad) => isset($ad->ad_data['js_code']) && !empty($ad->ad_data['js_code']))
+                ->first();
+            
+            if ($jsPopupAd) {
+                $jsPopupCode = $jsPopupAd->ad_data['js_code'];
+                $popupsToShow[] = [
+                    'type' => 'js',
+                    'code' => $jsPopupCode,
+                    'id' => $jsPopupAd->id,
+                ];
+                \Log::info('JS popup code found.', ['popup_id' => $jsPopupAd->id]);
+            }
+        }
+        
+        // 2. Check for URL popups (Admin and User)
+        $adminPopupUrl = null;
+        $userPopupUrl = null;
+        $userPopupCampaignId = null;
+        
+        // Admin URL popup from campaign template
+        if ($adStepToDisplay->show_popup || $adStepToDisplay->show_linked_popup) {
+            $adminPopupAd = $adStepToDisplay->campaignTemplateAds
+                ->where('ad_type', \App\Enums\AdType::Popup)
+                ->filter(fn($ad) => isset($ad->ad_data['url']) && !empty($ad->ad_data['url']) && empty($ad->ad_data['js_code']))
+                ->first();
+            
+            if ($adminPopupAd) {
+                $adminPopupUrl = $adminPopupAd->ad_data['url'];
+            }
+        }
+        
+        // User URL popup from approved AdCampaign
+        if (setting('popup_user_campaigns_enabled', true)) {
+            // Detect visitor info for targeting
+            $popupVisitorInfo = VisitorDetectionService::detect($request);
+            
+            $userPopupCampaign = AdCampaign::where('campaign_type', 'user')
+                ->where('approval_status', 'approved')
+                ->where('is_active', true)
+                ->get()
+                ->filter(function($campaign) use ($popupVisitorInfo) {
+                    $rules = $campaign->targeting_rules ?? [];
+                    
+                    // Check country targeting
+                    if (!empty($rules['countries'])) {
+                        if (!in_array($popupVisitorInfo['country'], $rules['countries'])) {
+                            return false;
+                        }
+                    }
+                    
+                    // Check device targeting
+                    if (!empty($rules['devices'])) {
+                        if (!in_array($popupVisitorInfo['device'], $rules['devices'])) {
+                            return false;
+                        }
+                    }
+                    
+                    // Check OS targeting
+                    if (!empty($rules['os'])) {
+                        if (!in_array($popupVisitorInfo['os'], $rules['os'])) {
+                            return false;
+                        }
+                    }
+                    
+                    return true;
+                })
+                ->first();
+            
+            if ($userPopupCampaign && isset($userPopupCampaign->targeting_rules['url'])) {
+                $userPopupUrl = $userPopupCampaign->targeting_rules['url'];
+                $userPopupCampaignId = $userPopupCampaign->id;
+                \Log::info('User popup campaign found.', ['campaign_id' => $userPopupCampaign->id]);
+            }
+        }
+        
+        // 3. Select URL popup (weighted selection if both exist)
+        $selectedUrlPopup = null;
+        if ($adminPopupUrl && $userPopupUrl) {
+            // Both exist - weighted random selection
+            $adminWeight = (int) setting('popup_admin_weight', 70);
+            $selectedUrlPopup = (rand(1, 100) <= $adminWeight)
+                ? ['url' => $adminPopupUrl, 'source' => 'admin', 'campaign_id' => null]
+                : ['url' => $userPopupUrl, 'source' => 'user', 'campaign_id' => $userPopupCampaignId];
+            \Log::info('URL popup selected by weight.', ['source' => $selectedUrlPopup['source'], 'admin_weight' => $adminWeight]);
+        } elseif ($adminPopupUrl) {
+            $selectedUrlPopup = ['url' => $adminPopupUrl, 'source' => 'admin', 'campaign_id' => null];
+        } elseif ($userPopupUrl) {
+            $selectedUrlPopup = ['url' => $userPopupUrl, 'source' => 'user', 'campaign_id' => $userPopupCampaignId];
+        }
+        
+        if ($selectedUrlPopup) {
+            $popupsToShow[] = [
+                'type' => 'url',
+                'url' => $selectedUrlPopup['url'],
+                'source' => $selectedUrlPopup['source'],
+                'campaign_id' => $selectedUrlPopup['campaign_id'],
+            ];
+        }
+        
+        // Legacy variable for backward compatibility
         $userPopupAd = null;
-        if ($adStepToDisplay->show_linked_popup && $userPopupCampaignId) {
-            $randomPopupCampaign = AdCampaign::find($userPopupCampaignId);
-            if ($randomPopupCampaign && isset($randomPopupCampaign->targeting_rules['popup_url'])) {
+        foreach ($popupsToShow as $popup) {
+            if ($popup['type'] === 'url') {
                 $userPopupAd = [
-                    'id' => $randomPopupCampaign->id,
+                    'id' => $popup['campaign_id'] ?? 0,
                     'ad_type' => \App\Enums\AdType::Popup,
                     'ad_data' => [
-                        'title' => $randomPopupCampaign->targeting_rules['popup_title'] ?? $randomPopupCampaign->name,
-                        'content' => $randomPopupCampaign->targeting_rules['popup_content'] ?? 'Bu bir kullanıcı pop-up reklamıdır.',
-                        'url' => $randomPopupCampaign->targeting_rules['popup_url'],
+                        'url' => $popup['url'],
+                        'source' => $popup['source'] ?? 'admin',
                     ],
                 ];
+                break;
             }
         }
 
@@ -289,13 +614,14 @@ class LinkController extends Controller
 
         return view($viewName, [
             'link' => $link,
-            'campaignOrTemplate' => $campaignTemplate, // Kampanya şablonunu gönder
+            'campaignOrTemplate' => $campaignTemplate,
             'adStep' => $adStepToDisplay,
             'stepNumber' => $stepNumber,
             'originalUrl' => $link->original_url,
-            'adsData' => $adsData, // Adım için reklam verileri (banner/interstitial)
-            'userPopupAd' => $userPopupAd, // Kullanıcı tarafından oluşturulan pop-up reklam (varsa)
-            'isFromTemplate' => true, // Her zaman şablondan geldiği için true
+            'adsData' => $adsData,
+            'userPopupAd' => $userPopupAd,
+            'popupsToShow' => $popupsToShow, // New: array of all popups to show
+            'isFromTemplate' => true,
         ]);
     }
 

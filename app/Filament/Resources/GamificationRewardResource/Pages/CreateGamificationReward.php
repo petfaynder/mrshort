@@ -10,3 +10,4 @@ class CreateGamificationReward extends CreateRecord
 {
     protected static string $resource = GamificationRewardResource::class;
 }
+

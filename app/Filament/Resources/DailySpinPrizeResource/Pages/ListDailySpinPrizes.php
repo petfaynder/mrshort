@@ -16,3 +16,4 @@ class ListDailySpinPrizes extends ListRecords
         ];
     }
 }
+

@@ -9,3 +9,4 @@ class CreateStreakMilestone extends CreateRecord
 {
     protected static string $resource = StreakMilestoneResource::class;
 }
+

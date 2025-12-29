@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Linklere Göre Rapor</title>
+    <title>Links Report</title>
     <style>
         body { font-family: DejaVu Sans, sans-serif; }
         table { width: 100%; border-collapse: collapse; }
@@ -10,15 +10,15 @@
     </style>
 </head>
 <body>
-    <h2>Linklere Göre Tıklama Raporu</h2>
+    <h2>Click Report by Links</h2>
     <table>
         <thead>
             <tr>
-                <th>Orijinal Link</th>
-                <th>Kısaltılmış Link</th>
-                <th>Tekil Tıklama</th>
-                <th>Toplam Tıklama</th>
-                <th>Kazanç ($)</th>
+                <th>Original Link</th>
+                <th>Short Link</th>
+                <th>Unique Clicks</th>
+                <th>Total Clicks</th>
+                <th>Earnings ($)</th>
             </tr>
         </thead>
         <tbody>

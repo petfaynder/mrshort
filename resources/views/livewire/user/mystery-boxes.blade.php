@@ -1,9 +1,9 @@
 <div class="mystery-boxes-page">
     <div class="mb-6">
         <h2 class="text-2xl font-bold text-white flex items-center gap-3">
-            <span class="text-3xl">🎁</span> Gizem Kutuları
+            <span class="text-3xl">🎁</span> Mystery Boxes
         </h2>
-        <p class="text-gray-400 mt-1">Milestone'lara ulaşarak gizem kutuları kazan!</p>
+        <p class="text-gray-400 mt-1">Reach milestones to earn mystery boxes!</p>
     </div>
 
     @if(count($unopenedBoxes) > 0)
@@ -45,9 +45,9 @@
                         <p class="text-xs text-gray-500 mb-4">
                             @switch($box->source)
                                 @case('links_milestone') 🔗 Link Milestone @break
-                                @case('clicks_milestone') 👆 Tıklama Milestone @break
-                                @case('weekly_challenge') 🎯 Haftalık Görev @break
-                                @case('monthly_top10') 🏆 Aylık Top 10 @break
+                                @case('clicks_milestone') 👆 Clicks Milestone @break
+                                @case('weekly_challenge') 🎯 Weekly Challenge @break
+                                @case('monthly_top10') 🏆 Monthly Top 10 @break
                                 @default {{ $box->source }}
                             @endswitch
                         </p>
@@ -57,7 +57,7 @@
                             class="w-full py-2 rounded-lg font-semibold transition-all"
                             style="background: {{ $box->mysteryBox->tier_color }}; color: #1a1a2e;"
                         >
-                            Aç!
+                            Open!
                         </button>
                     </div>
                 </div>
@@ -66,8 +66,8 @@
     @else
         <div class="bg-gray-800/50 rounded-xl p-12 text-center">
             <div class="text-6xl mb-4 opacity-50">📦</div>
-            <h3 class="text-xl font-semibold text-gray-400 mb-2">Gizem kutunuz yok</h3>
-            <p class="text-gray-500">Milestone'lara ulaşarak, haftalık görevleri tamamlayarak<br>ve yarışmalarda derece yaparak kutu kazanabilirsin!</p>
+            <h3 class="text-xl font-semibold text-gray-400 mb-2">No mystery boxes</h3>
+            <p class="text-gray-500">You can earn boxes by reaching milestones, completing weekly challenges,<br>and placing in competitions!</p>
         </div>
     @endif
 
@@ -88,21 +88,21 @@
         >
             <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 border border-purple-500/30 shadow-2xl text-center animate-bounce-in">
                 <div class="text-6xl mb-4">🎉</div>
-                <h2 class="text-2xl font-bold text-white mb-4">Kutu Açıldı!</h2>
+                <h2 class="text-2xl font-bold text-white mb-4">Box Opened!</h2>
 
                 <div class="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 rounded-xl p-6 mb-6 border border-yellow-500/30">
                     @if($wonReward['type'] === 'points')
                         <div class="text-5xl font-bold text-yellow-400 mb-2">
                             +{{ $wonReward['value'] }}
                         </div>
-                        <p class="text-gray-400">Puan Kazandınız!</p>
+                        <p class="text-gray-400">You Won Points!</p>
                     @elseif($wonReward['type'] === 'streak_freeze')
                         <div class="text-5xl mb-2">🛡️</div>
                         <div class="text-2xl font-bold text-blue-400 mb-2">Streak Freeze</div>
                         <p class="text-gray-400">x{{ $wonReward['value'] ?? 1 }}</p>
                     @else
                         <div class="text-5xl mb-2">🏅</div>
-                        <div class="text-xl font-bold text-purple-400">Özel Ödül!</div>
+                        <div class="text-xl font-bold text-purple-400">Special Reward!</div>
                     @endif
                 </div>
 
@@ -110,7 +110,7 @@
                     wire:click="closeResultModal"
                     class="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold rounded-full hover:opacity-90 transition-opacity"
                 >
-                    Harika! 🎉
+                    Awesome! 🎉
                 </button>
             </div>
         </div>

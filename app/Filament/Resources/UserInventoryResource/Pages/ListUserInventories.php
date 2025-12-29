@@ -17,3 +17,4 @@ class ListUserInventories extends ListRecords
         ];
     }
 }
+

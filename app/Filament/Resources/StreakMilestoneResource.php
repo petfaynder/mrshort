@@ -17,7 +17,7 @@ class StreakMilestoneResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-fire';
 
-    protected static ?string $navigationGroup = 'Gamification';
+    protected static ?string $navigationGroup = 'Features';
 
     protected static ?string $navigationLabel = 'Streak Milestones';
 
@@ -134,3 +134,5 @@ class StreakMilestoneResource extends Resource
         ];
     }
 }
+
+

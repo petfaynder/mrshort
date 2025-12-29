@@ -6,17 +6,18 @@ use Livewire\Component;
 use App\Models\Link;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use App\Services\GamificationService; // Add this line
+use App\Services\GamificationService;
+use App\Services\LinkValidationService;
 
 class MassShortener extends Component
 {
-    protected $layout = 'components.user-dashboard-layout'; // Layout'u belirt
+    protected $layout = 'components.user-dashboard-layout';
 
-    public $urls = ''; // Property to hold the input URLs
-    public $shortenedLinks = []; // Property to hold the shortened links
+    public $urls = '';
+    public $shortenedLinks = [];
 
     protected $rules = [
-        'urls' => 'required', // Basic validation
+        'urls' => 'required',
     ];
 
     public function render()
@@ -28,21 +29,42 @@ class MassShortener extends Component
     {
         $this->validate();
 
-        $urlsArray = array_filter(array_map('trim', explode("\n", $this->urls))); // Split by newline and clean up
-
-        $this->shortenedLinks = []; // Reset the shortened links array
+        $urlsArray = array_filter(array_map('trim', explode("\n", $this->urls)));
+        $this->shortenedLinks = [];
+        
+        $validator = app(LinkValidationService::class);
+        $massLimit = (int) setting('mass_shrinker_limit', 20);
+        
+        // Limit URLs
+        $urlsArray = array_slice($urlsArray, 0, $massLimit);
 
         foreach ($urlsArray as $originalUrl) {
-            // Basic URL validation within the loop
+            // Auto-add https:// if URL doesn't have a protocol
+            if ($originalUrl && !preg_match('#^https?://#i', $originalUrl)) {
+                $originalUrl = 'https://' . $originalUrl;
+            }
+            
             if (filter_var($originalUrl, FILTER_VALIDATE_URL)) {
-                $code = Str::random(6); // Generate a random short code
+                // Validate against banned words and domains
+                $errors = $validator->validate($originalUrl);
+                
+                if (!empty($errors)) {
+                    $this->shortenedLinks[] = [
+                        'original' => $originalUrl,
+                        'shortened' => $errors[0],
+                    ];
+                    continue;
+                }
+                
+                $codeLength = setting('link_code_length', 6);
+                $code = Str::random($codeLength);
 
                 $link = Auth::user()->links()->create([
                     'original_url' => $originalUrl,
                     'code' => $code,
                 ]);
 
-                // Gamification hedefini güncelle
+                // Update gamification goal
                 if ($link->user_id) {
                     $gamificationService = app(GamificationService::class);
                     $gamificationService->updateGoalProgress($link->user, 'shorten_links', 1);
@@ -50,19 +72,15 @@ class MassShortener extends Component
 
                 $this->shortenedLinks[] = [
                     'original' => $originalUrl,
-                    'shortened' => $link->shortLink(), // Assuming shortLink method exists on Link model
+                    'shortened' => $link->shortLink(),
                 ];
             } else {
-                // Handle invalid URL - maybe add to a separate error list
                 $this->shortenedLinks[] = [
                     'original' => $originalUrl,
                     'shortened' => 'Invalid URL',
                 ];
             }
         }
-
-        // Optionally clear the input textarea after shortening
-        // $this->urls = '';
 
         session()->flash('message', 'URLs successfully shortened.');
     }

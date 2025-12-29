@@ -105,3 +105,5 @@ class UserInventoryResource extends Resource
         ];
     }
 }
+
+

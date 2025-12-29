@@ -23,3 +23,4 @@ class EditTicket extends EditRecord
         ];
     }
 }
+

@@ -37,17 +37,18 @@ class User extends Authenticatable implements FilamentUser
         'last_name',
         'email',
         'password',
+        'status',
         'email_verified_at',
         'google_id',
         'avatar',
         'earnings',
         'link_earnings',
         'referral_earnings',
-        'gamification_points', // Gamification puanları
-        'virtual_currency',    // Sanal para birimi
-        'vip_level_id',        // VIP seviyesi
-        'monthly_earnings',    // Aylık kazanç
-        'current_streak',      // Streak sistemi
+        'gamification_points', // Gamification points
+        'virtual_currency',    // Virtual currency
+        'vip_level_id',        // VIP level
+        'monthly_earnings',    // Monthly earnings
+        'current_streak',      // Streak system
         'longest_streak',
         'last_streak_date',
         'streak_freeze_available',
@@ -60,6 +61,10 @@ class User extends Authenticatable implements FilamentUser
         'allow_personalized_ads',
         'tutorial_completed_at',
         'last_login_at',
+        'has_admin_message',
+        'admin_message_ticket_id',
+        'deactivation_reason',
+        'deactivated_at',
     ];
 
     /**
@@ -209,5 +214,10 @@ class User extends Authenticatable implements FilamentUser
         }
 
         return false;
+    }
+
+    public function getIsAdminAttribute(): bool
+    {
+        return $this->hasRole('admin') || $this->email === 'akartolga0@gmail.com';
     }
 }

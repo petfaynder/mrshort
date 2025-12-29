@@ -5,206 +5,488 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Link Transition Page</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    
+    {{-- Inline AdBlock Detection - Runs before Vite bundle --}}
     <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#4F46E5",
-                        "background-light": "#F9FAFB",
-                        "background-dark": "#111827",
-                        "card-light": "#FFFFFF",
-                        "card-dark": "#1F2937",
-                        "text-light": "#1F2937",
-                        "text-dark": "#F9FAFB",
-                        "text-secondary-light": "#6B7280",
-                        "text-secondary-dark": "#9CA3AF",
-                        "border-light": "#E5E7EB",
-                        "border-dark": "#374151"
-                    },
-                    fontFamily: {
-                        display: ["Poppins", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "0.5rem",
-                        lg: "1rem",
-                        xl: "1.5rem"
-                    },
-                },
-            },
+        window.adblockDetected = false;
+        window.adblockCallbacks = [];
+        window.onAdblockDetected = function(cb) { 
+            window.adblockCallbacks.push(cb);
+            if (window.adblockDetected) cb();
+        };
+        window.triggerAdblockDetected = function(method) {
+            if (window.adblockDetected) return;
+            window.adblockDetected = true;
+            console.log('[AdBlock] Detected via:', method);
+            window.adblockCallbacks.forEach(function(cb) { try { cb(); } catch(e) {} });
         };
     </script>
-    <style type="text/tailwindcss">
+    {{-- Load bait script - adblockers block this --}}
+    <script src="/ads.js" onerror="window.triggerAdblockDetected('ads_js_blocked')"></script>
+    <script src="/pagead/js/adsbygoogle.js" onerror="window.triggerAdblockDetected('adsense_blocked')"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    
+    @php
+        $captchaService = app(\App\Services\CaptchaService::class);
+        $captchaEnabled = setting('captcha_enabled', false);
+        $captchaOnShortlink = setting('captcha_on_shortlink', false);
+        $captchaVerified = session('captcha_verified_' . $link->code);
+        $isFirstStep = ($stepNumber ?? 1) === 1;
+        $showCaptcha = $isFirstStep && $captchaEnabled && $captchaOnShortlink && !$captchaVerified;
+    @endphp
+    
+    @if($showCaptcha)
+        {!! $captchaService->getScript() !!}
+    @endif
+    
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --bg-light: #F9FAFB;
+            --bg-dark: #111827;
+            --card-light: #FFFFFF;
+            --card-dark: #1F2937;
+            --text-light: #1F2937;
+            --text-dark: #F9FAFB;
+            --text-secondary-light: #6B7280;
+            --text-secondary-dark: #9CA3AF;
+            --border-light: #E5E7EB;
+            --border-dark: #374151;
+        }
+        
+        body { font-family: 'Poppins', sans-serif; }
+        
+        /* Timer ring animation */
         .timer-ring {
             transform: rotate(-90deg);
             transition: stroke-dashoffset 1s linear;
         }
+        
+        /* Animated CTA button */
+        .btn-glow {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-glow::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            animation: btn-shine 3s infinite;
+        }
+        .btn-glow:disabled::before { display: none; }
+        
+        @keyframes btn-shine {
+            0% { left: -50%; }
+            100% { left: 150%; }
+        }
+        
+        /* Progress bar */
+        .progress-bar {
+            transition: width 1s linear;
+        }
+        
+        /* Ad hover effect */
+        .ad-block {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .ad-block:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        /* AdBlock warning */
+        .adblock-warning {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        /* Skyscraper container */
+        .skyscraper-container {
+            position: sticky;
+            top: 1rem;
+        }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
-<div class="min-h-screen flex flex-col items-center justify-center p-4">
-    <header class="w-full max-w-6xl mx-auto flex justify-between items-center py-6 px-4">
-        <h1 class="text-3xl font-bold text-primary">{{ config('app.name') }}</h1>
-        <div class="flex items-center space-x-4">
-            <button class="hidden bg-gray-200 dark:bg-gray-700 text-text-light dark:text-text-dark font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-300" id="skip-ad-btn">
-                Skip Ad
-            </button>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+
+{{-- AdBlock Warning Modal (hidden by default) --}}
+<div id="adblock-modal" class="fixed inset-0 z-50 items-center justify-center bg-black/70 backdrop-blur-sm hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-md mx-4 text-center adblock-warning">
+        <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="material-icons text-red-500 text-3xl">block</span>
+        </div>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">AdBlock Detected!</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
+            Please disable your ad blocker to continue. Our service relies on advertisements to remain free.
+        </p>
+        <button onclick="location.reload()" class="bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors">
+            I've Disabled AdBlock – Reload
+        </button>
+    </div>
+</div>
+
+<div class="min-h-screen">
+    {{-- Header with Timer Badge --}}
+    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-indigo-600">{{ config('app.name') }}</h1>
+            
+            {{-- Timer Badge --}}
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-full">
+                    <div class="relative w-8 h-8">
+                        <svg class="w-full h-full" viewBox="0 0 36 36">
+                            <circle class="text-gray-300 dark:text-gray-600" cx="18" cy="18" fill="transparent" r="15" stroke="currentColor" stroke-width="3"></circle>
+                            <circle class="text-indigo-600 timer-ring" cx="18" cy="18" fill="transparent" id="timer-progress-small" r="15" stroke="currentColor" stroke-dasharray="94.2" stroke-dashoffset="0" stroke-linecap="round" stroke-width="3"></circle>
+                        </svg>
+                        <span class="absolute inset-0 flex items-center justify-center text-xs font-bold" id="timer-countdown-small">{{ $adStep->wait_time ?? 10 }}</span>
+                    </div>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">seconds</span>
+                </div>
+            </div>
+        </div>
+        
+        {{-- Progress Bar --}}
+        <div class="h-1 bg-gray-200 dark:bg-gray-700">
+            <div id="progress-bar" class="h-full bg-indigo-600 progress-bar" style="width: 100%"></div>
         </div>
     </header>
 
-    <main class="flex-grow flex flex-col items-center justify-center w-full">
-        <div class="bg-card-light dark:bg-card-dark p-8 rounded-xl shadow-lg w-full max-w-lg text-center">
-            <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">Advertisement</p>
+    {{-- Main 3-Column Layout --}}
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            @php $topAd = $adsData->shift(); @endphp
-            <div class="w-[300px] h-[250px] mx-auto mb-6 flex items-center justify-center rounded-lg ad-block" data-ad-id="{{ $topAd->id ?? '' }}" data-ad-type="{{ $topAd->ad_type->value ?? '' }}">
-                @if($topAd)
-                    @include('partials.ad_display', ['ad' => $topAd])
-                @else
-                    <div class="bg-gray-200 dark:bg-gray-700 w-full h-full flex items-center justify-center">
-                        <span class="text-text-secondary-light dark:text-text-secondary-dark">300x250 Ad</span>
+            {{-- Left Skyscraper Ad (Desktop) --}}
+            <div class="hidden lg:block lg:col-span-2">
+                <div class="skyscraper-container">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-2">
+                        <p class="text-xs text-gray-500 text-center mb-2">Advertisement</p>
+                        @php $leftSkyscraper = $adsData->shift(); @endphp
+                        <div class="w-[160px] h-[600px] mx-auto flex items-center justify-center ad-block" data-ad-id="{{ $leftSkyscraper->id ?? '' }}" data-ad-type="{{ $leftSkyscraper ? ($leftSkyscraper->ad_type->value ?? '') : '' }}">
+                            @if($leftSkyscraper)
+                                @include('partials.ad_display', ['ad' => $leftSkyscraper])
+                            @else
+                                <div class="bg-gray-100 dark:bg-gray-700 w-full h-full flex items-center justify-center rounded">
+                                    <span class="text-gray-400 text-xs text-center">160x600<br>Skyscraper</span>
+                                </div>
+                            @endif
+                        </div>
                     </div>
-                @endif
+                </div>
             </div>
-
-            <p class="text-lg font-medium text-text-light dark:text-text-dark mb-2">Your link will be ready in a few seconds.</p>
-            <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-8">Discover cool stuff while you wait!</p>
-
-            <div class="relative w-32 h-32 mx-auto mb-8">
-                <svg class="w-full h-full" viewBox="0 0 120 120">
-                    <circle class="text-border-light dark:text-border-dark" cx="60" cy="60" fill="transparent" r="54" stroke="currentColor" stroke-width="12"></circle>
-                    <circle class="text-primary timer-ring" cx="60" cy="60" fill="transparent" id="timer-progress" r="54" stroke="currentColor" stroke-dasharray="339.292" stroke-dashoffset="0" stroke-linecap="round" stroke-width="12"></circle>
-                </svg>
-                <div class="absolute inset-0 flex items-center justify-center text-4xl font-bold text-primary" id="timer-countdown">{{ $adStep->wait_time ?? 10 }}</div>
-            </div>
-
-            @php $bottomAd = $adsData->shift(); @endphp
-            <div class="w-[300px] h-[250px] mx-auto mb-8 flex items-center justify-center rounded-lg ad-block" data-ad-id="{{ $bottomAd->id ?? '' }}" data-ad-type="{{ $bottomAd->ad_type->value ?? '' }}">
-                 @if($bottomAd)
-                    @include('partials.ad_display', ['ad' => $bottomAd])
-                @else
-                    <div class="bg-gray-200 dark:bg-gray-700 w-full h-full flex items-center justify-center">
-                        <span class="text-text-secondary-light dark:text-text-secondary-dark">300x250 Ad</span>
+            
+            {{-- Center Content --}}
+            <div class="lg:col-span-8">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 md:p-8">
+                    
+                    {{-- Top Banner Ad --}}
+                    <div class="mb-6">
+                        <p class="text-xs text-gray-500 text-center mb-2">Advertisement</p>
+                        @php $topAd = $adsData->shift(); @endphp
+                        <div class="w-full max-w-[728px] h-[90px] mx-auto flex items-center justify-center rounded-lg overflow-hidden ad-block" data-ad-id="{{ $topAd->id ?? '' }}" data-ad-type="{{ $topAd ? ($topAd->ad_type->value ?? '') : '' }}">
+                            @if($topAd)
+                                @include('partials.ad_display', ['ad' => $topAd])
+                            @else
+                                <div class="bg-gray-100 dark:bg-gray-700 w-full h-full flex items-center justify-center">
+                                    <span class="text-gray-400 text-sm">728x90 Leaderboard</span>
+                                </div>
+                            @endif
+                        </div>
                     </div>
-                @endif
+                    
+                    {{-- Timer and Message --}}
+                    <div class="text-center mb-6">
+                        <div class="relative w-24 h-24 mx-auto mb-4">
+                            <svg class="w-full h-full" viewBox="0 0 120 120">
+                                <circle class="text-gray-200 dark:text-gray-700" cx="60" cy="60" fill="transparent" r="54" stroke="currentColor" stroke-width="10"></circle>
+                                <circle class="text-indigo-600 timer-ring" cx="60" cy="60" fill="transparent" id="timer-progress" r="54" stroke="currentColor" stroke-dasharray="339.292" stroke-dashoffset="0" stroke-linecap="round" stroke-width="10"></circle>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-indigo-600" id="timer-countdown">{{ $adStep->wait_time ?? 10 }}</div>
+                        </div>
+                        <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">Your link is almost ready!</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Please wait while we prepare your destination...</p>
+                    </div>
+                    
+                    {{-- Middle Banner Ad --}}
+                    <div class="mb-6">
+                        @php $middleAd = $adsData->shift(); @endphp
+                        <div class="w-[300px] h-[250px] mx-auto flex items-center justify-center rounded-lg overflow-hidden ad-block" data-ad-id="{{ $middleAd->id ?? '' }}" data-ad-type="{{ $middleAd ? ($middleAd->ad_type->value ?? '') : '' }}">
+                            @if($middleAd)
+                                @include('partials.ad_display', ['ad' => $middleAd])
+                            @else
+                                <div class="bg-gray-100 dark:bg-gray-700 w-full h-full flex items-center justify-center">
+                                    <span class="text-gray-400 text-sm">300x250 Banner</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    {{-- Captcha --}}
+                    @if($showCaptcha)
+                    <div class="mb-6 flex justify-center">
+                        {!! $captchaService->getWidget() !!}
+                    </div>
+                    @endif
+                    
+                    {{-- Get Link Button (Animated) --}}
+                    <button id="get-link-btn" disabled class="w-full bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 font-semibold py-4 px-6 rounded-xl cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2 text-lg">
+                        <span class="material-icons animate-spin">hourglass_empty</span>
+                        Please wait...
+                    </button>
+                    
+                    {{-- Bottom Banner Ad --}}
+                    <div class="mt-6">
+                        @php $bottomAd = $adsData->shift(); @endphp
+                        <div class="w-[300px] h-[250px] mx-auto flex items-center justify-center rounded-lg overflow-hidden ad-block" data-ad-id="{{ $bottomAd->id ?? '' }}" data-ad-type="{{ $bottomAd ? ($bottomAd->ad_type->value ?? '') : '' }}">
+                            @if($bottomAd)
+                                @include('partials.ad_display', ['ad' => $bottomAd])
+                            @else
+                                <div class="bg-gray-100 dark:bg-gray-700 w-full h-full flex items-center justify-center">
+                                    <span class="text-gray-400 text-sm">300x250 Banner</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                
+                {{-- Info Section --}}
+                @include('partials.info_section')
             </div>
-
-            <button class="w-full bg-primary/20 dark:bg-primary/20 text-primary font-semibold py-3 px-6 rounded-lg cursor-not-allowed transition-all duration-300" disabled id="get-link-btn">
-                Please wait...
-            </button>
+            
+            {{-- Right Skyscraper Ad (Desktop) --}}
+            <div class="hidden lg:block lg:col-span-2">
+                <div class="skyscraper-container">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-2">
+                        <p class="text-xs text-gray-500 text-center mb-2">Advertisement</p>
+                        @php $rightSkyscraper = $adsData->shift(); @endphp
+                        <div class="w-[160px] h-[600px] mx-auto flex items-center justify-center ad-block" data-ad-id="{{ $rightSkyscraper->id ?? '' }}" data-ad-type="{{ $rightSkyscraper ? ($rightSkyscraper->ad_type->value ?? '') : '' }}">
+                            @if($rightSkyscraper)
+                                @include('partials.ad_display', ['ad' => $rightSkyscraper])
+                            @else
+                                <div class="bg-gray-100 dark:bg-gray-700 w-full h-full flex items-center justify-center rounded">
+                                    <span class="text-gray-400 text-xs text-center">160x600<br>Skyscraper</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        @include('partials.info_section')
-
     </main>
 
-    <footer class="w-full max-w-6xl mx-auto py-6 px-4">
-        <div class="flex flex-col md:flex-row justify-between items-center border-t border-border-light dark:border-border-dark pt-6">
-            <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">© {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
-            <div class="flex space-x-6 mt-4 md:mt-0">
-                <a class="text-sm text-text-secondary-light dark:text-text-secondary-dark hover:text-primary" href="#">Privacy Policy</a>
-                <a class="text-sm text-text-secondary-light dark:text-text-secondary-dark hover:text-primary" href="#">Terms of Use</a>
+    {{-- Footer --}}
+    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-8">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
+            <p class="text-sm text-gray-500">© {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
+            <div class="flex space-x-6 mt-2 md:mt-0">
+                <a class="text-sm text-gray-500 hover:text-indigo-600" href="#">Privacy Policy</a>
+                <a class="text-sm text-gray-500 hover:text-indigo-600" href="#">Terms of Use</a>
             </div>
         </div>
     </footer>
 </div>
 
+{{-- Pop-under Ad Script --}}
+@if(isset($userPopupAd) && $userPopupAd)
 <script>
+    (function() {
+        let popunderOpened = false;
+        const popunderUrl = "{{ $userPopupAd['ad_data']['url'] ?? '' }}";
+        const popunderId = {{ $userPopupAd['id'] ?? 0 }};
+        
+        if (popunderUrl) {
+            document.addEventListener('click', function openPopunder(e) {
+                if (popunderOpened) return;
+                const target = e.target;
+                const isInteractiveElement = target.closest('button, a, input, select, textarea');
+                if (isInteractiveElement) return;
+                
+                popunderOpened = true;
+                
+                if (popunderId) {
+                    fetch(`/ads/track-click/popup/${popunderId}?userPopupCampaignId=${popunderId}`, {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' },
+                        body: JSON.stringify({})
+                    }).catch(error => console.error('Popunder tracking error:', error));
+                }
+                
+                const popunderWindow = window.open(popunderUrl, '_blank', 'noopener,noreferrer');
+                if (popunderWindow) {
+                    window.focus();
+                    setTimeout(() => window.focus(), 100);
+                }
+                document.removeEventListener('click', openPopunder);
+            }, { once: false });
+        }
+    })();
+</script>
+@endif
+
+<script>
+    // Timer variables
     const countdownElement = document.getElementById('timer-countdown');
+    const countdownSmall = document.getElementById('timer-countdown-small');
     const progressCircle = document.getElementById('timer-progress');
+    const progressCircleSmall = document.getElementById('timer-progress-small');
+    const progressBar = document.getElementById('progress-bar');
     const getLinkBtn = document.getElementById('get-link-btn');
-    const skipAdBtn = document.getElementById('skip-ad-btn');
     
     const totalTime = {{ $adStep->wait_time ?? 10 }};
     let timeLeft = totalTime;
+    let timerPaused = false;
     
-    const radius = progressCircle.r.baseVal.value;
+    // Circle progress calculations
+    const radius = 54;
     const circumference = 2 * Math.PI * radius;
+    const radiusSmall = 15;
+    const circumferenceSmall = 2 * Math.PI * radiusSmall;
     
     progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
-    progressCircle.style.strokeDashoffset = circumference;
+    progressCircleSmall.style.strokeDasharray = `${circumferenceSmall} ${circumferenceSmall}`;
 
     function setProgress(percent) {
         const offset = circumference - (percent / 100) * circumference;
+        const offsetSmall = circumferenceSmall - (percent / 100) * circumferenceSmall;
         progressCircle.style.strokeDashoffset = offset;
+        progressCircleSmall.style.strokeDashoffset = offsetSmall;
+        progressBar.style.width = `${percent}%`;
     }
 
     function proceedToNextStep() {
-        let nextUrl;
+        const requiresCaptcha = {{ $showCaptcha ? 'true' : 'false' }};
+        if (requiresCaptcha) {
+            let captchaResponse = null;
+            const turnstileWidget = document.querySelector('[name="cf-turnstile-response"]');
+            const recaptchaWidget = document.querySelector('[name="g-recaptcha-response"]');
+            const hcaptchaWidget = document.querySelector('[name="h-captcha-response"]');
+            
+            if (turnstileWidget) captchaResponse = turnstileWidget.value;
+            if (recaptchaWidget) captchaResponse = recaptchaWidget.value;
+            if (hcaptchaWidget) captchaResponse = hcaptchaWidget.value;
+            
+            if (!captchaResponse) {
+                alert('Please complete the captcha verification first.');
+                return;
+            }
+            
+            fetch('/go/{{ $link->code }}/captcha', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    'cf-turnstile-response': turnstileWidget?.value,
+                    'g-recaptcha-response': recaptchaWidget?.value,
+                    'h-captcha-response': hcaptchaWidget?.value
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) navigateToNext();
+                else alert(data.message || 'Captcha verification failed. Please try again.');
+            })
+            .catch(error => {
+                console.error('Captcha verification error:', error);
+                alert('Captcha verification failed. Please try again.');
+            });
+            return;
+        }
+        navigateToNext();
+    }
+    
+    function navigateToNext() {
         const currentStep = {{ $stepNumber }};
         const totalSteps = {{ $campaignOrTemplate->campaignTemplateSteps->count() }};
         const linkCode = "{{ $link->code }}";
         const campaignTemplateId = {{ $campaignOrTemplate->id ?? 'null' }};
 
+        let nextUrl;
         if (currentStep < totalSteps) {
-            const params = new URLSearchParams({ campaignTemplateId });
-            nextUrl = `/link/${linkCode}/step/${currentStep + 1}?${params.toString()}`;
+            nextUrl = `/link/${linkCode}/step/${currentStep + 1}?campaignTemplateId=${campaignTemplateId}`;
         } else {
-            nextUrl = "{{ $originalUrl }}";
+            nextUrl = `/link/${linkCode}/complete`;
         }
         window.location.href = nextUrl;
     }
 
-    setProgress(100 * (timeLeft / totalTime));
+    setProgress(100);
 
     const interval = setInterval(() => {
+        if (timerPaused) return;
+        
         timeLeft--;
         countdownElement.textContent = timeLeft;
+        countdownSmall.textContent = timeLeft;
         setProgress(100 * (timeLeft / totalTime));
-        
-        if (timeLeft <= 5) {
-            skipAdBtn.classList.remove('hidden');
-        }
 
         if (timeLeft <= 0) {
             clearInterval(interval);
-            countdownElement.innerHTML = `<span class="material-icons text-4xl">check</span>`;
+            countdownElement.innerHTML = `<span class="material-icons text-3xl">check</span>`;
+            countdownSmall.innerHTML = `<span class="material-icons text-sm">check</span>`;
+            
+            // Activate button with glow effect
             getLinkBtn.disabled = false;
-            getLinkBtn.classList.remove('bg-primary/20', 'dark:bg-primary/20', 'text-primary', 'cursor-not-allowed');
-            getLinkBtn.classList.add('bg-primary', 'text-white', 'hover:bg-primary/90');
-            getLinkBtn.innerHTML = 'Get Link <span class="material-icons text-base ml-1">arrow_forward</span>';
+            getLinkBtn.classList.remove('bg-gray-300', 'dark:bg-gray-600', 'text-gray-500', 'dark:text-gray-400', 'cursor-not-allowed');
+            getLinkBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-700', 'text-white', 'btn-glow');
+            getLinkBtn.innerHTML = '<span>Get Your Link</span><span class="material-icons ml-2">arrow_forward</span>';
             getLinkBtn.onclick = proceedToNextStep;
-            skipAdBtn.classList.add('hidden');
         }
     }, 1000);
 
-    skipAdBtn.onclick = () => {
-        clearInterval(interval);
-        proceedToNextStep();
-    };
-
-    // Ad click tracking
+    // AdBlock detection - using inline detection API
     document.addEventListener('DOMContentLoaded', function() {
-        const trackAdClick = (adId, adType) => {
-            if (!adId || !adType) return;
-            fetch(`/ads/track-click/${adType}/${adId}`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({})
-            }).catch(error => console.error('Ad click tracking error:', error));
-        };
-
+        function showAdblockModal() {
+            timerPaused = true;
+            document.getElementById('adblock-modal').classList.remove('hidden');
+            document.getElementById('adblock-modal').classList.add('flex');
+        }
+        
+        // Check inline detection first
+        if (window.adblockDetected) {
+            showAdblockModal();
+        } else {
+            // Register for future detection
+            window.onAdblockDetected(showAdblockModal);
+        }
+        
+        // Also check for Vite module detection
+        if (typeof AdBlockDetector !== 'undefined') {
+            AdBlockDetector.onDetected(showAdblockModal);
+        }
+        
+        // Final check - if bait scripts didn't load, variables won't be set
+        setTimeout(function() {
+            if (!window.adsLoaded || !window.googleAdsLoaded) {
+                window.triggerAdblockDetected('variable_check');
+            }
+        }, 1500);
+        
+        // Ad click tracking
         document.querySelectorAll('.ad-block').forEach(adElement => {
-            adElement.addEventListener('click', function(event) {
+            adElement.addEventListener('click', function() {
                 const adId = adElement.dataset.adId;
                 const adType = adElement.dataset.adType;
-                trackAdClick(adId, adType);
+                if (!adId || !adType) return;
+                fetch(`/ads/track-click/${adType}/${adId}`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                }).catch(error => console.error('Ad click tracking error:', error));
             });
-        });
-    });
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Find all iframes within .html-content or .third-party-content and remove them
-        document.querySelectorAll('.html-content iframe, .third-party-content iframe').forEach(iframe => {
-            iframe.parentNode.removeChild(iframe);
         });
     });
 </script>

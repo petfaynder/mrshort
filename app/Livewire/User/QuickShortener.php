@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 class QuickShortener extends Component
 {
     public $original_url;
+    public $shortenedLink = '';
 
     protected $rules = [
         'original_url' => 'required|url',
@@ -16,20 +17,41 @@ class QuickShortener extends Component
 
     public function shortenLink()
     {
+        // Auto-add https:// if URL doesn't have a protocol
+        if ($this->original_url && !preg_match('#^https?://#i', $this->original_url)) {
+            $this->original_url = 'https://' . $this->original_url;
+        }
+        
         $this->validate();
+        
+        // Validate URL against banned words, disallowed domains, and safety
+        $validator = app(\App\Services\LinkValidationService::class);
+        $errors = $validator->validate($this->original_url);
+        
+        if (!empty($errors)) {
+            $this->addError('original_url', $errors[0]);
+            return;
+        }
+        
+        // Check URL safety if enabled
+        $safetyErrors = $validator->checkUrlSafety($this->original_url);
+        if (!empty($safetyErrors)) {
+            $this->addError('original_url', $safetyErrors[0]);
+            return;
+        }
 
-        $code = Str::random(6); // Generate a random short code
+        $codeLength = setting('link_code_length', 6);
+        $code = Str::random($codeLength);
 
         $link = Auth::user()->links()->create([
             'original_url' => $this->original_url,
             'code' => $code,
         ]);
 
-        $this->original_url = ''; // Clear the input field
+        $this->original_url = '';
+        $this->shortenedLink = $link->shortLink();
         
-        session()->flash('status', 'Link shortened successfully! ' . $link->short_url); // Assuming short_url accessor exists or constructing it
-        
-        $this->dispatch('linkShortened'); // To update RecentLinks component
+        $this->dispatch('linkShortened');
     }
 
     public function render()
@@ -37,3 +59,4 @@ class QuickShortener extends Component
         return view('livewire.user.quick-shortener');
     }
 }
+

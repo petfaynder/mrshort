@@ -10,3 +10,4 @@ class CreateUserReward extends CreateRecord
 {
     protected static string $resource = UserRewardResource::class;
 }
+

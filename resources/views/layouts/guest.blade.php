@@ -5,7 +5,15 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        {{-- SEO Meta Tags from Site Settings --}}
+        <title>{{ $title ?? setting('seo_meta_title', config('app.name', 'Laravel')) }}</title>
+        <meta name="description" content="{{ setting('seo_description', 'Shorten your links and earn money.') }}">
+        <meta name="keywords" content="{{ setting('seo_keywords', 'link shortener, url shortener') }}">
+        
+        {{-- Favicon --}}
+        @if(setting('favicon_url'))
+        <link rel="icon" href="{{ setting('favicon_url') }}" type="image/x-icon">
+        @endif
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -13,6 +21,9 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        {{-- Custom Front Head Code from Settings --}}
+        {!! setting('front_head_code', '') !!}
         <style>
             /* Custom CSS for decorative shapes and responsive adjustments */
             .decorative-shape-1 { /* Üst-sağ: Büyük turuncu circle (200px) */

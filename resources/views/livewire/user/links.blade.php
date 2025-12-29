@@ -9,7 +9,7 @@
             <div class="flex flex-wrap gap-4">
                 <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900/50">
                     <p class="text-base font-medium leading-normal text-gray-600 dark:text-gray-300">Current Balance</p>
-                    <p class="tracking-light text-2xl font-bold leading-tight text-gray-900 dark:text-white">${{ number_format(Auth::user()->earniigss ?? 0, 2) }}</p>
+                    <p class="tracking-light text-2xl font-bold leading-tight text-gray-900 dark:text-white">${{ number_format((Auth::user()->link_earnings ?? 0) + (Auth::user()->referral_earnings ?? 0), 2) }}</p>
                 </div>
             </div>
         </div>
@@ -30,11 +30,6 @@
                     {{ $message }}
                 </div>
             @enderror
-            @if (session()->has('message'))
-                <div class="text-green-500 mt-2 text-sm">
-                    {{ session('message') }}
-                </div>
-            @endif
         </div>
         <div class="flex flex-col gap-4">
             <div class="flex flex-col items-start justify-between gap-4">
@@ -153,6 +148,11 @@
                                                 <button wire:click="editLink({{ $link->id }})" class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
                                                     <span class="material-symbols-outlined text-sm">settings</span> Details
                                                 </button>
+                                                <button wire:click="hideLink({{ $link->id }})" wire:loading.attr="disabled" class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-orange-600 hover:bg-orange-50 dark:text-orange-500 dark:hover:bg-orange-500/10 disabled:opacity-75 disabled:cursor-not-allowed">
+                                                    <span wire:loading.remove wire:target="hideLink({{ $link->id }})" class="material-symbols-outlined text-sm">visibility_off</span>
+                                                    <span wire:loading wire:target="hideLink({{ $link->id }})" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                                                    Hide
+                                                </button>
                                                 <button 
                                                     x-data
                                                     @click="$dispatch('open-confirm-modal', { 
@@ -182,15 +182,15 @@
                                         <tr>
                                             <td colspan="8" class="px-6 py-4">
                                                 @if (!empty($statsData))
-                                                    <h5 class="text-lg font-semibold text-gray-700 mb-2 dark:text-gray-200">Günlük İstatistikler</h5>
+                                                    <h5 class="text-lg font-semibold text-gray-700 mb-2 dark:text-gray-200">Daily Statistics</h5>
                                                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
                                                         <thead>
                                                             <tr>
                                                                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:bg-gray-900 dark:text-gray-400">
-                                                                    Tarih
+                                                                    Date
                                                                 </th>
                                                                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:bg-gray-900 dark:text-gray-400">
-                                                                    Tıklama Sayısı
+                                                                    Click Count
                                                                 </th>
                                                             </tr>
                                                         </thead>
@@ -208,7 +208,7 @@
                                                         </tbody>
                                                     </table>
                                                 @else
-                                                    <p class="text-gray-600 dark:text-gray-400">İstatistikler yükleniyor veya mevcut değil...</p>
+                                                    <p class="text-gray-600 dark:text-gray-400">Statistics are loading or not available...</p>
                                                 @endif
                                             </td>
                                         </tr>
@@ -217,7 +217,7 @@
                             @else
                                 <tr>
                                     <td colspan="8" class="px-6 py-4 text-center text-gray-600 dark:text-gray-400">
-                                        Henüz kısaltılmış bir bağlantınız yok.
+                                        You don't have any shortened links yet.
                                     </td>
                                 </tr>
                             @endif
@@ -294,4 +294,13 @@
         });
     }
 </script>
+
+    @if (session()->has('message'))
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" class="fixed bottom-4 right-4 z-50 rounded-lg bg-green-600 px-4 py-3 text-white shadow-lg">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>{{ session('message') }}</span>
+            </div>
+        </div>
+    @endif
 </div>

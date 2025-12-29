@@ -163,6 +163,11 @@
                         </label>
                     </div>
 
+                    {{-- Captcha Widget --}}
+                    <div class="animate-form-item" style="animation-delay: 0.85s;">
+                        <x-captcha form="register" />
+                    </div>
+
                     <button type="submit" class="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-all duration-300 hover:scale-105 active:scale-95 animate-form-item" style="animation-delay: 0.9s;">
                         <span class="truncate">Sign Up</span>
                     </button>

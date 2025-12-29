@@ -9,3 +9,4 @@ class CreateSeason extends CreateRecord
 {
     protected static string $resource = SeasonResource::class;
 }
+

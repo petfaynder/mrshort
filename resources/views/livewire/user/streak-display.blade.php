@@ -14,13 +14,13 @@
                 <div>
                     <div class="flex items-baseline gap-2">
                         <span class="text-3xl font-bold text-white">{{ $streakStatus['current_streak'] }}</span>
-                        <span class="text-gray-400">gün</span>
+                        <span class="text-gray-400">days</span>
                     </div>
                     <p class="text-sm text-gray-400">
                         @if($streakStatus['is_active_today'])
-                            <span class="text-green-400">✓ Bugün aktif</span>
+                            <span class="text-green-400">✓ Active today</span>
                         @else
-                            <span class="text-yellow-400">⚠ Streak'ini koru!</span>
+                            <span class="text-yellow-400">⚠ Keep your streak!</span>
                         @endif
                     </p>
                 </div>
@@ -28,7 +28,7 @@
 
             <div class="text-right">
                 <div class="text-sm text-gray-400 mb-1">
-                    En uzun: <span class="text-orange-400 font-semibold">{{ $streakStatus['longest_streak'] }} gün</span>
+                    Longest: <span class="text-orange-400 font-semibold">{{ $streakStatus['longest_streak'] }} days</span>
                 </div>
                 @if($streakStatus['freeze_available'] > 0)
                     <div class="flex items-center justify-end gap-1 text-xs text-blue-400">
@@ -47,8 +47,8 @@
         @if($nextMilestone)
             <div class="mt-4">
                 <div class="flex justify-between text-xs text-gray-400 mb-1">
-                    <span>Sonraki milestone</span>
-                    <span>{{ $nextMilestone['milestone']->days_required }} gün</span>
+                    <span>Next milestone</span>
+                    <span>{{ $nextMilestone['milestone']->days_required }} days</span>
                 </div>
                 <div class="w-full bg-gray-700 rounded-full h-2">
                     <div 
@@ -57,9 +57,9 @@
                     ></div>
                 </div>
                 <div class="flex justify-between text-xs mt-1">
-                    <span class="text-orange-400">{{ $nextMilestone['milestone']->points_reward }} puan</span>
+                    <span class="text-orange-400">{{ $nextMilestone['milestone']->points_reward }} points</span>
                     @if($nextMilestone['milestone']->badgeReward)
-                        <span class="text-purple-400">+ Rozet</span>
+                        <span class="text-purple-400">+ Badge</span>
                     @endif
                 </div>
             </div>
@@ -91,7 +91,7 @@
                 ">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-lg font-bold {{ $claimed ? 'text-green-400' : ($reachable ? 'text-yellow-400' : 'text-gray-500') }}">
-                            {{ $milestone->days_required }} gün
+                            {{ $milestone->days_required }} days
                         </span>
                         @if($claimed)
                             <span class="text-green-400">✓</span>
@@ -103,7 +103,7 @@
                     </div>
                     <div class="text-xs space-y-1">
                         <div class="{{ $claimed || $reachable ? 'text-gray-300' : 'text-gray-500' }}">
-                            +{{ $milestone->points_reward }} puan
+                            +{{ $milestone->points_reward }} points
                         </div>
                         @if($milestone->badgeReward)
                             <div class="text-purple-400">🏅 {{ $milestone->badgeReward->name }}</div>

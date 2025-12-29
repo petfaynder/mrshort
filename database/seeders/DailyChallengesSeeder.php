@@ -16,17 +16,17 @@ class DailyChallengesSeeder extends Seeder
         // Add gamification settings
         GamificationSetting::updateOrCreate(
             ['setting_key' => 'daily_challenges_enabled'],
-            ['setting_value' => '1', 'description' => 'Günlük görevler aktif mi?']
+            ['setting_value' => '1', 'description' => 'Are daily challenges enabled?']
         );
 
         GamificationSetting::updateOrCreate(
             ['setting_key' => 'daily_challenge_count'],
-            ['setting_value' => '3', 'description' => 'Günde kaç görev verilecek?']
+            ['setting_value' => '3', 'description' => 'How many challenges per day?']
         );
 
         GamificationSetting::updateOrCreate(
             ['setting_key' => 'daily_challenge_bonus'],
-            ['setting_value' => '150', 'description' => 'Tüm görevleri tamamlama bonusu']
+            ['setting_value' => '150', 'description' => 'Bonus for completing all challenges']
         );
 
         // Clear old challenges and create new ones
@@ -35,55 +35,55 @@ class DailyChallengesSeeder extends Seeder
         // Create default challenges - each type has only ONE challenge
         // This ensures no duplicate types in daily selection
         $challenges = [
-            // Link kısaltma görevleri (EASY)
+            // Link shortening challenges (EASY)
             [
-                'title' => '3 Link Kısalt',
-                'description' => 'Bugün 3 yeni link kısalt',
+                'title' => 'Shorten 3 Links',
+                'description' => 'Shorten 3 new links today',
                 'type' => 'shorten_links_easy',
                 'target_value' => 3,
                 'difficulty' => 'easy',
                 'points_reward' => 30,
             ],
-            // Link kısaltma görevleri (MEDIUM)
+            // Link shortening challenges (MEDIUM)
             [
-                'title' => '5 Link Kısalt',
-                'description' => 'Bugün 5 yeni link kısalt',
+                'title' => 'Shorten 5 Links',
+                'description' => 'Shorten 5 new links today',
                 'type' => 'shorten_links_medium',
                 'target_value' => 5,
                 'difficulty' => 'medium',
                 'points_reward' => 60,
             ],
-            // Tıklama görevleri (EASY)
+            // Click challenges (EASY)
             [
-                'title' => '50 Tıklama Al',
-                'description' => 'Linklerinden 50 tıklama al',
+                'title' => 'Get 50 Clicks',
+                'description' => 'Get 50 clicks on your links',
                 'type' => 'get_clicks_easy',
                 'target_value' => 50,
                 'difficulty' => 'easy',
                 'points_reward' => 40,
             ],
-            // Tıklama görevleri (MEDIUM)
+            // Click challenges (MEDIUM)
             [
-                'title' => '100 Tıklama Al',
-                'description' => 'Linklerinden 100 tıklama al',
+                'title' => 'Get 100 Clicks',
+                'description' => 'Get 100 clicks on your links',
                 'type' => 'get_clicks_medium',
                 'target_value' => 100,
                 'difficulty' => 'medium',
                 'points_reward' => 80,
             ],
-            // Farklı ülke görevi (HARD)
+            // Different countries challenge (HARD)
             [
-                'title' => '5 Farklı Ülke',
-                'description' => '5 farklı ülkeden tıklama al',
+                'title' => '5 Different Countries',
+                'description' => 'Get clicks from 5 different countries',
                 'type' => 'different_countries',
                 'target_value' => 5,
                 'difficulty' => 'hard',
                 'points_reward' => 150,
             ],
-            // Sosyal paylaşım (EASY)
+            // Social sharing (EASY)
             [
-                'title' => 'Sosyal Paylaşım',
-                'description' => '1 link sosyal medyada paylaş',
+                'title' => 'Social Share',
+                'description' => 'Share 1 link on social media',
                 'type' => 'share_links',
                 'target_value' => 1,
                 'difficulty' => 'easy',

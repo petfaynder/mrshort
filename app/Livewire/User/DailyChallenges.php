@@ -40,7 +40,7 @@ class DailyChallenges extends Component
     {
         if (!$this->todaysChallenges->isAllCompleted()) {
             Notification::make()
-                ->title('Tüm görevleri tamamlayın!')
+                ->title('Complete all challenges!')
                 ->warning()
                 ->send();
             return;
@@ -48,7 +48,7 @@ class DailyChallenges extends Component
 
         if ($this->todaysChallenges->bonus_claimed) {
             Notification::make()
-                ->title('Bonus zaten alındı!')
+                ->title('Bonus already claimed!')
                 ->warning()
                 ->send();
             return;
@@ -58,8 +58,8 @@ class DailyChallenges extends Component
 
         if ($claimed) {
             Notification::make()
-                ->title('3/3 Bonus Alındı!')
-                ->body('+' . $this->bonusPoints . ' Puan kazandınız!')
+                ->title('3/3 Bonus Claimed!')
+                ->body('+' . $this->bonusPoints . ' Points earned!')
                 ->success()
                 ->send();
 

@@ -16,3 +16,4 @@ class EditDailyChallengePool extends EditRecord
         ];
     }
 }
+

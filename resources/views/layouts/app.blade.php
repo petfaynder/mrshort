@@ -4,8 +4,16 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <title>LinkShortener - Dashboard</title>
+        
+        {{-- SEO Meta Tags from Site Settings --}}
+        <title>{{ $title ?? setting('seo_meta_title', config('app.name') . ' - Dashboard') }}</title>
+        <meta name="description" content="{{ setting('seo_description', 'Shorten your links and earn money.') }}">
+        <meta name="keywords" content="{{ setting('seo_keywords', 'link shortener, url shortener') }}">
+        
+        {{-- Favicon --}}
+        @if(setting('favicon_url'))
+        <link rel="icon" href="{{ setting('favicon_url') }}" type="image/x-icon">
+        @endif
         
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com" rel="preconnect"/>
@@ -22,6 +30,9 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
+        
+        {{-- Custom Head Code from Settings --}}
+        {!! setting('member_head_code', '') !!}
     </head>
     <body class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200">
         <div class="relative flex h-auto min-h-screen w-full flex-col">

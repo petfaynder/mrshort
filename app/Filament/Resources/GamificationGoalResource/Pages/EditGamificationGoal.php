@@ -17,3 +17,4 @@ class EditGamificationGoal extends EditRecord
         ];
     }
 }
+

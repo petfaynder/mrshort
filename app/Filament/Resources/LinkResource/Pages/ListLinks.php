@@ -17,3 +17,4 @@ class ListLinks extends ListRecords
         ];
     }
 }
+

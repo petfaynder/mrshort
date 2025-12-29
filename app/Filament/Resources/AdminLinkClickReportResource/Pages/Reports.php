@@ -11,3 +11,4 @@ class Reports extends Page
 
     protected static string $view = 'filament.resources.admin-link-click-report-resource.pages.reports';
 }
+

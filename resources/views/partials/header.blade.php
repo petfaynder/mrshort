@@ -12,6 +12,9 @@
                 <div class="ml-10 flex items-baseline space-x-6">
                     <a class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors" style="font-family: 'Inter', 'Space Grotesk', sans-serif;" href="{{ route('payout.rates') }}">Payout Rates</a>
                     <a class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors" style="font-family: 'Inter', 'Space Grotesk', sans-serif;" href="{{ route('api.documentation') }}">API</a>
+                    @if(setting('blog_enabled', false))
+                    <a class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors" style="font-family: 'Inter', 'Space Grotesk', sans-serif;" href="{{ route('blog.index') }}">Blog</a>
+                    @endif
                 </div>
             </div>
             
@@ -52,6 +55,12 @@
                 <span class="material-symbols-outlined text-bright-magenta">api</span>
                 <span class="font-medium text-base">API Documentation</span>
             </a>
+            @if(setting('blog_enabled', false))
+            <a @click="mobileMenuOpen = false" href="{{ route('blog.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-gray-800/50 transition-all duration-200" style="font-family: 'Inter', 'Space Grotesk', sans-serif;">
+                <span class="material-symbols-outlined text-electric-blue">article</span>
+                <span class="font-medium text-base">Blog</span>
+            </a>
+            @endif
             
             <div class="border-t border-gray-800 pt-4 mt-4">
                 @auth

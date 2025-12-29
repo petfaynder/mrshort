@@ -10,6 +10,7 @@ use Carbon\Carbon;
 class DashboardStats extends Component
 {
     public $totalViews = 0;
+    public $paidViews = 0;
     public $publisherEarnings = 0;
     public $averageCpm = 0;
     public $referralEarnings = 0;
@@ -36,13 +37,15 @@ class DashboardStats extends Component
         $clicks = $query->get();
 
         $totalViews = $clicks->count();
+        $paidViews = $clicks->where('cpm_rate', '>', 0)->count();
         $publisherEarnings = $clicks->sum('cpm_rate') / 1000;
         $referralEarnings = $user->referral_earnings ?? 0;
 
         $this->totalViews = $totalViews;
+        $this->paidViews = $paidViews;
         $this->publisherEarnings = $publisherEarnings;
         $this->referralEarnings = $referralEarnings;
-        $this->averageCpm = $totalViews > 0 ? ($publisherEarnings / $totalViews) * 1000 : 0;
+        $this->averageCpm = $paidViews > 0 ? ($publisherEarnings / $paidViews) * 1000 : 0;
     }
 
     public function render()

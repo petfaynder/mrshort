@@ -114,18 +114,28 @@ class Links extends Component
     public function shortenLink()
     {
         $this->validate(['original_url' => 'required|url']);
+        
+        // Validate URL against banned words and domains
+        $validator = app(\App\Services\LinkValidationService::class);
+        $errors = $validator->validate($this->original_url);
+        
+        if (!empty($errors)) {
+            $this->addError('original_url', $errors[0]);
+            return;
+        }
 
-        $code = Str::random(6); // Generate a random short code
+        $codeLength = setting('link_code_length', 6);
+        $code = Str::random($codeLength);
 
         Auth::user()->links()->create([
             'original_url' => $this->original_url,
             'code' => $code,
         ]);
 
-        $this->original_url = ''; // Clear the input field
-        $this->resetPage(); // Go to first page to see new link
+        $this->original_url = '';
+        $this->resetPage();
         
-        session()->flash('message', 'Bağlantı başarıyla kısaltıldı.');
+        session()->flash('message', 'Link successfully shortened.');
     }
 
     public function deleteLink($linkId)
@@ -134,7 +144,18 @@ class Links extends Component
 
         if ($link) {
             $link->delete();
-            session()->flash('message', 'Bağlantı başarıyla silindi.');
+            session()->flash('message', 'Link successfully deleted.');
+        }
+    }
+
+    public function hideLink($linkId)
+    {
+        $link = Auth::user()->links()->find($linkId);
+
+        if ($link) {
+            $link->is_hidden = true;
+            $link->save();
+            session()->flash('message', 'Link successfully hidden.');
         }
     }
 
@@ -147,7 +168,7 @@ class Links extends Component
         $this->selectedLinks = [];
         $this->selectAll = false;
         
-        session()->flash('message', 'Seçilen bağlantılar başarıyla silindi.');
+        session()->flash('message', 'Selected links successfully deleted.');
     }
 
     public function editLink($linkId)
@@ -178,7 +199,7 @@ class Links extends Component
             ]);
 
             $this->cancelEdit();
-            session()->flash('message', 'Bağlantı başarıyla güncellendi.');
+            session()->flash('message', 'Link successfully updated.');
         }
     }
 

@@ -12,7 +12,7 @@
                     <img alt="User avatar" class="w-8 h-8 rounded-full" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&size=40&background=0D8ABC&color=fff"/>
                     <div>
                         <p class="text-sm font-semibold text-heading-light dark:text-heading-dark">{{ Auth::user()->name }}</p>
-                        <p class="text-xs text-text-light dark:text-subtext-dark">Balance: ${{ number_format(Auth::user()->balance, 5) }}</p>
+                        <p class="text-xs text-text-light dark:text-subtext-dark">Balance: ${{ number_format((Auth::user()->link_earnings ?? 0) + (Auth::user()->referral_earnings ?? 0), 2) }}</p>
                     </div>
                 </div>
             </div>

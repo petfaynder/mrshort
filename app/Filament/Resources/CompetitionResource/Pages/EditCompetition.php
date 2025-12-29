@@ -16,3 +16,4 @@ class EditCompetition extends EditRecord
         ];
     }
 }
+

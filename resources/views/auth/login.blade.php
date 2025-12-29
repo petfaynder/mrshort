@@ -113,6 +113,11 @@
         </label>
     </div>
 
+    {{-- Captcha Widget --}}
+    <div class="animate-form-item" style="animation-delay: 0.65s;">
+        <x-captcha form="login" />
+    </div>
+
     <button type="submit" class="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-all duration-300 hover:scale-105 active:scale-95 animate-form-item" style="animation-delay: 0.7s;">
         <span class="truncate">Log In</span>
     </button>
@@ -204,67 +209,4 @@
     });
 </script>
 </body></html>
-</final_file_content>
 
-IMPORTANT: For any future changes to this file, use the final_file_content shown above as your reference. This content reflects the current state of the file, including any auto-formatting (e.g., if you used single quotes but the formatter converted them to double quotes). Always base your SEARCH/REPLACE operations on this final version to ensure accuracy.
-
-<environment_details>
-# Visual Studio Code Visible Files
-resources/views/auth/login.blade.php
-
-# Visual Studio Code Open Tabs
-database/migrations/2025_10_26_135922_create_campaign_template_steps_table.php
-database/migrations/2025_10_26_135942_create_campaign_template_ads_table.php
-database/migrations/2025_10_26_135959_add_campaign_template_id_to_ad_campaigns_table.php
-database/migrations/2025_10_26_140014_add_campaign_template_id_to_links_table.php
-app/Models/CampaignTemplateStep.php
-app/Models/CampaignTemplateAd.php
-app/Models/Link.php
-database/migrations/2025_10_26_144902_add_advanced_ad_campaign_fields_to_ad_campaigns_table.php
-database/migrations/2025_10_26_151347_add_campaign_schedule_to_ad_campaigns_table.php
-database/migrations/2025_10_26_162840_add_budget_and_run_until_budget_depleted_to_ad_campaigns_table.php
-app/Models/AdCampaign.php
-app/Filament/Resources/AdCampaignResource.php
-resources/views/livewire/user/create-ad-campaign.blade.php
-database/migrations/2025_10_26_171737_add_advertiser_rate_to_cpm_rates_table.php
-database/migrations/2025_10_26_171759_rename_default_cpm_rate_and_add_advertiser_rate_to_cpm_tiers_table.php
-app/Models/CpmRate.php
-app/Models/CpmTier.php
-app/Filament/Resources/CpmTierResource.php
-resources/views/filament/pages/manage-country-cpm-rates.blade.php
-app/Providers/Filament/AdminPanelProvider.php
-app/Filament/Pages/ManageCountryCpmRates.php
-app/Services/CampaignSeeder.php
-app/Filament/Widgets/CampaignPerformanceWidget.php
-app/Livewire/User/CreateAdCampaign.php
-app/Livewire/User/EditAdCampaign.php
-database/migrations/2025_10_26_194354_add_popup_fields_to_campaign_template_steps_table.php
-app/Enums/AdType.php
-database/migrations/2025_10_26_203307_drop_popup_ad_campaign_id_from_campaign_template_steps_table.php
-app/Filament/Resources/CampaignTemplateResource.php
-app/Models/CampaignTemplate.php
-database/migrations/2025_10_26_215909_add_fields_to_campaign_templates_table.php
-routes/web.php
-app/Http/Controllers/LinkController.php
-resources/views/partials/info_section.blade.php
-resources/views/ad_banner_page.blade.php
-resources/views/ad_interstitial.blade.php
-resources/views/welcome.blade.php
-resources/views/auth/register.blade.php
-app/Http/Controllers/Auth/RegisteredUserController.php
-resources/views/dashboard.blade.php
-resources/views/user/dashboard/index.blade.php
-app/Http/Controllers/Auth/AuthenticatedSessionController.php
-resources/views/auth/login.blade.php
-resources/views/partials/ad_display.blade.php
-resources/views/livewire/user/edit-ad-campaign.blade.php
-
-# Current Time
-10/29/2025, 3:45:04 PM (Europe/Istanbul, UTC+3:00)
-
-# Context Window Usage
-82,732 / 1,048.576K tokens used (8%)
-
-# Current Mode
-ACT MODE
-</environment_details>

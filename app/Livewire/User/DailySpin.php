@@ -54,7 +54,7 @@ class DailySpin extends Component
     {
         if (!$this->spinEnabled) {
             Notification::make()
-                ->title('Şans çarkı şu anda kapalı.')
+                ->title('The lucky wheel is currently closed.')
                 ->warning()
                 ->send();
             return;
@@ -62,8 +62,8 @@ class DailySpin extends Component
 
         if (!$this->canSpin) {
             Notification::make()
-                ->title('Henüz çark döndüremezsiniz!')
-                ->body('Lütfen bekleme süresinin dolmasını bekleyin.')
+                ->title("You can't spin the wheel yet!")
+                ->body('Please wait for the cooldown to expire.')
                 ->warning()
                 ->send();
             return;
@@ -76,7 +76,7 @@ class DailySpin extends Component
 
         if (!$prize) {
             Notification::make()
-                ->title('Bir hata oluştu.')
+                ->title('An error occurred.')
                 ->danger()
                 ->send();
             $this->isSpinning = false;

@@ -10,3 +10,4 @@ class CreateLinkClick extends CreateRecord
 {
     protected static string $resource = LinkClickResource::class;
 }
+

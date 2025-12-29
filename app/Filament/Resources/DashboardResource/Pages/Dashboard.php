@@ -16,3 +16,4 @@ class Dashboard extends Page
 
     protected static string $view = 'filament.resources.dashboard-resource.pages.dashboard';
 }
+

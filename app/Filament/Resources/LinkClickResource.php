@@ -108,3 +108,5 @@ class LinkClickResource extends Resource
         ];
     }
 }
+
+

@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 class FraudScoreService
 {
     /**
-     * Fraud score hesapla (0-100)
+     * Calculate fraud score (0-100)
      */
     public function calculate(WithdrawalRequest $withdrawal): array
     {
@@ -27,7 +27,7 @@ class FraudScoreService
         $metrics = [];
         $flagReasons = [];
         
-        // 1. Bot Oranı (30%)
+        // 1. Bot Ratio (30%)
         $botCount = $clicks->where('is_bot', true)->count();
         $botRatio = $botCount / $total;
         $botScore = min($botRatio * 100, 30);
@@ -40,10 +40,10 @@ class FraudScoreService
         
         // Auto-flag: Bot > 50%
         if ($botRatio > 0.5) {
-            $flagReasons[] = "Bot oranı çok yüksek: " . round($botRatio * 100, 1) . "%";
+            $flagReasons[] = "Bot ratio too high: " . round($botRatio * 100, 1) . "%";
         }
         
-        // 2. IP Tekrarı (25%)
+        // 2. IP Duplication (25%)
         $uniqueIps = $clicks->unique('ip_address')->count();
         $ipDuplicateRatio = 1 - ($uniqueIps / $total);
         $ipScore = $ipDuplicateRatio * 25;
@@ -56,10 +56,10 @@ class FraudScoreService
         
         // Auto-flag: Unique IP < 10%
         if ($uniqueIps / $total < 0.1 && $total > 100) {
-            $flagReasons[] = "Unique IP oranı çok düşük: " . round($uniqueIps / $total * 100, 1) . "%";
+            $flagReasons[] = "Unique IP ratio too low: " . round($uniqueIps / $total * 100, 1) . "%";
         }
         
-        // 3. Ülke Çeşitliliği (15%)
+        // 3. Country Diversity (15%)
         $countryCounts = $clicks->groupBy('country_id');
         $uniqueCountries = $countryCounts->count();
         $topCountryRatio = $countryCounts->max(fn($g) => $g->count()) / $total;
@@ -77,14 +77,14 @@ class FraudScoreService
             'max' => 15
         ];
         
-        // Auto-flag: Tek ülkeden > 95%
+        // Auto-flag: Single country > 95%
         if ($topCountryRatio > 0.95 && $total > 100) {
-            $flagReasons[] = "Tek ülkeden çok fazla trafik: " . round($topCountryRatio * 100, 1) . "%";
+            $flagReasons[] = "Too much traffic from single country: " . round($topCountryRatio * 100, 1) . "%";
         }
         
-        // 4. Referrer Kalitesi (15%)
+        // 4. Referrer Quality (15%)
         $directAccess = $clicks->filter(fn($c) => 
-            $c->referrer === 'Doğrudan Erişim' || empty($c->referrer)
+            $c->referrer === 'Direct Access' || $c->referrer === 'Doğrudan Erişim' || empty($c->referrer)
         )->count();
         $directRatio = $directAccess / $total;
         $referrerScore = match(true) {
@@ -100,7 +100,7 @@ class FraudScoreService
             'max' => 15
         ];
         
-        // 5. Zaman Dağılımı (10%)
+        // 5. Time Distribution (10%)
         $nightClicks = $clicks->filter(fn($c) => 
             in_array($c->created_at->hour, [2, 3, 4, 5])
         )->count();
@@ -117,7 +117,7 @@ class FraudScoreService
             'max' => 10
         ];
         
-        // 6. Cihaz Çeşitliliği (5%)
+        // 6. Device Diversity (5%)
         $deviceTypes = $clicks->unique('device_type')->count();
         $deviceScore = ($deviceTypes === 1 && $total > 50) ? 5 : 0;
         $metrics['device_diversity'] = [
@@ -126,19 +126,19 @@ class FraudScoreService
             'max' => 5
         ];
         
-        // Toplam score
+        // Total score
         $totalScore = (int) round($botScore + $ipScore + $countryScore + 
                                   $referrerScore + $timeScore + $deviceScore);
         
         // Auto-flag: Score > 60
         if ($totalScore > 60 && empty($flagReasons)) {
-            $flagReasons[] = "Fraud score kritik seviyede: $totalScore";
+            $flagReasons[] = "Fraud score at critical level: $totalScore";
         }
         
-        // Auto-flag: 24 saatte çok fazla tıklama
+        // Auto-flag: Too many clicks in 24 hours
         $last24hClicks = $clicks->filter(fn($c) => $c->created_at->gt(now()->subDay()))->count();
         if ($last24hClicks > 10000) {
-            $flagReasons[] = "Son 24 saatte anormal trafik spike'ı: " . number_format($last24hClicks);
+            $flagReasons[] = "Abnormal traffic spike in last 24h: " . number_format($last24hClicks);
         }
         
         return [
@@ -156,15 +156,15 @@ class FraudScoreService
     }
     
     /**
-     * Risk seviyesi al
+     * Get risk level
      */
     public function getRiskLevel(int $score): array
     {
         return match(true) {
-            $score <= 20 => ['level' => 'low', 'label' => 'Düşük', 'color' => 'success'],
-            $score <= 40 => ['level' => 'medium', 'label' => 'Orta', 'color' => 'warning'],
-            $score <= 60 => ['level' => 'high', 'label' => 'Yüksek', 'color' => 'danger'],
-            default => ['level' => 'critical', 'label' => 'Kritik', 'color' => 'danger'],
+            $score <= 20 => ['level' => 'low', 'label' => 'Low', 'color' => 'success'],
+            $score <= 40 => ['level' => 'medium', 'label' => 'Medium', 'color' => 'warning'],
+            $score <= 60 => ['level' => 'high', 'label' => 'High', 'color' => 'danger'],
+            default => ['level' => 'critical', 'label' => 'Critical', 'color' => 'danger'],
         };
     }
 }

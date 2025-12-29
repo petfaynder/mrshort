@@ -109,3 +109,4 @@ class GamificationSettingResource extends Resource
         ];
     }
 }
+

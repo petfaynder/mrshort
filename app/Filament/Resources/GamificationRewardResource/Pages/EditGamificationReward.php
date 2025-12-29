@@ -17,3 +17,4 @@ class EditGamificationReward extends EditRecord
         ];
     }
 }
+

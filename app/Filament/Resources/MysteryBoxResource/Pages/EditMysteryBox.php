@@ -16,3 +16,4 @@ class EditMysteryBox extends EditRecord
         ];
     }
 }
+

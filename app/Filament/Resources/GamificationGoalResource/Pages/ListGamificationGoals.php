@@ -17,3 +17,4 @@ class ListGamificationGoals extends ListRecords
         ];
     }
 }
+

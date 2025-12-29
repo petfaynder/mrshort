@@ -16,3 +16,4 @@ class EditTeam extends EditRecord
         ];
     }
 }
+

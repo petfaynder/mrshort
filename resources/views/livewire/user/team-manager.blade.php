@@ -18,7 +18,7 @@
                 </div>
                 <div class="text-left md:text-right">
                     <div class="text-2xl font-bold text-cyan-400">#{{ $myTeam->weekly_rank }}</div>
-                    <div class="text-sm text-gray-400">Haftalık Sıralama</div>
+                    <div class="text-sm text-gray-400">Weekly Ranking</div>
                 </div>
             </div>
 
@@ -26,15 +26,15 @@
             <div class="grid grid-cols-3 gap-4 mb-6">
                 <div class="bg-gray-800/50 rounded-xl p-4 text-center">
                     <div class="text-2xl font-bold text-white">{{ $myTeam->member_count }}/20</div>
-                    <div class="text-sm text-gray-400">Üyeler</div>
+                    <div class="text-sm text-gray-400">Members</div>
                 </div>
                 <div class="bg-gray-800/50 rounded-xl p-4 text-center">
                     <div class="text-2xl font-bold text-cyan-400">{{ number_format($myTeam->weekly_points) }}</div>
-                    <div class="text-sm text-gray-400">Haftalık Puan</div>
+                    <div class="text-sm text-gray-400">Weekly Points</div>
                 </div>
                 <div class="bg-gray-800/50 rounded-xl p-4 text-center">
                     <div class="text-2xl font-bold text-blue-400">{{ number_format($myTeam->total_points) }}</div>
-                    <div class="text-sm text-gray-400">Toplam Puan</div>
+                    <div class="text-sm text-gray-400">Total Points</div>
                 </div>
             </div>
 
@@ -52,15 +52,15 @@
                     class="flex-1 px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
                 >
                     <span class="material-symbols-outlined">chat</span>
-                    {{ $showChat ? 'Sohbeti Kapat' : 'Takım Sohbeti' }}
+                    {{ $showChat ? 'Close Chat' : 'Team Chat' }}
                 </button>
                 @if($myMembership->role !== 'leader')
                     <button 
                         wire:click="leaveTeam"
-                        wire:confirm="Takımdan ayrılmak istediğinize emin misiniz?"
+                        wire:confirm="Are you sure you want to leave the team?"
                         class="px-4 py-3 bg-red-600/20 text-red-400 font-semibold rounded-lg hover:bg-red-600/30 transition"
                     >
-                        Ayrıl
+                        Leave
                     </button>
                 @endif
             </div>
@@ -85,14 +85,14 @@
                                 </div>
                                 <div class="{{ $message['user_id'] === auth()->id() ? 'bg-blue-600/30' : 'bg-gray-700/50' }} rounded-lg px-3 py-2 max-w-[70%]">
                                     <div class="text-xs text-gray-400 mb-1">
-                                        {{ $message['user']['name'] ?? 'Kullanıcı' }}
+                                        {{ $message['user']['name'] ?? 'User' }}
                                     </div>
                                     <div class="text-white text-sm">{{ $message['message'] }}</div>
                                 </div>
                             </div>
                         @empty
                             <div class="text-center text-gray-500 py-8">
-                                Henüz mesaj yok. İlk mesajı sen gönder!
+                                No messages yet. Be the first to send one!
                             </div>
                         @endforelse
                     </div>
@@ -102,7 +102,7 @@
                         <input 
                             type="text" 
                             wire:model="newMessage"
-                            placeholder="Mesajınızı yazın..."
+                            placeholder="Type your message..."
                             maxlength="200"
                             class="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white text-sm focus:border-blue-500 focus:ring-blue-500"
                         >
@@ -126,7 +126,7 @@
             <!-- Pending Invites -->
             @if(count($pendingInvites) > 0)
                 <div class="bg-gradient-to-r from-amber-900/30 to-orange-900/30 rounded-xl p-4 border border-amber-500/20">
-                    <h3 class="text-lg font-semibold text-white mb-3">Bekleyen Davetler</h3>
+                    <h3 class="text-lg font-semibold text-white mb-3">Pending Invites</h3>
                     <div class="space-y-2">
                         @foreach($pendingInvites as $invite)
                             <div class="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
@@ -136,7 +136,7 @@
                                     </div>
                                     <div>
                                         <div class="text-white font-medium">{{ $invite['team']['name'] }}</div>
-                                        <div class="text-xs text-gray-400">{{ $invite['invited_by']['name'] ?? 'Bilinmeyen' }} tarafından</div>
+                                        <div class="text-xs text-gray-400">Invited by {{ $invite['invited_by']['name'] ?? 'Unknown' }}</div>
                                     </div>
                                 </div>
                                 <div class="flex gap-2">
@@ -160,19 +160,19 @@
                     class="bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl p-6 text-center hover:from-blue-700 hover:to-cyan-700 transition"
                 >
                     <span class="text-4xl block mb-2">🏰</span>
-                    <div class="text-white font-bold text-lg">Takım Kur</div>
-                    <div class="text-blue-200 text-sm">1,000 Puan</div>
+                    <div class="text-white font-bold text-lg">Create Team</div>
+                    <div class="text-blue-200 text-sm">1,000 Points</div>
                 </button>
                 <div class="bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl p-6 text-center border border-gray-600">
                     <span class="text-4xl block mb-2">🔍</span>
-                    <div class="text-white font-bold text-lg">Takım Bul</div>
-                    <div class="text-gray-400 text-sm">Aşağıdan seç</div>
+                    <div class="text-white font-bold text-lg">Find Team</div>
+                    <div class="text-gray-400 text-sm">Select below</div>
                 </div>
             </div>
 
             <!-- Top Teams -->
             <div class="bg-gray-800/50 rounded-xl p-4">
-                <h3 class="text-lg font-semibold text-white mb-4">Açık Takımlar</h3>
+                <h3 class="text-lg font-semibold text-white mb-4">Open Teams</h3>
                 <div class="space-y-2">
                     @forelse($teams as $index => $team)
                         <div class="flex items-center justify-between bg-gray-700/50 rounded-lg p-3 hover:bg-gray-700 transition">
@@ -182,25 +182,25 @@
                                 </span>
                                 <div>
                                     <div class="text-white font-medium">{{ $team['name'] }}</div>
-                                    <div class="text-xs text-gray-400">{{ $team['member_count'] }}/20 üye</div>
+                                    <div class="text-xs text-gray-400">{{ $team['member_count'] }}/20 members</div>
                                 </div>
                             </div>
                             <div class="flex items-center gap-4">
                                 <div class="text-right hidden sm:block">
                                     <div class="text-cyan-400 font-semibold">{{ number_format($team['weekly_points']) }}</div>
-                                    <div class="text-xs text-gray-400">haftalık</div>
+                                    <div class="text-xs text-gray-400">weekly</div>
                                 </div>
                                 <button 
                                     wire:click="joinTeam({{ $team['id'] }})"
                                     wire:loading.attr="disabled"
                                     class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
                                 >
-                                    Katıl
+                                    Join
                                 </button>
                             </div>
                         </div>
                     @empty
-                        <p class="text-gray-400 text-center py-4">Henüz açık takım yok</p>
+                        <p class="text-gray-400 text-center py-4">No open teams yet</p>
                     @endforelse
                 </div>
             </div>
@@ -210,46 +210,46 @@
         @if($showCreateModal)
             <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" wire:click.self="$set('showCreateModal', false)">
                 <div class="bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4 border border-blue-500/30">
-                    <h3 class="text-xl font-bold text-white mb-4">Takım Kur</h3>
+                    <h3 class="text-xl font-bold text-white mb-4">Create Team</h3>
                     
                     <form wire:submit="createTeam" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Takım Adı</label>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Team Name</label>
                             <input 
                                 type="text" 
                                 wire:model="newTeamName" 
                                 class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-blue-500 focus:ring-blue-500"
-                                placeholder="Takım adını girin..."
+                                placeholder="Enter team name..."
                             >
                             @error('newTeamName') <span class="text-red-400 text-sm">{{ $message }}</span> @enderror
                         </div>
                         
                         <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-1">Açıklama (Opsiyonel)</label>
+                            <label class="block text-sm font-medium text-gray-300 mb-1">Description (Optional)</label>
                             <textarea 
                                 wire:model="newTeamDescription" 
                                 rows="3"
                                 class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-blue-500 focus:ring-blue-500"
-                                placeholder="Takımınızı tanıtın..."
+                                placeholder="Describe your team..."
                             ></textarea>
                         </div>
                         
                         <div class="flex items-center gap-3">
                             <input type="checkbox" wire:model="newTeamIsPublic" id="isPublic" class="rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500">
-                            <label for="isPublic" class="text-gray-300">Herkese açık (herkes katılabilir)</label>
+                            <label for="isPublic" class="text-gray-300">Public (anyone can join)</label>
                         </div>
                         
                         <div class="bg-amber-900/30 rounded-lg p-3 text-amber-300 text-sm">
-                            ⚠️ Takım kurmak 1,000 puan gerektirir
+                            ⚠️ Creating a team requires 1,000 points
                         </div>
                         
                         <div class="flex gap-3">
                             <button type="button" wire:click="$set('showCreateModal', false)" class="flex-1 px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition">
-                                İptal
+                                Cancel
                             </button>
                             <button type="submit" wire:loading.attr="disabled" class="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
-                                <span wire:loading.remove wire:target="createTeam">Kur (1,000 Puan)</span>
-                                <span wire:loading wire:target="createTeam">Oluşturuluyor...</span>
+                                <span wire:loading.remove wire:target="createTeam">Create (1,000 Points)</span>
+                                <span wire:loading wire:target="createTeam">Creating...</span>
                             </button>
                         </div>
                     </form>

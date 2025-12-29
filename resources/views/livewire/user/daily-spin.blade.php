@@ -2,16 +2,16 @@
     @if(!$spinEnabled)
         <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-6 text-center">
             <x-heroicon-o-exclamation-triangle class="w-12 h-12 text-yellow-500 mx-auto mb-3"/>
-            <p class="text-yellow-500">Şans Çarkı şu anda kapalı.</p>
+            <p class="text-yellow-500">Daily Spin Wheel is currently disabled.</p>
         </div>
     @else
         <!-- Spin Wheel Card -->
         <div class="bg-gradient-to-br from-purple-900/50 via-indigo-900/50 to-blue-900/50 rounded-2xl p-6 border border-purple-500/30 shadow-2xl">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold text-white mb-2 flex items-center justify-center gap-2">
-                    <span class="text-3xl">🎰</span> Günlük Şans Çarkı
+                    <span class="text-3xl">🎰</span> Daily Spin Wheel
                 </h2>
-                <p class="text-gray-400">Her gün bir kez çarkı döndür ve ödül kazan!</p>
+                <p class="text-gray-400">Spin the wheel once a day and win rewards!</p>
             </div>
 
             <!-- Wheel Container -->
@@ -104,19 +104,19 @@
                         {{ $isSpinning ? 'disabled' : '' }}
                     >
                         <span wire:loading.remove wire:target="spin">
-                            🎰 Çarkı Döndür!
+                            🎰 Spin the Wheel!
                         </span>
                         <span wire:loading wire:target="spin" class="flex items-center gap-2">
                             <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                             </svg>
-                            Dönüyor...
+                            Spinning...
                         </span>
                     </button>
                 @else
                     <div class="bg-gray-800/50 rounded-xl p-4 inline-block">
-                        <p class="text-gray-400 mb-2">Sonraki çark hakkı:</p>
+                        <p class="text-gray-400 mb-2">Next spin available in:</p>
                         <div 
                             class="text-2xl font-bold text-yellow-400"
                             x-data="{ seconds: {{ $timeUntilNextSpin }} }"
@@ -141,7 +141,7 @@
 
         <!-- Prize Legend -->
         <div class="mt-6 bg-gray-800/30 rounded-xl p-4">
-            <h3 class="text-lg font-semibold text-white mb-3">Ödüller</h3>
+            <h3 class="text-lg font-semibold text-white mb-3">Prizes</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                 @foreach($prizes as $prize)
                     <div class="flex items-center gap-2 bg-gray-800/50 rounded-lg p-2">
@@ -157,18 +157,18 @@
         <!-- Spin History -->
         @if(count($spinHistory) > 0)
             <div class="mt-6 bg-gray-800/30 rounded-xl p-4">
-                <h3 class="text-lg font-semibold text-white mb-3">📜 Çevirme Geçmişi</h3>
+                <h3 class="text-lg font-semibold text-white mb-3">📜 Spin History</h3>
                 <div class="space-y-2 max-h-48 overflow-y-auto">
                     @foreach($spinHistory as $spin)
                         <div class="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
                             <div class="flex items-center gap-3">
                                 <div class="w-3 h-3 rounded-full" style="background: {{ $spin->prize->color ?? '#6b7280' }}"></div>
-                                <span class="text-white">{{ $spin->prize->name ?? 'Ödül' }}</span>
+                                <span class="text-white">{{ $spin->prize->name ?? 'Reward' }}</span>
                             </div>
                             <div class="text-right">
                                 <div class="text-yellow-400 font-semibold">
                                     @if($spin->prize->type === 'points')
-                                        +{{ $spin->prize_value }} Puan
+                                        +{{ $spin->prize_value }} Points
                                     @else
                                         {{ $spin->prize->name }}
                                     @endif
@@ -203,25 +203,25 @@
                         {{ $wonPrize['is_jackpot'] ? '🎉' : '🎊' }}
                     </div>
                     <h2 class="text-2xl font-bold text-white mb-2">
-                        {{ $wonPrize['is_jackpot'] ? 'JACKPOT!' : 'Tebrikler!' }}
+                        {{ $wonPrize['is_jackpot'] ? 'JACKPOT!' : 'Congratulations!' }}
                     </h2>
                     <div class="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 rounded-xl p-6 mb-6 border border-yellow-500/30">
                         <div class="text-4xl font-bold text-yellow-400 mb-2">
                             @if($wonPrize['type'] === 'points')
-                                +{{ $wonPrize['value'] }} Puan
+                                +{{ $wonPrize['value'] }} Points
                             @elseif($wonPrize['type'] === 'streak_freeze')
                                 🛡️ Streak Freeze
                             @else
                                 {{ $wonPrize['name'] }}
                             @endif
                         </div>
-                        <p class="text-gray-400">Kazandınız!</p>
+                        <p class="text-gray-400">You Won!</p>
                     </div>
                     <button 
                         wire:click="closeResultModal"
                         class="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold rounded-full hover:opacity-90 transition-opacity"
                     >
-                        Harika! 🎉
+                        Awesome! 🎉
                     </button>
                 </div>
             </div>

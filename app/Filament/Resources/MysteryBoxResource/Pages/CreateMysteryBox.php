@@ -9,3 +9,4 @@ class CreateMysteryBox extends CreateRecord
 {
     protected static string $resource = MysteryBoxResource::class;
 }
+

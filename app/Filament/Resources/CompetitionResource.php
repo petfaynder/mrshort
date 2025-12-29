@@ -17,7 +17,7 @@ class CompetitionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-trophy';
 
-    protected static ?string $navigationGroup = 'Gamification';
+    protected static ?string $navigationGroup = 'Competitions';
 
     protected static ?string $navigationLabel = 'Yarışmalar';
 
@@ -177,3 +177,5 @@ class CompetitionResource extends Resource
         ];
     }
 }
+
+

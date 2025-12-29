@@ -8,9 +8,23 @@
         </button>
     </div>
     @error('original_url') <span class="text-red-500 text-sm mt-2 block">{{ $message }}</span> @enderror
-    @if (session()->has('status'))
-        <div class="text-green-500 text-sm mt-2 block">
-            {{ session('status') }}
+    
+    {{-- Shortened Link Result Display --}}
+    @if ($shortenedLink)
+        <div x-data="{ copied: false }" class="mt-4 p-4 bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded-lg flex items-center justify-between">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <span class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
+                <a href="{{ $shortenedLink }}" target="_blank" class="text-green-700 dark:text-green-400 font-semibold text-lg truncate hover:underline">{{ $shortenedLink }}</a>
+            </div>
+            <button 
+                x-on:click="navigator.clipboard.writeText('{{ $shortenedLink }}'); copied = true; setTimeout(() => copied = false, 2000)" 
+                class="p-2 hover:bg-green-200 dark:hover:bg-green-800 rounded-lg transition-colors text-green-700 dark:text-green-400 flex items-center gap-2" 
+                title="Copy to Clipboard">
+                <span x-show="!copied" class="material-symbols-outlined">content_copy</span>
+                <span x-show="copied" class="material-symbols-outlined">check</span>
+                <span x-show="copied" class="text-sm font-medium">Copied!</span>
+            </button>
         </div>
     @endif
 </div>
+

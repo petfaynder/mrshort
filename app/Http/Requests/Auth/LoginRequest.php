@@ -41,6 +41,20 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
+        // Verify captcha if enabled for login form
+        if (setting('captcha_enabled', false) && setting('captcha_on_login', false)) {
+            $captchaService = app(\App\Services\CaptchaService::class);
+            $tokenField = $captchaService->getTokenFieldName();
+            $token = $this->input($tokenField);
+            
+            if (!$captchaService->verify($token)) {
+                RateLimiter::hit($this->throttleKey());
+                throw ValidationException::withMessages([
+                    'captcha' => 'Captcha verification failed. Please try again.',
+                ]);
+            }
+        }
+
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 

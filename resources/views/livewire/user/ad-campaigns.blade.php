@@ -1,4 +1,4 @@
-{{-- Gerekli Stiller ve Scriptler --}}
+{{-- Required Styles and Scripts --}}
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
 <style>
@@ -10,7 +10,7 @@
     }
 </style>
 
-{{-- Sayfa İçeriği --}}
+{{-- Page Content --}}
 <div class="bg-card-light dark:bg-card-dark p-6 md:p-8 rounded-lg shadow-sm font-poppins">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h2 class="text-2xl font-semibold text-heading-light dark:text-heading-dark mb-4 sm:mb-0">Campaigns</h2>
@@ -54,10 +54,11 @@
 
     <div class="overflow-x-auto">
         <table class="w-full text-left">
-            <thead class="border-b border-border-light dark:border-border-dark">
+                <thead class="border-b border-border-light dark:border-border-dark">
                 <tr>
                     <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Campaign Name') }}</th>
                     <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Type') }}</th>
+                    <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Approval') }}</th>
                     <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Active') }}</th>
                     <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Impressions') }}</th>
                     <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Clicks') }}</th>
@@ -72,6 +73,29 @@
                         </td>
                         <td class="p-4 whitespace-nowrap text-sm text-text-light dark:text-text-dark">
                             {{ $campaign->campaign_type->value }}
+                        </td>
+                        <td class="p-4 text-sm min-w-[120px]">
+                            @php
+                                $status = $campaign->approval_status ?? 'pending';
+                            @endphp
+                            @if ($status === 'approved')
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    {{ __('Approved') }}
+                                </span>
+                            @elseif ($status === 'rejected')
+                                <div class="flex items-center gap-1">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        {{ __('Rejected') }}
+                                    </span>
+                                    @if ($campaign->rejection_reason)
+                                        <span class="material-icons-outlined text-red-500 cursor-help" style="font-size: 16px;" title="{{ $campaign->rejection_reason }}">info</span>
+                                    @endif
+                                </div>
+                            @else
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    {{ __('Pending') }}
+                                </span>
+                            @endif
                         </td>
                         <td class="p-4 whitespace-nowrap text-sm text-text-light dark:text-text-dark">
                             @if ($campaign->is_active)
@@ -118,7 +142,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td class="text-center py-20 px-4" colspan="6">
+                        <td class="text-center py-20 px-4" colspan="7">
                             <p class="text-text-light dark:text-text-dark">{{ __("You don't have any active campaigns yet.") }}</p>
                         </td>
                     </tr>

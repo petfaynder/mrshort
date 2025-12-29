@@ -110,14 +110,79 @@
         {{-- Buraya reklam kodu gelecek --}}
     </div>
 
-<div class="bg-card-light dark:bg-card-dark p-6 rounded-lg mb-8 shadow-md">
-<div class="flex items-center gap-4">
-<input class="w-full bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent text-heading-light dark:text-heading-dark placeholder:text-text-light dark:placeholder:text-text-dark" placeholder="Paste your long URL here" type="text"/>
-<button class="bg-primary text-white font-semibold px-6 py-3 rounded-lg flex items-center gap-2 whitespace-nowrap hover:bg-blue-600 transition-colors">
-<span class="material-symbols-outlined">content_cut</span>
-                    Shrink Now
-                </button>
-</div>
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-lg mb-8 shadow-md" 
+    x-data="{ 
+        url: '', 
+        shortened: '', 
+        loading: false, 
+        error: '',
+        copied: false,
+        submit() {
+            if(!this.url) return;
+            this.loading = true;
+            this.error = '';
+            this.shortened = '';
+            this.copied = false;
+            fetch('{{ route('guest.shorten') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ url: this.url })
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.loading = false;
+                if (data.success) {
+                    this.shortened = data.short_link;
+                    this.url = '';
+                } else {
+                    this.error = data.message || 'Something went wrong';
+                }
+            })
+            .catch(err => {
+                this.loading = false;
+                this.error = 'Network error. Please try again.';
+                console.error(err);
+            });
+        },
+        copyToClipboard() {
+            navigator.clipboard.writeText(this.shortened);
+            this.copied = true;
+            setTimeout(() => { this.copied = false; }, 2000);
+        }
+    }">
+    <form @submit.prevent="submit" class="flex items-center gap-4">
+        <input x-model="url" class="w-full bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent text-heading-light dark:text-heading-dark placeholder:text-text-light dark:placeholder:text-text-dark" placeholder="Paste your long URL here" type="url" required/>
+        <button type="submit" :disabled="loading" class="bg-primary text-white font-semibold px-6 py-3 rounded-lg flex items-center gap-2 whitespace-nowrap hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <span x-show="!loading" class="material-symbols-outlined">content_cut</span>
+            <span x-show="loading" class="material-symbols-outlined animate-spin">progress_activity</span>
+            <span x-show="!loading">Shrink Now</span>
+            <span x-show="loading">Shortening...</span>
+        </button>
+    </form>
+    
+    <!-- Result Display -->
+    <div x-show="shortened" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform -translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0"
+         class="mt-4 p-4 bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded-lg flex items-center justify-between">
+        <div class="flex items-center gap-3 overflow-hidden">
+            <span class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
+            <a :href="shortened" target="_blank" class="text-green-700 dark:text-green-400 font-semibold text-lg truncate hover:underline" x-text="shortened"></a>
+        </div>
+        <button @click="copyToClipboard()" class="p-2 hover:bg-green-200 dark:hover:bg-green-800 rounded-lg transition-colors text-green-700 dark:text-green-400 flex items-center gap-2" title="Copy to Clipboard">
+            <span x-show="!copied" class="material-symbols-outlined">content_copy</span>
+            <span x-show="copied" class="material-symbols-outlined">check</span>
+            <span x-show="copied" class="text-sm font-medium">Copied!</span>
+        </button>
+    </div>
+    
+    <!-- Error Display -->
+    <div x-show="error" x-transition class="mt-4 p-4 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg text-red-700 dark:text-red-400 text-sm flex items-center gap-3">
+        <span class="material-symbols-outlined">error</span>
+        <span x-text="error"></span>
+    </div>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <livewire:user.dashboard-stats />

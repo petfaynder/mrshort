@@ -9,3 +9,4 @@ class CreateDailySpinPrize extends CreateRecord
 {
     protected static string $resource = DailySpinPrizeResource::class;
 }
+

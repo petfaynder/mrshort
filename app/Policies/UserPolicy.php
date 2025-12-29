@@ -12,8 +12,7 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        \Log::info('UserPolicy viewAny check', ['user' => $user, 'has_admin_role' => $user->hasRole('admin')]);
-        return $user->hasRole('admin'); // Admin rolüne sahip kullanıcıların listeyi görmesine izin ver
+        return $user->is_admin; // Use is_admin accessor
     }
 
     /**
@@ -21,7 +20,7 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        return $user->is_admin; // Varsayımsal olarak admin kullanıcıların raporları görmesine izin ver
+        return $user->is_admin;
     }
 
     /**
@@ -29,7 +28,7 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -37,7 +36,7 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**
@@ -45,7 +44,7 @@ class UserPolicy
      */
     public function delete(User $user, User $model): bool
     {
-        return false;
+        return $user->is_admin;
     }
 
     /**

@@ -16,7 +16,7 @@ class DailySpinPrizeResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-gift';
 
-    protected static ?string $navigationGroup = 'Gamification';
+    protected static ?string $navigationGroup = 'Features';
 
     protected static ?string $navigationLabel = 'Daily Spin';
 
@@ -154,3 +154,5 @@ class DailySpinPrizeResource extends Resource
         ];
     }
 }
+
+

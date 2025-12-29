@@ -10,3 +10,4 @@ class CreateAdminLinkClickReport extends CreateRecord
 {
     protected static string $resource = AdminLinkClickReportResource::class;
 }
+

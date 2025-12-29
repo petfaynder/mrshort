@@ -3,13 +3,25 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>MrShort - Monetize Your Links | Highest CPM Rates</title>
-    <meta name="description" content="Turn your links into revenue with MrShort. Get the highest CPM rates in the industry, instant payouts, and powerful analytics."/>
+    
+    {{-- SEO Meta Tags from Site Settings --}}
+    <title>{{ setting('seo_meta_title', setting('site_name', 'MrShort') . ' - Monetize Your Links | Highest CPM Rates') }}</title>
+    <meta name="description" content="{{ setting('seo_description', 'Turn your links into revenue. Get the highest CPM rates in the industry, instant payouts, and powerful analytics.') }}"/>
+    <meta name="keywords" content="{{ setting('seo_keywords', 'link shortener, url shortener, earn money, monetize links') }}"/>
+    
+    {{-- Favicon --}}
+    @if(setting('favicon_url'))
+    <link rel="icon" href="{{ setting('favicon_url') }}" type="image/x-icon">
+    @endif
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
+    
+    {{-- Custom Front Head Code from Settings --}}
+    {!! setting('front_head_code', '') !!}
 </head>
 <body class="bg-[#050505] text-white font-display overflow-x-hidden">
     @include('partials.header')
@@ -832,5 +844,11 @@
             background-image: linear-gradient(to right, #00BFFF, #FF00FF);
         }
     </style>
+    
+{{-- Cookie Consent Banner --}}
+@livewire('cookie-consent')
+
+{{-- Custom Footer Code from Settings --}}
+{!! setting('footer_code', '') !!}
 </body>
 </html>

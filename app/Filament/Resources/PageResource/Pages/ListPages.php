@@ -17,3 +17,4 @@ class ListPages extends ListRecords
         ];
     }
 }
+

@@ -8,24 +8,10 @@
             </div>
             <div class="flex flex-wrap justify-between gap-3"><p class="text-4xl font-black leading-tight tracking-[-0.033em] text-heading-light dark:text-heading-dark min-w-72">Referrals</p></div>
             <h2 class="text-[22px] font-bold leading-tight tracking-[-0.015em] pt-5 text-heading-light dark:text-heading-dark">Referral System Overview</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 border border-border-light dark:border-border-dark">
-                    <p class="text-base font-medium leading-normal text-text-light dark:text-text-dark">Total Referrals</p>
-                    <p class="tracking-light text-2xl font-bold leading-tight text-heading-light dark:text-heading-dark">15</p>
-                </div>
-                <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 border border-border-light dark:border-border-dark">
-                    <p class="text-base font-medium leading-normal text-text-light dark:text-text-dark">Active Referrals</p>
-                    <p class="tracking-light text-2xl font-bold leading-tight text-heading-light dark:text-heading-dark">12</p>
-                </div>
-                <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-lg p-6 border border-border-light dark:border-border-dark">
-                    <p class="text-base font-medium leading-normal text-text-light dark:text-text-dark">Total Commission Earned</p>
-                    <p class="tracking-light text-2xl font-bold leading-tight text-heading-light dark:text-heading-dark">$250.75</p>
-                </div>
-                <div class="flex min-w-[158px flex-1 flex-col gap-2 rounded-lg p-6 border border-border-light dark:border-border-dark">
-                    <p class="text-base font-medium leading-normal text-text-light dark:text-text-dark">Commission Rate</p>
-                    <p class="tracking-light text-2xl font-bold leading-tight text-heading-light dark:text-heading-dark">10%</p>
-                </div>
-            </div>
+            
+            {{-- Dynamic Referral Stats from Backend --}}
+            <livewire:user.referral-stats />
+            
             <div class="flex flex-col gap-4 pt-8">
                 <h3 class="text-lg font-bold leading-tight tracking-[-0.015em] text-heading-light dark:text-heading-dark">Invite New Users</h3>
                 <div class="flex flex-col sm:flex-row items-center gap-2 p-4 rounded-lg border border-border-light dark:border-border-dark" x-data="{ 
@@ -41,16 +27,19 @@
                         <span>Copy Link</span>
                     </button>
                 </div>
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-4" x-data="{ 
+                    referralLink: '{{ route('register', ['referral_code' => auth()->user()->referral_code]) }}',
+                    shareText: 'Join MrShort and start earning money from your links! Use my referral link:'
+                }">
                     <p class="text-sm font-medium text-text-light dark:text-text-dark">Share via:</p>
                     <div class="flex gap-2">
-                        <a class="flex items-center justify-center size-9 rounded-full bg-background-light dark:bg-[#233648] hover:bg-gray-200 dark:hover:bg-[#324d67] transition-colors" data-alt="Share on Twitter" href="#">
+                        <a :href="'https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText + ' ' + referralLink)" target="_blank" class="flex items-center justify-center size-9 rounded-full bg-background-light dark:bg-[#233648] hover:bg-gray-200 dark:hover:bg-[#324d67] transition-colors" title="Share on Twitter">
                             <svg aria-hidden="true" class="size-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
                         </a>
-                        <a class="flex items-center justify-center size-9 rounded-full bg-background-light dark:bg-[#233648] hover:bg-gray-200 dark:hover:bg-[#324d67] transition-colors" data-alt="Share on Facebook" href="#">
+                        <a :href="'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(referralLink)" target="_blank" class="flex items-center justify-center size-9 rounded-full bg-background-light dark:bg-[#233648] hover:bg-gray-200 dark:hover:bg-[#324d67] transition-colors" title="Share on Facebook">
                             <svg aria-hidden="true" class="size-5" fill="currentColor" viewBox="0 0 24 24"><path clip-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" fill-rule="evenodd"></path></svg>
                         </a>
-                        <a class="flex items-center justify-center size-9 rounded-full bg-background-light dark:bg-[#233648] hover:bg-gray-200 dark:hover:bg-[#324d67] transition-colors" data-alt="Share via Email" href="#">
+                        <a :href="'mailto:?subject=' + encodeURIComponent('Join MrShort - Link Shortening Service') + '&body=' + encodeURIComponent(shareText + '\n\n' + referralLink)" class="flex items-center justify-center size-9 rounded-full bg-background-light dark:bg-[#233648] hover:bg-gray-200 dark:hover:bg-[#324d67] transition-colors" title="Share via Email">
                             <span class="material-symbols-outlined text-xl">mail</span>
                         </a>
                     </div>

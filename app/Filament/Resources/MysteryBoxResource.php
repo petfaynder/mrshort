@@ -16,7 +16,7 @@ class MysteryBoxResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-gift';
 
-    protected static ?string $navigationGroup = 'Gamification';
+    protected static ?string $navigationGroup = 'Features';
 
     protected static ?string $navigationLabel = 'Mystery Boxes';
 
@@ -151,3 +151,5 @@ class MysteryBoxResource extends Resource
         ];
     }
 }
+
+

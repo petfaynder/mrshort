@@ -99,7 +99,7 @@ class ReportsManager extends Component
         // Ülkelere göre tıklama dağılımı
         $clicksByCountry = $clicks->groupBy('country_id')->map(function ($group, $countryId) {
             $countryModel = \App\Models\Country::find($countryId); // Country modelini doğrudan ID ile çek
-            $countryName = $countryModel ? $countryModel->iso_code : 'Bilinmiyor';
+            $countryName = $countryModel ? $countryModel->iso_code : 'Unknown';
             return [
                 'country' => $countryModel,
                 'total' => $group->count(),
@@ -107,7 +107,7 @@ class ReportsManager extends Component
         })->sortByDesc('total');
 
         $this->clicksByCountryChartData = [
-            'labels' => $clicksByCountry->pluck('country.iso_code')->map(fn($iso) => $iso ?? 'Bilinmiyor')->toArray(),
+            'labels' => $clicksByCountry->pluck('country.iso_code')->map(fn($iso) => $iso ?? 'Unknown')->toArray(),
             'data' => $clicksByCountry->pluck('total')->toArray(),
         ];
 
@@ -262,23 +262,23 @@ class ReportsManager extends Component
         switch ($reportType) {
             case 'countries':
             case 'countries_table':
-                return ['Ülke', 'Tıklama Sayısı'];
+                return ['Country', 'Click Count'];
             case 'time_trends':
-                return ['Tarih', 'Tıklama Sayısı'];
+                return ['Date', 'Click Count'];
             case 'device_types':
-                return ['Cihaz Türü', 'Tıklama Sayısı'];
+                return ['Device Type', 'Click Count'];
             case 'operating_systems':
-                return ['İşletim Sistemi', 'Tıklama Sayısı'];
+                return ['Operating System', 'Click Count'];
             case 'browsers':
-                return ['Tarayıcı', 'Tıklama Sayısı'];
+                return ['Browser', 'Click Count'];
             case 'links':
-                return ['Orijinal Link', 'Kısaltılmış Link', 'Tekil Tıklama', 'Toplam Tıklama', 'Kazanç ($)'];
+                return ['Original Link', 'Shortened Link', 'Unique Click', 'Total Click', 'Earnings ($)'];
             case 'referrers':
-                return ['Yönlendiren Domain', 'Tıklama Sayısı'];
+                return ['Referrer Domain', 'Click Count'];
             case 'bot_status':
-                return ['Bot Durumu', 'Tıklama Sayısı'];
+                return ['Bot Status', 'Click Count'];
             case 'recent_click_count':
-                return ['Son 1 Dakikadaki Tıklama Sayısı', 'Tıklama Sayısı'];
+                return ['Click Count in Last 1 Minute', 'Click Count'];
             default:
                 return [];
         }
@@ -301,17 +301,17 @@ class ReportsManager extends Component
                 break;
             case 'device_types':
                 foreach ($this->clicksByDeviceType as $item) {
-                    $data[] = [$item['device_type'] ?? 'Bilinmiyor', $item['total']];
+                    $data[] = [$item['device_type'] ?? 'Unknown', $item['total']];
                 }
                 break;
             case 'operating_systems':
                 foreach ($this->clicksByOs as $item) {
-                    $data[] = [$item['os'] ?? 'Bilinmiyor', $item['total']];
+                    $data[] = [$item['os'] ?? 'Unknown', $item['total']];
                 }
                 break;
             case 'browsers':
                 foreach ($this->clicksByBrowser as $item) {
-                    $data[] = [$item['browser'] ?? 'Bilinmiyor', $item['total']];
+                    $data[] = [$item['browser'] ?? 'Unknown', $item['total']];
                 }
                 break;
             case 'links':
@@ -327,12 +327,12 @@ class ReportsManager extends Component
                 break;
             case 'referrers':
                 foreach ($this->clicksByReferrer as $item) {
-                    $data[] = [$item['referrer'] ?? 'Doğrudan / Bilinmiyor', $item['total']];
+                    $data[] = [$item['referrer'] ?? 'Direct / Unknown', $item['total']];
                 }
                 break;
             case 'bot_status':
                 foreach ($this->clicksByBotStatus as $item) {
-                    $data[] = [$item['is_bot'] ? 'Bot' : 'Organik', $item['total']];
+                    $data[] = [$item['is_bot'] ? 'Bot' : 'Organic', $item['total']];
                 }
                 break;
             case 'recent_click_count':

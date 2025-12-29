@@ -69,20 +69,20 @@
                     @if($pointsEarned > 0)
                         <div class="bg-purple-600/20 border border-purple-500/30 rounded-xl px-4 py-2">
                             <div class="text-2xl font-bold text-purple-400">+{{ number_format($pointsEarned) }}</div>
-                            <div class="text-xs text-purple-300">Puan</div>
+                            <div class="text-xs text-purple-300">Points</div>
                         </div>
                     @endif
                     @if($badgeEarned)
                         <div class="bg-amber-600/20 border border-amber-500/30 rounded-xl px-4 py-2">
                             <div class="text-2xl">{{ $badgeEarned['icon'] ?? '🏅' }}</div>
-                            <div class="text-xs text-amber-300">{{ $badgeEarned['name'] ?? 'Rozet' }}</div>
+                            <div class="text-xs text-amber-300">{{ $badgeEarned['name'] ?? 'Badge' }}</div>
                         </div>
                     @endif
                 </div>
 
                 <!-- Share buttons -->
                 <div class="mb-6">
-                    <p class="text-sm text-gray-400 mb-3">Başarını paylaş</p>
+                    <p class="text-sm text-gray-400 mb-3">Share your achievement</p>
                     <div class="flex justify-center gap-3">
                         <button 
                             wire:click="shareOnTwitter"
@@ -97,7 +97,7 @@
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                         </button>
                         <button 
-                            onclick="navigator.share ? navigator.share({title: '{{ $milestoneName }}', url: '{{ config('app.url') }}'}) : alert('Paylaşım desteklenmiyor')"
+                            onclick="navigator.share ? navigator.share({title: '{{ $milestoneName }}', url: '{{ config('app.url') }}'}) : alert('Sharing not supported')"
                             class="p-3 bg-green-500/20 hover:bg-green-500/40 text-green-400 rounded-xl transition"
                         >
                             <span class="material-symbols-outlined">share</span>
@@ -110,7 +110,7 @@
                     wire:click="close"
                     class="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold rounded-xl hover:from-amber-600 hover:to-orange-700 transition"
                 >
-                    Harika! 🎉
+                    Awesome! 🎉
                 </button>
             </div>
         </div>

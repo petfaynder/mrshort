@@ -18,7 +18,7 @@ class ReportsResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
 
-    protected static ?string $navigationGroup = 'Raporlar';
+    protected static ?string $navigationGroup = 'User Management';
     
     // Bu resource boş olduğu için navigasyondan gizliyoruz
     protected static bool $shouldRegisterNavigation = false;
@@ -64,3 +64,4 @@ class ReportsResource extends Resource
         ];
     }
 }
+

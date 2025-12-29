@@ -16,3 +16,4 @@ class EditVipLevel extends EditRecord
         ];
     }
 }
+

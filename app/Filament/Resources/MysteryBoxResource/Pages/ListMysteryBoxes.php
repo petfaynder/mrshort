@@ -16,3 +16,4 @@ class ListMysteryBoxes extends ListRecords
         ];
     }
 }
+

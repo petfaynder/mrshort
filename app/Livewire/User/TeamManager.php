@@ -66,7 +66,7 @@ class TeamManager extends Component
         
         // Check if user has enough points
         if ($user->gamification_points < $creationCost) {
-            $this->addError('newTeamName', 'Takım kurmak için en az ' . $creationCost . ' puan gerekli.');
+            $this->addError('newTeamName', 'At least ' . $creationCost . ' points are required to create a team.');
             return;
         }
         
@@ -203,7 +203,7 @@ class TeamManager extends Component
         if (!$this->myTeam || empty(trim($this->newMessage))) return;
         
         if (strlen($this->newMessage) > 200) {
-            $this->addError('newMessage', 'Mesaj en fazla 200 karakter olabilir');
+            $this->addError('newMessage', 'Message can be at most 200 characters');
             return;
         }
 

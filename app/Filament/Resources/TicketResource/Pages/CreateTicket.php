@@ -10,3 +10,4 @@ class CreateTicket extends CreateRecord
 {
     protected static string $resource = TicketResource::class;
 }
+

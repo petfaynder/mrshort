@@ -10,3 +10,4 @@ class CreateGamificationGoal extends CreateRecord
 {
     protected static string $resource = GamificationGoalResource::class;
 }
+

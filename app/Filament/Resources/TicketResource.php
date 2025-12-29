@@ -20,13 +20,13 @@ class TicketResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-ticket';
     
-    protected static ?string $navigationGroup = 'Destek';
+    protected static ?string $navigationGroup = 'Support';
     
-    protected static ?string $navigationLabel = 'Destek Talepleri';
+    protected static ?string $navigationLabel = 'Tickets';
     
-    protected static ?string $modelLabel = 'Destek Talebi';
+    protected static ?string $modelLabel = 'Ticket';
     
-    protected static ?string $pluralModelLabel = 'Destek Talepleri';
+    protected static ?string $pluralModelLabel = 'Tickets';
     
     protected static ?int $navigationSort = 1;
     
@@ -55,6 +55,7 @@ class TicketResource extends Resource
                             ->disabled(), // Kullanıcı değiştirilemez
                         Forms\Components\TextInput::make('subject')
                             ->required()
+                            ->label('Subject')
                             ->maxLength(191)
                             ->disabled(), // Konu değiştirilemez
                         Forms\Components\Select::make('category')
@@ -77,8 +78,11 @@ class TicketResource extends Resource
                     ]),
                 Forms\Components\Textarea::make('message')
                     ->required()
+                    ->label('Message')
                     ->columnSpanFull()
-                    ->disabled(), // Mesaj değiştirilemez
+                    ->disabled()
+                    ->hidden(), // Mesaj artık conversation view içinde gösteriliyor, burada gizle
+
                 Forms\Components\Select::make('status')
                     ->options([
                         'open' => 'Open',
@@ -88,60 +92,28 @@ class TicketResource extends Resource
                     ])
                     ->label('Status')
                     ->required(),
-                Forms\Components\Section::make('Conversation')
-                    ->schema([
-                        Forms\Components\Placeholder::make('initial_message')
-                            ->label('Initial Message')
-                            ->content(function (Ticket $record) {
-                                return new \Illuminate\Support\HtmlString(view('filament.components.ticket-message', [
-                                    'message' => $record->message,
-                                    'user' => $record->user,
-                                    'timestamp' => $record->created_at,
-                                    'is_admin' => false, // İlk mesaj kullanıcıdan gelir
-                                ])->render());
-                            })
-                            ->columnSpanFull(),
 
-                        Forms\Components\Repeater::make('replies')
-                            ->relationship('replies')
-                            ->schema([
-                                Forms\Components\Placeholder::make('reply_message')
-                                    ->label(fn ($state, $record) => $record->user->is_admin ? 'Admin' : $record->user->name)
-                                    ->content(function ($state, $record) {
-                                         return new \Illuminate\Support\HtmlString(view('filament.components.ticket-message', [
-                                            'message' => $record->message,
-                                            'user' => $record->user,
-                                            'timestamp' => $record->created_at,
-                                            'is_admin' => $record->user->is_admin,
-                                        ])->render());
-                                    })
-                                    ->columnSpanFull(),
-                            ])
-                            ->label('Replies')
-                            ->hiddenLabel()
-                            ->collapsible()
-                            ->itemLabel(fn (array $state): ?string => $state['user']['name'] ?? null)
-                            ->defaultItems(0)
-                            ->disableItemCreation()
-                            ->disableItemDeletion()
-                            ->disableItemMovement()
+                Forms\Components\Section::make('Conversation')
+                    ->description('View message history and send replies')
+                    ->schema([
+                        Forms\Components\View::make('filament.components.ticket-conversation')
+                            ->viewData(fn (Ticket $record) => ['record' => $record->load('replies.user')])
                             ->columnSpanFull(),
 
                         Forms\Components\Textarea::make('admin_reply')
-                            ->label('Reply')
+                            ->label('Your Reply')
                             ->placeholder('Write your reply here...')
-                            ->hidden(fn (Ticket $record) => $record->status === 'closed' || $record->status === 'resolved') // Kapalı veya çözülmüşse gizle
+                            ->rows(4)
+                            ->hidden(fn (Ticket $record) => $record->status === 'closed' || $record->status === 'resolved')
                             ->columnSpanFull(),
 
                         Forms\Components\Actions::make([
                             \Filament\Forms\Components\Actions\Action::make('send_reply')
                                 ->label('Send Reply')
+                                ->icon('heroicon-o-paper-airplane')
+                                ->color('success')
                                 ->action(function (Ticket $record, array $data, \Filament\Resources\Pages\EditRecord $livewire) {
-                                    // Form verilerine $livewire->data ile eriş
                                     $adminReply = $livewire->data['admin_reply'] ?? null;
-
-                                    \Illuminate\Support\Facades\Log::info('Send Reply Action Data:', $data); // Loglama eklendi
-                                    \Illuminate\Support\Facades\Log::info('Admin Reply Value:', [$adminReply]); // admin_reply değerini logla
 
                                     if ($adminReply) {
                                         $record->replies()->create([
@@ -149,20 +121,16 @@ class TicketResource extends Resource
                                             'message' => $adminReply,
                                         ]);
 
-                                        // Durumu "in_progress" olarak güncelle (isteğe bağlı)
                                         if ($record->status === 'open') {
                                             $record->status = 'in_progress';
                                             $record->save();
                                         }
 
-                                        // Form alanını temizle
                                         $livewire->data['admin_reply'] = null;
-
-                                        // Ticket kaydını yeniden yükle
                                         $livewire->record = $record->load('replies.user');
 
                                         \Filament\Notifications\Notification::make()
-                                            ->title('Reply sent')
+                                            ->title('Reply sent successfully!')
                                             ->success()
                                             ->send();
                                     } else {
@@ -172,9 +140,10 @@ class TicketResource extends Resource
                                             ->send();
                                     }
                                 })
-                                ->hidden(fn (Ticket $record) => $record->status === 'closed' || $record->status === 'resolved'), // Kapalı veya çözülmüşse gizle
+                                ->hidden(fn (Ticket $record) => $record->status === 'closed' || $record->status === 'resolved'),
                         ]),
                     ])
+                    ->collapsible()
                     ->columnSpanFull(),
             ]);
    }
@@ -188,22 +157,63 @@ class TicketResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('subject')
+                    ->label('Subject')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'open' => 'Open',
+                        'in_progress' => 'In Progress',
+                        'closed' => 'Closed',
+                        'resolved' => 'Resolved',
+                        default => $state,
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'open' => 'danger',
+                        'in_progress' => 'warning',
+                        'closed' => 'gray',
+                        'resolved' => 'success',
+                        default => 'gray',
+                    })
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('category')
+                    ->label('Category')
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'payment' => 'Payment',
+                        'technical' => 'Technical',
+                        'account' => 'Account',
+                        'general' => 'General',
+                        default => $state,
+                    })
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('priority')
+                    ->label('Priority')
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'low' => 'Low',
+                        'medium' => 'Medium',
+                        'high' => 'High',
+                        default => $state,
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'high' => 'danger',
+                        'medium' => 'warning',
+                        'low' => 'success',
+                        default => 'gray',
+                    })
+                    ->badge()
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label('Created At')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Updated At')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -234,7 +244,9 @@ class TicketResource extends Resource
                     ->label('Priority'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->label('Reply')
+                    ->icon('heroicon-o-chat-bubble-left-right'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -259,3 +271,5 @@ class TicketResource extends Resource
         ];
     }
 }
+
+

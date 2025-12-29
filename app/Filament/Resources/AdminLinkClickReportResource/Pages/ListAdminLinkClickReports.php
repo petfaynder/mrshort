@@ -17,3 +17,4 @@ class ListAdminLinkClickReports extends ListRecords
         ];
     }
 }
+

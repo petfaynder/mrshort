@@ -3,7 +3,7 @@
     <button 
         wire:click="openModal"
         class="inline-flex items-center gap-1 px-2 py-1 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded transition"
-        title="Paylaş ve puan kazan!"
+        title="Share and earn points!"
     >
         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
             <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/>
@@ -19,7 +19,7 @@
         >
             <div class="bg-gray-900 rounded-2xl p-6 max-w-sm w-full mx-4 border border-purple-500/30 shadow-2xl">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-white">Paylaş & Kazan!</h3>
+                    <h3 class="text-lg font-bold text-white">Share & Earn!</h3>
                     <button wire:click="closeModal" class="text-gray-400 hover:text-white">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -27,7 +27,7 @@
                     </button>
                 </div>
 
-                <p class="text-gray-400 text-sm mb-4">Her paylaşım için puan kazan!</p>
+                <p class="text-gray-400 text-sm mb-4">Earn points for every share!</p>
 
                 @if($shareResult)
                     <div class="mb-4 p-3 bg-green-500/20 border border-green-500/30 rounded-lg text-green-400 text-center">
@@ -117,7 +117,7 @@
                         x-data
                         @click="
                             navigator.clipboard.writeText('{{ $link->shortLink() }}');
-                            $dispatch('notify', { type: 'success', message: 'Link kopyalandı!' });
+                            $dispatch('notify', { type: 'success', message: 'Link copied!' });
                         "
                         class="flex flex-col items-center gap-2 p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition"
                     >
@@ -126,12 +126,12 @@
                                 <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
                             </svg>
                         </div>
-                        <span class="text-xs text-gray-300">Kopyala</span>
+                        <span class="text-xs text-gray-300">Copy</span>
                     </button>
                 </div>
 
                 <p class="text-xs text-gray-500 text-center mt-4">
-                    Her platform için günlük 1 paylaşım puanı!
+                    1 share point per platform daily!
                 </p>
             </div>
         </div>

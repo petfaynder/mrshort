@@ -39,7 +39,8 @@
                         <p class="text-sm font-normal leading-normal">Withdrawal Limits & Fees</p>
                     </div>
                     <div class="text-sm text-gray-700 dark:text-gray-300 space-y-1.5">
-                        <p>Min. Withdrawal: <span class="font-medium text-gray-900 dark:text-white">$5.00</span></p>
+                        <p>Min. Withdrawal: <span class="font-medium text-gray-900 dark:text-white">${{ number_format(setting('min_withdrawal_amount', 5), 2) }}</span></p>
+                        <p>Processing Time: <span class="font-medium text-gray-900 dark:text-white">{{ setting('withdraw_business_days', 4) }} business days</span></p>
                         <p>PayPal Fee: <span class="font-medium text-gray-900 dark:text-white">2%</span></p>
                         <p>Bank Transfer Fee: <span class="font-medium text-gray-900 dark:text-white">$1.00</span></p>
                     </div>
@@ -52,10 +53,10 @@
                         <p class="text-sm font-normal leading-normal">Recurring Withdrawals</p>
                     </div>
                     <div class="flex items-center gap-2 mt-2">
-                        <span class="inline-flex items-center rounded-full bg-green-100 dark:bg-green-900/50 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:text-green-300">Active</span>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Next: 1st of month</p>
+                        <span class="inline-flex items-center rounded-full bg-amber-100 dark:bg-amber-900/50 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-300">Coming Soon</span>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Automatic monthly withdrawal</p>
                     </div>
-                    <a class="text-sm text-primary hover:underline mt-1" href="#">Manage Settings</a>
+                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">This feature will be available soon.</p>
                 </div>
             </div>
         </div>

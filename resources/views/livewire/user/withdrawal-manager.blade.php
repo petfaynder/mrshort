@@ -1,53 +1,53 @@
 <div>
-    <h3 class="text-xl font-semibold text-gray-700 mb-4">Para Çekme</h3>
+    <h3 class="text-xl font-semibold text-gray-700 mb-4">Withdrawals</h3>
 
-    {{-- Para Çekme Talebi Oluştur Formu --}}
+    {{-- Create Withdrawal Request Form --}}
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h4 class="text-lg font-semibold text-gray-700 mb-4">Yeni Para Çekme Talebi Oluştur</h4>
+        <h4 class="text-lg font-semibold text-gray-700 mb-4">Create New Withdrawal Request</h4>
         <form wire:submit.prevent="createWithdrawalRequest">
             <div class="mb-4">
-                <label for="amount" class="block text-gray-700 text-sm font-bold mb-2">Miktar ($):</label>
+                <label for="amount" class="block text-gray-700 text-sm font-bold mb-2">Amount ($):</label>
                 <input wire:model="amount" type="number" step="0.01" id="amount" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 @error('amount') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
             </div>
             <div class="mb-4">
-                <label for="paymentMethod" class="block text-gray-700 text-sm font-bold mb-2">Ödeme Yöntemi:</label>
+                <label for="paymentMethod" class="block text-gray-700 text-sm font-bold mb-2">Payment Method:</label>
                 <select wire:model="paymentMethod" id="paymentMethod" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    <option value="">Seçiniz</option>
+                    <option value="">Select</option>
                     <option value="paypal">PayPal</option>
-                    <option value="bank_transfer">Banka Transferi</option>
-                    {{-- Diğer ödeme yöntemleri buraya eklenebilir --}}
+                    <option value="bank_transfer">Bank Transfer</option>
+                    {{-- Other payment methods can be added here --}}
                 </select>
                 @error('paymentMethod') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
             </div>
             <div class="flex items-center justify-between">
                 <button type="submit" wire:loading.attr="disabled" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-75 disabled:cursor-not-allowed flex items-center gap-2">
-                    <span wire:loading.remove wire:target="createWithdrawalRequest">Talep Oluştur</span>
+                    <span wire:loading.remove wire:target="createWithdrawalRequest">Submit Request</span>
                     <span wire:loading wire:target="createWithdrawalRequest" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
-                    <span wire:loading wire:target="createWithdrawalRequest">Oluşturuluyor...</span>
+                    <span wire:loading wire:target="createWithdrawalRequest">Creating...</span>
                 </button>
             </div>
         </form>
     </div>
 
-    {{-- Mevcut Talepler Listesi --}}
+    {{-- Current Requests List --}}
     <div class="bg-white p-6 rounded-lg shadow-md">
-        <h4 class="text-lg font-semibold text-gray-700 mb-4">Mevcut Para Çekme Talepleriniz</h4>
+        <h4 class="text-lg font-semibold text-gray-700 mb-4">Your Withdrawal Requests</h4>
         @if ($withdrawalRequests->count() > 0)
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr>
                         <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Miktar ($)
+                            Amount ($)
                         </th>
                         <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Ödeme Yöntemi
+                            Payment Method
                         </th>
                         <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Durum
+                            Status
                         </th>
                         <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Tarih
+                            Date
                         </th>
                     </tr>
                 </thead>
@@ -71,11 +71,11 @@
                 </tbody>
             </table>
         @else
-            <p class="text-gray-600">Henüz para çekme talebiniz bulunmuyor.</p>
+            <p class="text-gray-600">You have no withdrawal requests yet.</p>
         @endif
     </div>
 
-    {{-- Genel Flash Mesajları --}}
+    {{-- General Flash Messages --}}
     @if (session()->has('message'))
         <div class="mt-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4" role="alert">
             <p>{{ session('message') }}</p>

@@ -30,8 +30,34 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Check if registration is closed
+        if (setting('close_registration', false)) {
+            return redirect()->route('login')
+                ->with('error', 'Registration is currently closed.');
+        }
+        
+        // Verify captcha if enabled for register form
+        if (setting('captcha_enabled', false) && setting('captcha_on_register', true)) {
+            $captchaService = app(\App\Services\CaptchaService::class);
+            $tokenField = $captchaService->getTokenFieldName();
+            $token = $request->input($tokenField);
+            
+            if (!$captchaService->verify($token)) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['captcha' => 'Captcha verification failed. Please try again.']);
+            }
+        }
+        
+        // Get reserved usernames from settings
+        $reservedUsernames = array_filter(array_map('trim', explode(',', setting('reserved_usernames', ''))));
+        
         $request->validate([
-            'first_name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255', function ($attribute, $value, $fail) use ($reservedUsernames) {
+                if (in_array(strtolower($value), array_map('strtolower', $reservedUsernames))) {
+                    $fail('This name is not allowed.');
+                }
+            }],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::min(8)],
@@ -52,13 +78,17 @@ class RegisteredUserController extends Controller
         while (User::where('referral_code', $newUserReferralCode)->exists()) {
             $newUserReferralCode = Str::random(8);
         }
+        
+        // Get signup bonus from settings
+        $signupBonus = (float) setting('signup_bonus', 0);
 
         $user = User::create([
             'name' => $request->first_name . ' ' . $request->last_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'referred_by_user_id' => $referrer ? $referrer->id : null,
-            'referral_code' => $newUserReferralCode, // Use the newly generated code for the new user
+            'referral_code' => $newUserReferralCode,
+            'earnings' => $signupBonus, // Signup bonus from settings
         ]);
 
         event(new Registered($user));

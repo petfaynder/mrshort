@@ -17,3 +17,4 @@ class EditLinkClick extends EditRecord
         ];
     }
 }
+

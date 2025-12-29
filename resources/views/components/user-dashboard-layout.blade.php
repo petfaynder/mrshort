@@ -24,7 +24,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Linkly') }} - Dashboard</title>
+    {{-- SEO Meta Tags from Site Settings --}}
+    <title>{{ setting('site_name', config('app.name', 'Linkly')) }} - Dashboard</title>
+    <meta name="description" content="{{ setting('seo_description', '') }}">
+    
+    {{-- Favicon --}}
+    @if(setting('favicon_url'))
+    <link rel="icon" href="{{ setting('favicon_url') }}" type="image/x-icon">
+    @endif
 
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
@@ -34,11 +41,40 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     @livewireStyles
+    <style>[x-cloak] { display: none !important; }</style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    
+    {{-- Custom Member Head Code from Settings --}}
+    {!! setting('member_head_code', '') !!}
 </head>
 <body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark overflow-hidden">
+
+{{-- Impersonation Banner (Admin logged in as another user) --}}
+@if(session()->has('impersonating_from_admin_id'))
+<div class="bg-amber-500 text-white py-2 px-4 text-center fixed top-0 left-0 right-0 z-50 shadow-lg">
+    <div class="flex items-center justify-center gap-4">
+        <span class="material-symbols-outlined">visibility</span>
+        <span class="font-medium">Logged in as: <strong>{{ Auth::user()->name }} ({{ Auth::user()->email }})</strong></span>
+        <a href="{{ route('admin.stop-impersonation') }}" class="bg-white text-amber-600 px-4 py-1 rounded-md font-semibold hover:bg-amber-100 transition-colors">
+            ← Return to Admin Panel
+        </a>
+    </div>
+</div>
+<style>
+    /* Add padding to body when impersonation banner is active */
+    body.has-impersonation-banner .flex.h-screen { margin-top: 44px; height: calc(100vh - 44px); }
+</style>
+<script>document.body.classList.add('has-impersonation-banner');</script>
+@endif
+
+{{-- Admin Message Modal --}}
+<livewire:user.admin-message-modal />
+
+{{-- Deactivated Account Modal (Non-closeable) --}}
+<livewire:user.deactivated-account-modal />
+
 <div class="flex h-screen overflow-hidden">
     <aside class="w-64 bg-card-light dark:bg-card-dark flex flex-col p-4 border-r border-border-light dark:border-border-dark overflow-y-auto">
         <div class="flex items-center gap-2 px-4 py-2 mb-8">
@@ -97,60 +133,66 @@
                         Reports
                     </a>
                 </li>
-                <li class="mb-2" data-tutorial="nav-gamification">
-                    <span class="px-4 text-xs font-semibold text-gray-500 uppercase">Gamification</span>
-                    <ul class="mt-2 space-y-1">
+                <li class="mb-2" data-tutorial="nav-gamification" x-data="{ open: {{ request()->routeIs('user.daily-spin') || request()->routeIs('user.mystery-boxes') || request()->routeIs('user.competition') || request()->routeIs('user.battle-pass') || request()->routeIs('user.teams') || request()->routeIs('user.vip') || request()->routeIs('user.achievements') || request()->routeIs('user.leaderboard') || request()->routeIs('user.inventory') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="flex items-center justify-between w-full px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark {{ request()->routeIs('user.daily-spin') || request()->routeIs('user.mystery-boxes') || request()->routeIs('user.competition') || request()->routeIs('user.battle-pass') || request()->routeIs('user.teams') || request()->routeIs('user.vip') || request()->routeIs('user.achievements') || request()->routeIs('user.leaderboard') || request()->routeIs('user.inventory') ? 'bg-blue-50 dark:bg-blue-900/30' : '' }}">
+                        <span class="flex items-center gap-3">
+                            <span class="material-symbols-outlined">emoji_events</span>
+                            Gamification
+                        </span>
+                        <span class="material-symbols-outlined transition-transform duration-200" :class="{ 'rotate-180': open }">expand_more</span>
+                    </button>
+                    <ul x-cloak x-show="open" x-collapse class="mt-2 ml-4 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-2">
                         <li>
-                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.daily-spin') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.daily-spin') }}">
-                                <span class="material-symbols-outlined">casino</span>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm {{ request()->routeIs('user.daily-spin') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.daily-spin') }}">
+                                <span class="material-symbols-outlined text-lg">casino</span>
                                 Daily Spin
                             </a>
                         </li>
                         <li>
-                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.mystery-boxes') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.mystery-boxes') }}">
-                                <span class="material-symbols-outlined">redeem</span>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm {{ request()->routeIs('user.mystery-boxes') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.mystery-boxes') }}">
+                                <span class="material-symbols-outlined text-lg">redeem</span>
                                 Mystery Boxes
                             </a>
                         </li>
                         <li>
-                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.competition') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.competition') }}">
-                                <span class="material-symbols-outlined">trophy</span>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm {{ request()->routeIs('user.competition') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.competition') }}">
+                                <span class="material-symbols-outlined text-lg">trophy</span>
                                 Competition
                             </a>
                         </li>
                         <li>
-                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.battle-pass') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.battle-pass') }}">
-                                <span class="material-symbols-outlined">military_tech</span>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm {{ request()->routeIs('user.battle-pass') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.battle-pass') }}">
+                                <span class="material-symbols-outlined text-lg">military_tech</span>
                                 Battle Pass
                             </a>
                         </li>
                         <li>
-                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.teams') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.teams') }}">
-                                <span class="material-symbols-outlined">groups</span>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm {{ request()->routeIs('user.teams') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.teams') }}">
+                                <span class="material-symbols-outlined text-lg">groups</span>
                                 Teams
                             </a>
                         </li>
                         <li>
-                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.vip') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.vip') }}">
-                                <span class="material-symbols-outlined">star</span>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm {{ request()->routeIs('user.vip') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.vip') }}">
+                                <span class="material-symbols-outlined text-lg">star</span>
                                 VIP Status
                             </a>
                         </li>
                         <li>
-                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.achievements') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.achievements') }}">
-                                <span class="material-symbols-outlined">emoji_events</span>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm {{ request()->routeIs('user.achievements') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.achievements') }}">
+                                <span class="material-symbols-outlined text-lg">emoji_events</span>
                                 Achievements
                             </a>
                         </li>
                         <li>
-                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.leaderboard') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.leaderboard') }}">
-                                <span class="material-symbols-outlined">leaderboard</span>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm {{ request()->routeIs('user.leaderboard') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.leaderboard') }}">
+                                <span class="material-symbols-outlined text-lg">leaderboard</span>
                                 Leaderboard
                             </a>
                         </li>
                         <li>
-                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.inventory') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.inventory') }}">
-                                <span class="material-symbols-outlined">inventory_2</span>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm {{ request()->routeIs('user.inventory') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.inventory') }}">
+                                <span class="material-symbols-outlined text-lg">inventory_2</span>
                                 Inventory
                             </a>
                         </li>
@@ -218,5 +260,11 @@
     window.csrfToken = '{{ csrf_token() }}';
 </script>
 @endif
+
+{{-- Cookie Consent Banner --}}
+<livewire:cookie-consent />
+
+{{-- Custom Footer Code from Settings --}}
+{!! setting('footer_code', '') !!}
 </body>
 </html>

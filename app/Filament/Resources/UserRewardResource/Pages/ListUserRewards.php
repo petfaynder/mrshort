@@ -17,3 +17,4 @@ class ListUserRewards extends ListRecords
         ];
     }
 }
+

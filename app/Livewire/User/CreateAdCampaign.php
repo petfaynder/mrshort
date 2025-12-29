@@ -248,11 +248,11 @@ class CreateAdCampaign extends Component
                 'popup_url' => $this->popup_url,
                 'is_popup_campaign' => true, // Bu kampanyanın bir pop-up kampanyası olduğunu işaretle
                 'popup_title' => $this->name,
-                'popup_content' => 'Bu bir kullanıcı pop-up reklamıdır.',
+                'popup_content' => 'This is a user pop-up ad.',
             ]),
         ]);
 
-        session()->flash('success', '🎉 Reklam kampanyanız oluşturuldu ve ödemesi bakiyenizden alındı. Admin onayı bekleniyor!');
+        session()->flash('success', '🎉 Your ad campaign has been created and payment has been taken from your balance. Awaiting admin approval!');
 
         return redirect()->route('user.ads.index');
     }
@@ -263,8 +263,8 @@ class CreateAdCampaign extends Component
             'countries' => Country::whereNotNull('name')->orderBy('name')->get(),
             'ageRanges' => ['18-24', '25-34', '35-44', '45-54', '55+'],
             'deviceOptions' => [
-                'desktop' => '💻 Masaüstü',
-                'mobile' => '📱 Mobil',
+                'desktop' => '💻 Desktop',
+                'mobile' => '📱 Mobile',
                 'tablet' => '📟 Tablet',
             ],
             'osOptions' => [
@@ -273,7 +273,7 @@ class CreateAdCampaign extends Component
                 'windows' => '🪟 Windows',
                 'macos' => '💻 macOS',
                 'linux' => '🐧 Linux',
-                'other' => 'Diğer',
+                'other' => 'Other',
             ],
         ]);
     }

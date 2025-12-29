@@ -16,3 +16,4 @@ class EditDailySpinPrize extends EditRecord
         ];
     }
 }
+

@@ -20,7 +20,7 @@ class AdminLinkClickReportResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
     
-    protected static ?string $navigationGroup = 'Raporlar';
+    protected static ?string $navigationGroup = 'User Management';
     
     protected static ?string $navigationLabel = 'Tıklama Raporları';
     
@@ -125,3 +125,5 @@ class AdminLinkClickReportResource extends Resource
         ];
     }
 }
+
+

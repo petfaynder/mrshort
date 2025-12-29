@@ -10,3 +10,4 @@ class CreateUserInventory extends CreateRecord
 {
     protected static string $resource = UserInventoryResource::class;
 }
+

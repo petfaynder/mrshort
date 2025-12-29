@@ -25,7 +25,7 @@ class AnnouncementResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-megaphone';
     
-    protected static ?string $navigationGroup = 'Destek';
+    protected static ?string $navigationGroup = 'Content';
     
     protected static ?string $navigationLabel = 'Duyurular';
     
@@ -112,3 +112,5 @@ class AnnouncementResource extends Resource
         ];
     }
 }
+
+

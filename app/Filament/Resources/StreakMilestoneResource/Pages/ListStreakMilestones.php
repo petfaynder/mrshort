@@ -16,3 +16,4 @@ class ListStreakMilestones extends ListRecords
         ];
     }
 }
+

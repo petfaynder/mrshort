@@ -148,3 +148,4 @@ class ClicksRelationManager extends RelationManager
             ->paginated([10, 25, 50, 100]);
     }
 }
+

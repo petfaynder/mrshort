@@ -1,0 +1,450 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@config 'tailwind.config.js';
+
+/*
+ * MrShort Admin Panel - Ocean Blue Theme
+ */
+
+/* Background & Base Styles */
+.fi-body {
+    background: linear-gradient(to bottom right, #080f19, #0f1928, #0c1929) !important;
+    min-height: 100vh;
+}
+
+.dark .fi-body {
+    background: linear-gradient(to bottom right, #080f19, #0f1928, #0c1929) !important;
+}
+
+/* Sidebar Styles */
+.fi-sidebar {
+    background: rgba(8, 15, 25, 0.95) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+}
+
+.fi-sidebar-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: linear-gradient(to right, rgba(2, 132, 199, 0.2), rgba(6, 182, 212, 0.2)) !important;
+}
+
+.fi-logo {
+    background: linear-gradient(to right, #38bdf8, #22d3ee) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-weight: 700 !important;
+}
+
+.fi-sidebar-nav-groups {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+}
+
+.fi-sidebar-group {
+    margin-bottom: 1rem !important;
+}
+
+.fi-sidebar-group-label {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: rgba(56, 189, 248, 0.7) !important;
+    padding-left: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.fi-sidebar-item {
+    border-radius: 0.75rem !important;
+    margin-left: 0.25rem !important;
+    margin-right: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fi-sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    transform: translateX(4px);
+}
+
+.fi-sidebar-item.fi-active {
+    background: #0369a1 !important;
+    color: white !important;
+    box-shadow: 0 4px 20px rgba(14, 165, 233, 0.3);
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-label,
+.fi-sidebar-item.fi-active .fi-sidebar-item-icon {
+    color: white !important;
+}
+
+.fi-sidebar-item-label {
+    font-weight: 500 !important;
+}
+
+.fi-sidebar-item-icon {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+}
+
+/* Header/Topbar Styles */
+.fi-topbar {
+    background: rgba(8, 15, 25, 0.9) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+}
+
+.fi-dropdown-trigger {
+    border-radius: 0.75rem !important;
+    transition: all 0.3s;
+}
+
+.fi-dropdown-trigger:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Main Content Area */
+.fi-main {
+    background: transparent !important;
+}
+
+.fi-page {
+    background: transparent !important;
+}
+
+.fi-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding-bottom: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.fi-header-heading {
+    font-size: 1.875rem !important;
+    font-weight: 700 !important;
+    background: linear-gradient(to right, white, #d1d5db) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+/* Cards & Sections */
+.fi-section,
+.fi-ta-content {
+    background: rgba(20, 35, 55, 0.6) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.fi-section-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.fi-section-header-heading {
+    font-size: 1.125rem !important;
+    font-weight: 600 !important;
+    color: white !important;
+}
+
+/* Tables */
+.fi-ta-table {
+    background: transparent !important;
+}
+
+.fi-ta-header-cell {
+    background: rgba(14, 165, 233, 0.1) !important;
+    color: #bae6fd !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.05em !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.fi-ta-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    transition: background 0.2s;
+}
+
+.fi-ta-row:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.fi-ta-cell {
+    color: #d1d5db !important;
+}
+
+/* Forms & Inputs */
+.fi-input-wrapper {
+    background: rgba(20, 35, 55, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 0.75rem !important;
+    transition: all 0.3s ease;
+}
+
+.fi-input-wrapper:focus-within {
+    border-color: #0ea5e9 !important;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3), 0 0 20px rgba(14, 165, 233, 0.2) !important;
+}
+
+.fi-input {
+    background: transparent !important;
+    color: white !important;
+}
+
+.fi-input::placeholder {
+    color: #6b7280 !important;
+}
+
+.fi-select-wrapper {
+    background: rgba(20, 35, 55, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 0.75rem !important;
+}
+
+.fi-fo-field-wrp label {
+    color: #d1d5db !important;
+    font-weight: 500 !important;
+}
+
+/* Buttons */
+.fi-btn {
+    border-radius: 0.75rem !important;
+    font-weight: 600 !important;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.fi-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.fi-btn-primary {
+    background: linear-gradient(to right, #0284c7, #06b6d4) !important;
+}
+
+.fi-btn-primary:hover {
+    background: linear-gradient(to right, #0ea5e9, #22d3ee) !important;
+}
+
+.fi-btn-danger {
+    background: linear-gradient(to right, #e11d48, #ec4899) !important;
+}
+
+.fi-btn-success {
+    background: linear-gradient(to right, #059669, #14b8a6) !important;
+}
+
+.fi-btn-gray {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.fi-btn-gray:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Stat Widgets */
+.fi-wi-stats-overview {
+    gap: 1.5rem !important;
+}
+
+.fi-wi-stats-overview-stat {
+    background: rgba(20, 35, 55, 0.6) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 1rem !important;
+    padding: 1.5rem !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(14, 165, 233, 0.2);
+}
+
+.fi-wi-stats-overview-stat-value {
+    font-size: 1.875rem !important;
+    font-weight: 700 !important;
+    background: linear-gradient(to right, #38bdf8, #22d3ee) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+.fi-wi-stats-overview-stat-label {
+    color: #9ca3af !important;
+    font-weight: 500 !important;
+}
+
+.fi-wi-stats-overview-stat-icon {
+    background: linear-gradient(to bottom right, rgba(14, 165, 233, 0.3), rgba(6, 182, 212, 0.3)) !important;
+    border-radius: 0.75rem !important;
+    padding: 0.75rem !important;
+}
+
+/* Charts */
+.fi-wi-chart {
+    background: rgba(20, 35, 55, 0.6) !important;
+    backdrop-filter: blur(24px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 1rem !important;
+}
+
+/* Modals & Dialogs */
+.fi-modal-window {
+    background: rgb(15, 25, 40) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+}
+
+.fi-modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.fi-modal-heading {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: white !important;
+}
+
+/* Notifications */
+.fi-no-notification {
+    background: rgba(20, 35, 55, 0.95) !important;
+    backdrop-filter: blur(24px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Badges */
+.fi-badge {
+    border-radius: 9999px !important;
+    font-weight: 600 !important;
+}
+
+.fi-badge-primary {
+    background: rgba(14, 165, 233, 0.2) !important;
+    color: #7dd3fc !important;
+    border: 1px solid rgba(14, 165, 233, 0.3) !important;
+}
+
+.fi-badge-success {
+    background: rgba(16, 185, 129, 0.2) !important;
+    color: #6ee7b7 !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.fi-badge-warning {
+    background: rgba(245, 158, 11, 0.2) !important;
+    color: #fcd34d !important;
+    border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+.fi-badge-danger {
+    background: rgba(244, 63, 94, 0.2) !important;
+    color: #fda4af !important;
+    border: 1px solid rgba(244, 63, 94, 0.3) !important;
+}
+
+/* Tabs */
+.fi-tabs-list {
+    background: rgba(20, 35, 55, 0.6) !important;
+    border-radius: 0.75rem !important;
+    padding: 0.25rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.fi-tabs-item {
+    border-radius: 0.5rem !important;
+}
+
+.fi-tabs-item[aria-selected="true"] {
+    background: linear-gradient(to right, #0284c7, #06b6d4) !important;
+    color: white !important;
+}
+
+/* Pagination */
+.fi-pagination-item {
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 0.5rem !important;
+}
+
+.fi-pagination-item:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.fi-pagination-item-active {
+    background: linear-gradient(to right, #0284c7, #06b6d4) !important;
+    border-color: transparent !important;
+}
+
+/* Empty States */
+.fi-ta-empty-state {
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
+}
+
+.fi-ta-empty-state-icon {
+    color: rgba(14, 165, 233, 0.5) !important;
+}
+
+.fi-ta-empty-state-heading {
+    color: #9ca3af !important;
+}
+
+/* Loading States */
+.fi-loading-indicator {
+    border-color: #0ea5e9 !important;
+}
+
+/* Scrollbar Styling */
+.fi-sidebar::-webkit-scrollbar,
+.fi-main::-webkit-scrollbar {
+    width: 6px;
+}
+
+.fi-sidebar::-webkit-scrollbar-track,
+.fi-main::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fi-sidebar::-webkit-scrollbar-thumb,
+.fi-main::-webkit-scrollbar-thumb {
+    background: rgba(14, 165, 233, 0.3);
+    border-radius: 3px;
+}
+
+.fi-sidebar::-webkit-scrollbar-thumb:hover,
+.fi-main::-webkit-scrollbar-thumb:hover {
+    background: rgba(14, 165, 233, 0.5);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fi-section {
+    animation: fadeInUp 0.5s ease-out;
+}

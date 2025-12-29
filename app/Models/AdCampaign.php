@@ -15,6 +15,9 @@ class AdCampaign extends Model
         'name',
         'campaign_type',
         'is_active',
+        'approval_status',
+        'rejection_reason',
+        'approved_at',
         'targeting_rules',
         'total_impressions',
         'total_clicks',
@@ -28,7 +31,7 @@ class AdCampaign extends Model
         'available_traffic',
         'budget',
         'run_until_budget_depleted',
-        'campaign_schedule', // Add this field
+        'campaign_schedule',
     ];
 
     protected $casts = [
@@ -37,14 +40,15 @@ class AdCampaign extends Model
         'campaign_type' => \App\Enums\CampaignType::class,
         'start_date' => 'datetime',
         'end_date' => 'datetime',
+        'approved_at' => 'datetime',
         'daily_click_limit' => 'integer',
         'frequency_cap' => 'integer',
-        'frequency_cap_unit' => 'string', // Will create an Enum for this later if needed
+        'frequency_cap_unit' => 'string',
         'estimated_traffic' => 'integer',
         'available_traffic' => 'integer',
         'budget' => 'decimal:2',
         'run_until_budget_depleted' => 'boolean',
-        'campaign_schedule' => 'json', // Cast as JSON
+        'campaign_schedule' => 'json',
     ];
 
     /**

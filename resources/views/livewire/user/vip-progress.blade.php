@@ -5,12 +5,12 @@
             <div class="flex items-center gap-3">
                 <span class="text-4xl">{{ $currentLevel?->icon ?? '🥉' }}</span>
                 <div>
-                    <h3 class="text-xl font-bold text-white">VIP Seviyesi</h3>
+                    <h3 class="text-xl font-bold text-white">VIP Level</h3>
                     <p class="text-amber-300 text-lg font-semibold">{{ $currentLevel?->name ?? 'Bronze' }}</p>
                 </div>
             </div>
             <div class="text-left md:text-right">
-                <div class="text-sm text-gray-400">Bu Ay Kazanç</div>
+                <div class="text-sm text-gray-400">This Month's Earnings</div>
                 <div class="text-3xl font-bold text-amber-400">${{ number_format($currentEarnings, 2) }}</div>
             </div>
         </div>
@@ -18,7 +18,7 @@
         @if($currentLevel)
             <!-- Current Benefits -->
             <div class="bg-gray-800/50 rounded-xl p-4 mb-6">
-                <h4 class="text-sm font-semibold text-gray-400 mb-3">Aktif Avantajlar</h4>
+                <h4 class="text-sm font-semibold text-gray-400 mb-3">Active Benefits</h4>
                 <div class="flex flex-wrap gap-2">
                     @foreach($currentLevel->benefits_list as $benefit)
                         <span class="px-3 py-1.5 bg-amber-600/20 text-amber-300 text-sm rounded-full flex items-center gap-1">
@@ -34,8 +34,8 @@
         @if($nextLevel)
             <div class="mb-6">
                 <div class="flex items-center justify-between text-sm mb-2">
-                    <span class="text-gray-400">Sonraki seviye: <span class="text-white font-semibold">{{ $nextLevel->name }}</span></span>
-                    <span class="text-amber-400">${{ number_format($nextLevel->min_earnings - $currentEarnings, 2) }} kaldı</span>
+                    <span class="text-gray-400">Next level: <span class="text-white font-semibold">{{ $nextLevel->name }}</span></span>
+                    <span class="text-amber-400">${{ number_format($nextLevel->min_earnings - $currentEarnings, 2) }} remaining</span>
                 </div>
                 <div class="h-4 bg-gray-700 rounded-full overflow-hidden">
                     <div 
@@ -47,13 +47,13 @@
         @else
             <div class="bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-xl p-4 mb-6 text-center">
                 <span class="text-3xl">👑</span>
-                <p class="text-purple-300 font-semibold mt-2">Maksimum seviyeye ulaştınız!</p>
+                <p class="text-purple-300 font-semibold mt-2">You've reached the maximum level!</p>
             </div>
         @endif
 
         <!-- All VIP Levels -->
         <div>
-            <h4 class="text-sm font-semibold text-gray-400 mb-3">Tüm VIP Seviyeleri</h4>
+            <h4 class="text-sm font-semibold text-gray-400 mb-3">All VIP Levels</h4>
             <div class="grid gap-2">
                 @foreach($allLevels as $level)
                     @php
@@ -84,7 +84,7 @@
                                 <span class="text-blue-400 hidden sm:inline">+{{ $level['spin_extra'] }} Spin</span>
                             @endif
                             @if($isCurrentLevel)
-                                <span class="px-2 py-1 bg-amber-500 text-white text-xs font-bold rounded">AKTİF</span>
+                                <span class="px-2 py-1 bg-amber-500 text-white text-xs font-bold rounded">ACTIVE</span>
                             @elseif($isAchieved)
                                 <span class="material-symbols-outlined text-green-400">check_circle</span>
                             @else
@@ -100,7 +100,7 @@
         <div class="mt-6 p-4 bg-gray-800/30 rounded-xl text-sm text-gray-400">
             <p class="flex items-start gap-2">
                 <span class="material-symbols-outlined text-amber-400">info</span>
-                <span>VIP seviyeniz her ayın başında sıfırlanır. Önceki ay Diamond iseniz Silver'dan, Platinum iseniz Bronze'dan başlarsınız.</span>
+                <span>Your VIP level resets at the beginning of each month. If you were Diamond the previous month, you start at Silver; if Platinum, you start at Bronze.</span>
             </p>
         </div>
     </div>

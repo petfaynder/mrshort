@@ -94,7 +94,7 @@ class Settings extends Component
             'email' => $this->email,
         ])->save();
 
-        session()->flash('success', 'Profil bilgileri başarıyla güncellendi.');
+        session()->flash('success', 'Profile information successfully updated.');
     }
 
     public function updatePassword()
@@ -109,7 +109,7 @@ class Settings extends Component
         ]);
 
         $this->reset(['currentPassword', 'newPassword', 'newPasswordConfirmation']);
-        session()->flash('success', 'Şifre başarıyla güncellendi.');
+        session()->flash('success', 'Password successfully updated.');
     }
 
     public function updatePaymentSettings()

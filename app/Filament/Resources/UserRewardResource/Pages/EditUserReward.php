@@ -17,3 +17,4 @@ class EditUserReward extends EditRecord
         ];
     }
 }
+

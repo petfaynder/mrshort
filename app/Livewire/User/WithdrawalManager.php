@@ -39,7 +39,7 @@ class WithdrawalManager extends Component
         $user = Auth::user();
 
         if ($user->earnings < $this->amount) {
-            session()->flash('error', 'Yetersiz bakiye.');
+            session()->flash('error', 'Insufficient balance.');
             return;
         }
 
@@ -56,7 +56,7 @@ class WithdrawalManager extends Component
 
         $this->reset(['amount', 'paymentMethod', 'paymentDetails']);
         $this->loadWithdrawalRequests();
-        session()->flash('success', 'Çekim talebiniz başarıyla oluşturuldu.');
+        session()->flash('success', 'Your withdrawal request has been successfully created.');
     }
 
     public function render()

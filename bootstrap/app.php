@@ -16,6 +16,21 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             '/payment/cryptomus/callback',
         ]);
+        
+        // Register middleware alias
+        $middleware->alias([
+            'check.deactivated' => \App\Http\Middleware\CheckDeactivatedAccount::class,
+            'check.maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
+        ]);
+        
+        // Add maintenance check first (prepend), then deactivated check
+        $middleware->web(prepend: [
+            \App\Http\Middleware\CheckMaintenanceMode::class,
+        ]);
+        
+        $middleware->web(append: [
+            \App\Http\Middleware\CheckDeactivatedAccount::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

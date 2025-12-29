@@ -16,3 +16,4 @@ class EditStreakMilestone extends EditRecord
         ];
     }
 }
+

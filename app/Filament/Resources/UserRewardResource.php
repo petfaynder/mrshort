@@ -137,3 +137,5 @@ class UserRewardResource extends Resource
         ];
     }
 }
+
+

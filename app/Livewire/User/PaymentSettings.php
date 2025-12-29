@@ -43,6 +43,6 @@ class PaymentSettings extends Component
         $user->payment_account = $this->paymentAccount;
         $user->save();
 
-        session()->flash('message', 'Ödeme ayarları başarıyla kaydedildi.');
+        session()->flash('message', 'Payment settings successfully saved.');
     }
 }

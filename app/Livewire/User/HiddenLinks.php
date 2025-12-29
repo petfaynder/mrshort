@@ -4,24 +4,68 @@ namespace App\Livewire\User;
 
 use App\Models\Link;
 use Livewire\Component;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
 
 class HiddenLinks extends Component
 {
-    protected $layout = 'components.user-dashboard-layout'; // Layout'u belirt
+    use WithPagination;
 
-    public $hiddenLinks;
+    protected $layout = 'components.user-dashboard-layout';
 
-    public function mount()
+    public $search = '';
+    public $sortStr = 'newest';
+    public $selectedLinks = [];
+    public $selectAll = false;
+
+    // Reset pagination when filters change
+    public function updatedSearch() { $this->resetPage(); }
+    public function updatedSortStr() { $this->resetPage(); }
+
+    public function updatedSelectAll($value)
     {
-        $this->loadHiddenLinks();
+        if ($value) {
+            $this->selectedLinks = $this->getHiddenLinksQuery()->pluck('id')->map(fn($id) => (string) $id)->toArray();
+        } else {
+            $this->selectedLinks = [];
+        }
+    }
+
+    public function updatedSelectedLinks()
+    {
+        $this->selectAll = false;
     }
 
     public function render()
     {
         return view('livewire.user.hidden-links', [
-            'hiddenLinks' => $this->hiddenLinks,
+            'hiddenLinks' => $this->getHiddenLinksQuery()->paginate(10),
         ]);
+    }
+
+    protected function getHiddenLinksQuery()
+    {
+        $query = Auth::user()->links()->where('is_hidden', true);
+
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('original_url', 'like', '%' . $this->search . '%')
+                  ->orWhere('code', 'like', '%' . $this->search . '%')
+                  ->orWhere('title', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        switch ($this->sortStr) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'newest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        return $query;
     }
 
     public function unhideLink($linkId)
@@ -31,13 +75,19 @@ class HiddenLinks extends Component
         if ($link) {
             $link->is_hidden = false;
             $link->save();
-            $this->loadHiddenLinks();
-            session()->flash('message', 'Bağlantı başarıyla görünür yapıldı.');
+            session()->flash('message', 'Link successfully made visible.');
         }
     }
 
-    protected function loadHiddenLinks()
+    public function unhideSelected()
     {
-        $this->hiddenLinks = Auth::user()->links()->where('is_hidden', true)->get();
+        if (empty($this->selectedLinks)) return;
+
+        Auth::user()->links()->whereIn('id', $this->selectedLinks)->update(['is_hidden' => false]);
+        
+        $this->selectedLinks = [];
+        $this->selectAll = false;
+        
+        session()->flash('message', 'Selected links successfully made visible.');
     }
 }

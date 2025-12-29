@@ -9,3 +9,4 @@ class CreateVipLevel extends CreateRecord
 {
     protected static string $resource = VipLevelResource::class;
 }
+

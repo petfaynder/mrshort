@@ -10,3 +10,4 @@ class CreateLevelConfiguration extends CreateRecord
 {
     protected static string $resource = LevelConfigurationResource::class;
 }
+

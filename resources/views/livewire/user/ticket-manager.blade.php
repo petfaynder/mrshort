@@ -24,7 +24,7 @@
         <div class="flex items-center gap-3 bg-green-900/50 border border-green-800 text-green-300 text-sm rounded-lg p-4 mb-8">
             <span class="material-symbols-outlined flex-shrink-0">check_circle</span>
             <div>
-                <span class="font-semibold">Başarılı:</span> {{ session('message') }}
+                <span class="font-semibold">Success:</span> {{ session('message') }}
             </div>
         </div>
     @endif
@@ -33,7 +33,7 @@
         <div class="flex items-center gap-3 bg-red-900/50 border border-red-800 text-red-300 text-sm rounded-lg p-4 mb-8">
             <span class="material-symbols-outlined flex-shrink-0">error</span>
             <div>
-                <span class="font-semibold">Hata:</span> {{ session('error') }}
+                <span class="font-semibold">Error:</span> {{ session('error') }}
             </div>
         </div>
     @endif

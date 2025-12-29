@@ -10,3 +10,4 @@ class CreateCpmTier extends CreateRecord
 {
     protected static string $resource = CpmTierResource::class;
 }
+

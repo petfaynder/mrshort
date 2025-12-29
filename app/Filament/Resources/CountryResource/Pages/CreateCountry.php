@@ -10,3 +10,4 @@ class CreateCountry extends CreateRecord
 {
     protected static string $resource = CountryResource::class;
 }
+

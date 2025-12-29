@@ -19,6 +19,7 @@ class Link extends Model
         'expires_at',
         'is_hidden',
         'campaign_template_id',
+        'use_wordpress',
     ];
 
     protected static function boot()
@@ -78,6 +79,21 @@ class Link extends Model
 
     public function shortLink(): string
     {
-        return url('/') . '/' . $this->code;
+        // Use active domain if available
+        $domain = activeDomain();
+        
+        if ($domain) {
+            return $domain->getShortUrl($this->code);
+        }
+        
+        // Fallback to app URL
+        $baseUrl = url('/');
+        
+        // Force HTTPS if enabled in settings
+        if (setting('enable_https_short_links', true)) {
+            $baseUrl = str_replace('http://', 'https://', $baseUrl);
+        }
+        
+        return $baseUrl . '/' . $this->code;
     }
 }

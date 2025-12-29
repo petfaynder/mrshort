@@ -44,9 +44,14 @@ Route::get('/api-documentation', function () {
     return view('pages.api-documentation');
 })->name('api.documentation');
 
+// Blog Routes
+Route::get('/blog', [\App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/category/{slug}', [\App\Http\Controllers\BlogController::class, 'category'])->name('blog.category');
+Route::get('/blog/{slug}', [\App\Http\Controllers\BlogController::class, 'show'])->name('blog.show');
+
 Route::get('/dashboard', function () {
     return view('user.dashboard.index');
-})->middleware(['auth', 'verified', \App\Http\Middleware\UpdateLastLogin::class])->name('dashboard');
+})->middleware(['auth', \App\Http\Middleware\VerifyEmailIfEnabled::class, \App\Http\Middleware\UpdateLastLogin::class])->name('dashboard');
 
 // Tutorial completion route
 Route::post('/tutorial/complete', [TutorialController::class, 'complete'])
@@ -130,12 +135,19 @@ Route::post('/links', [LinkController::class, 'store'])->name('links.store');
 // Guest Shorten Route (Public)
 Route::post('/guest/shorten', [LinkController::class, 'apiStore'])->name('guest.shorten');
 
+// Shortlink captcha verification (POST only - captcha shown in interstitial overlay)
+Route::post('/go/{code}/captcha', [LinkController::class, 'verifyCaptcha'])->name('shortlink.captcha.verify');
+
 Route::get('/{code}', [LinkController::class, 'redirect'])->name('shortlink.redirect');
 
 // Reklam Adımı Gösterim Route
 Route::get('/link/{link:code}/step/{stepNumber}', [LinkController::class, 'showAdStep'])
     ->name('link.ad_step')
     ->whereNumber('stepNumber'); // stepNumber'ın sayı olmasını sağla
+
+// Click completion after all ad steps viewed
+Route::get('/link/{link:code}/complete', [LinkController::class, 'recordClickAndRedirect'])
+    ->name('link.complete');
 
 // Reklam Tıklama Takip Route (Yeni)
 Route::post('/ads/track-click/{adType}/{adId}', [LinkController::class, 'trackAdClick'])->name('ads.track-click');
@@ -145,13 +157,44 @@ Route::get('/page/{slug}', [PageController::class, 'show'])->name('page.show');
 
 // Link istatistikleri route'u
 Route::get('/stats/{code}', [LinkController::class, 'showStats'])->name('stats');
-
-// Admin tarafından kullanıcı olarak giriş yapma route'u
-Route::middleware('auth', 'can:admin')->group(function () { // Sadece adminlerin erişebilmesi için middleware ekledim
+// Admin Login As User (Impersonation)
+// IMPORTANT: This SWITCHES your session to the user. Use incognito or different browser for admin panel.
+Route::middleware(['auth'])->group(function () {
+    // Start impersonating a user
     Route::get('/admin/users/{user}/login-as', function (App\Models\User $user) {
-        Auth::loginUsingId($user->id);
-        return redirect()->route('user.dashboard.index'); // Kullanıcı dashboard anasayfasına yönlendir
+        // Only admins can impersonate
+        if (!auth()->user()->is_admin) {
+            abort(403);
+        }
+        
+        // Store original admin ID so we can switch back
+        session()->put('impersonating_from_admin_id', auth()->id());
+        
+        // Actually login as the target user
+        \Illuminate\Support\Facades\Auth::login($user);
+        
+        return redirect()->route('dashboard');
     })->name('admin.users.login-as');
+    
+    // Stop impersonating and return to admin
+    Route::get('/admin/stop-impersonation', function () {
+        $adminId = session()->get('impersonating_from_admin_id');
+        
+        if (!$adminId) {
+            return redirect()->route('dashboard');
+        }
+        
+        // Clear impersonation session
+        session()->forget('impersonating_from_admin_id');
+        
+        // Login back as admin
+        $admin = App\Models\User::find($adminId);
+        if ($admin) {
+            \Illuminate\Support\Facades\Auth::login($admin);
+        }
+        
+        return redirect()->route('filament.admin.resources.users.index');
+    })->name('admin.stop-impersonation');
 });
 
 

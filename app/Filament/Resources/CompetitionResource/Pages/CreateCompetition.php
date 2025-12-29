@@ -9,3 +9,4 @@ class CreateCompetition extends CreateRecord
 {
     protected static string $resource = CompetitionResource::class;
 }
+

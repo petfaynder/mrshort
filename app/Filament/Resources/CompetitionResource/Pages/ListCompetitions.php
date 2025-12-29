@@ -16,3 +16,4 @@ class ListCompetitions extends ListRecords
         ];
     }
 }
+

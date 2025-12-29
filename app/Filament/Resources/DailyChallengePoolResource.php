@@ -16,7 +16,7 @@ class DailyChallengePoolResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
 
-    protected static ?string $navigationGroup = 'Gamification';
+    protected static ?string $navigationGroup = 'Features';
 
     protected static ?string $navigationLabel = 'Daily Challenges';
 
@@ -146,3 +146,5 @@ class DailyChallengePoolResource extends Resource
         ];
     }
 }
+
+

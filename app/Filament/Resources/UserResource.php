@@ -158,70 +158,144 @@ class UserResource extends Resource
                     ->url(fn (User $record): string => route('admin.users.login-as', ['user' => $record]))
                     ->openUrlInNewTab(),
                 Tables\Actions\Action::make('deleteAccount')
-                    ->label('Hesabı Sil')
+                    ->label('Delete Account')
                     ->icon('heroicon-o-trash')
                     ->color('danger')
-                    ->action(function (User $record): void {
+                    ->action(function (User $record, $livewire): void {
                         $record->delete();
+                        \Filament\Notifications\Notification::make()
+                            ->title('Account Deleted')
+                            ->body('User account has been permanently deleted.')
+                            ->success()
+                            ->send();
+                        $livewire->resetTable();
                     })
-                    ->requiresConfirmation(), // Silmeden önce onay iste
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete Account')
+                    ->modalDescription('Are you sure you want to permanently delete this user account? This action cannot be undone.'),
                 Tables\Actions\Action::make('deactivateAccount')
-                    ->label('Hesabı Deaktif Et')
+                    ->label('Deactivate Account')
                     ->icon('heroicon-o-x-circle')
                     ->color('warning')
-                    ->action(function (User $record): void {
-                        $record->update(['status' => 'deactivated']);
+                    ->form([
+                        Forms\Components\Select::make('reason')
+                            ->label('Deactivation Reason')
+                            ->options([
+                                'terms_violation' => 'Terms of Service Violation',
+                                'suspicious_activity' => 'Suspicious Activity',
+                                'payment_fraud' => 'Payment Fraud',
+                                'spam' => 'Spam / Abuse',
+                                'user_request' => 'User Request',
+                                'inactive' => 'Account Inactive',
+                                'other' => 'Other',
+                            ])
+                            ->required()
+                            ->native(false),
+                        Forms\Components\Textarea::make('custom_reason')
+                            ->label('Additional Details (Optional)')
+                            ->placeholder('Provide more details about the deactivation...')
+                            ->rows(3),
+                    ])
+                    ->action(function (User $record, array $data, $livewire): void {
+                        $reasonLabels = [
+                            'terms_violation' => 'Terms of Service Violation',
+                            'suspicious_activity' => 'Suspicious Activity',
+                            'payment_fraud' => 'Payment Fraud',
+                            'spam' => 'Spam / Abuse',
+                            'user_request' => 'User Request',
+                            'inactive' => 'Account Inactive',
+                            'other' => 'Other',
+                        ];
+                        
+                        $fullReason = $reasonLabels[$data['reason']] ?? $data['reason'];
+                        if (!empty($data['custom_reason'])) {
+                            $fullReason .= ': ' . $data['custom_reason'];
+                        }
+                        
+                        $record->update([
+                            'status' => 'deactivated',
+                            'deactivation_reason' => $fullReason,
+                            'deactivated_at' => now(),
+                        ]);
+                        
                         \Filament\Notifications\Notification::make()
-                            ->title('Hesap deaktif edildi')
+                            ->title('Account Deactivated')
+                            ->body("User account has been deactivated. Reason: {$fullReason}")
                             ->success()
                             ->send();
+                        $livewire->resetTable();
                     })
-                    ->requiresConfirmation()
-                    ->modalHeading('Hesabı Deaktif Et')
-                    ->modalDescription('Bu kullanıcının hesabını deaktif etmek istediğinizden emin misiniz?')
-                    ->visible(fn (User $record): bool => $record->status !== 'deactivated'),
-                Tables\Actions\Action::make('activateAccount')
-                    ->label('Hesabı Aktif Et')
+                    ->modalHeading('Deactivate Account')
+                    ->modalDescription('Select a reason for deactivating this account. The user will see this reason when they try to log in.')
+                    ->visible(fn (User $record): bool => $record->status !== 'deactivated' && $record->status !== 'banned'),
+                Tables\Actions\Action::make('reactivateAccount')
+                    ->label('Reactivate Account')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->action(function (User $record): void {
-                        $record->update(['status' => 'active']);
+                    ->action(function (User $record, $livewire): void {
+                        $record->update([
+                            'status' => 'active',
+                            'deactivation_reason' => null,
+                            'deactivated_at' => null,
+                        ]);
                         \Filament\Notifications\Notification::make()
-                            ->title('Hesap aktif edildi')
+                            ->title('Account Reactivated')
+                            ->body("User account has been reactivated. Deactivation reason cleared and user can now access their account normally.")
                             ->success()
                             ->send();
+                        $livewire->resetTable();
                     })
                     ->requiresConfirmation()
+                    ->modalHeading('Reactivate Account')
+                    ->modalDescription('This will restore the user\'s access to their account. They will be able to use all features again.')
                     ->visible(fn (User $record): bool => $record->status === 'deactivated'),
                 Tables\Actions\Action::make('sendMessage')
-                    ->label('Mesaj Gönder')
+                    ->label('Send Message')
                     ->icon('heroicon-o-envelope')
+                    ->color('info')
                     ->form([
                         Forms\Components\TextInput::make('subject')
-                            ->label('Konu')
+                            ->label('Subject')
                             ->required()
                             ->maxLength(255),
                         Forms\Components\Textarea::make('message')
-                            ->label('Mesaj')
+                            ->label('Message')
                             ->required()
                             ->rows(5),
                     ])
                     ->action(function (User $record, array $data): void {
-                        \Illuminate\Support\Facades\Mail::to($record->email)->send(
-                            new \Illuminate\Mail\Mailable(function ($message) use ($record, $data) {
-                                $message->subject($data['subject'])
-                                    ->html("<p>Merhaba {$record->name},</p><p>{$data['message']}</p>");
-                            })
-                        );
+                        // Create ticket for user
+                        $ticket = \App\Models\Ticket::create([
+                            'user_id' => $record->id,
+                            'subject' => '[Admin Message] ' . $data['subject'],
+                            'message' => $data['message'],
+                            'status' => 'open',
+                            'category' => 'general',
+                            'priority' => 'high',
+                        ]);
+                        
+                        // Add admin reply
+                        $ticket->replies()->create([
+                            'user_id' => auth()->id(),
+                            'message' => $data['message'],
+                        ]);
+                        
+                        // Mark user as having admin message
+                        $record->update([
+                            'has_admin_message' => true,
+                            'admin_message_ticket_id' => $ticket->id,
+                        ]);
+                        
                         \Filament\Notifications\Notification::make()
-                            ->title('Mesaj gönderildi')
-                            ->body("{$record->email} adresine mesaj gönderildi.")
+                            ->title('Message Sent')
+                            ->body("Ticket created for {$record->name}. They will see a notification on their dashboard.")
                             ->success()
                             ->send();
                     })
-                    ->modalHeading('Kullanıcıya Mesaj Gönder'),
+                    ->modalHeading('Send Message to User')
+                    ->modalDescription('This message will create a support ticket and the user will see a notification on their dashboard.'),
                 Tables\Actions\Action::make('viewReports')
-                    ->label('Raporları Görüntüle')
+                    ->label('View Reports')
                     ->url(fn (User $record): string => static::getUrl('reports', ['record' => $record]))
                     ->icon('heroicon-o-chart-bar'),
             ])
@@ -249,3 +323,5 @@ class UserResource extends Resource
         ];
     }
 }
+
+

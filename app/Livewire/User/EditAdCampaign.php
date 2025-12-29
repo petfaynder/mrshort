@@ -182,14 +182,17 @@ class EditAdCampaign extends Component
         ];
 
         $needsAdminApproval = false;
-        if ($this->popup_url !== $this->originalPopupUrl) {
+        $wasRejected = $this->adCampaign->approval_status === 'rejected';
+        
+        // Re-submit for approval if URL changed OR if campaign was rejected
+        if ($this->popup_url !== $this->originalPopupUrl || $wasRejected) {
             $needsAdminApproval = true;
         }
 
-        $this->adCampaign->update([
+        $updateData = [
             'name' => $this->name,
             'campaign_type' => $this->campaign_type,
-            'is_active' => $needsAdminApproval ? false : $this->is_active, // Set to false if URL changed
+            'is_active' => $needsAdminApproval ? false : $this->is_active,
             'targeting_rules' => $targetingRules,
             'daily_budget' => $this->daily_budget,
             'budget' => $this->budget,
@@ -200,21 +203,32 @@ class EditAdCampaign extends Component
             'daily_click_limit' => $this->daily_click_limit,
             'estimated_traffic' => $this->estimated_traffic,
             'available_traffic' => $this->available_traffic,
-        ]);
+        ];
+
+        // Reset approval status if campaign needs re-approval
+        if ($needsAdminApproval) {
+            $updateData['approval_status'] = 'pending';
+            $updateData['rejection_reason'] = null;
+            $updateData['approved_at'] = null;
+        }
+
+        $this->adCampaign->update($updateData);
 
         // Update the popup URL in AdCampaign's targeting_rules
         $updatedTargetingRules = array_merge($targetingRules, [
             'popup_url' => $this->popup_url,
-            'is_popup_campaign' => true, // Ensure it's still marked as a popup campaign
-            'popup_title' => $this->name, // Update title as well
-            'popup_content' => 'Bu bir kullanıcı pop-up reklamıdır.', // Update content as well
+            'is_popup_campaign' => true,
+            'popup_title' => $this->name,
+            'popup_content' => 'This is a user pop-up ad.',
         ]);
         $this->adCampaign->update(['targeting_rules' => $updatedTargetingRules]);
 
-        if ($needsAdminApproval) {
-            session()->flash('success', 'Reklam kampanyanız güncellendi. URL değişikliği nedeniyle admin onayı bekleniyor!');
+        if ($wasRejected) {
+            session()->flash('success', 'Your campaign has been re-submitted for approval.');
+        } elseif ($needsAdminApproval) {
+            session()->flash('success', 'Your ad campaign has been updated. Awaiting admin approval due to URL change!');
         } else {
-            session()->flash('success', 'Reklam kampanyası başarıyla güncellendi.');
+            session()->flash('success', 'Ad campaign successfully updated.');
         }
 
         return redirect()->route('user.ads.index');
@@ -226,8 +240,8 @@ class EditAdCampaign extends Component
             'countries' => Country::whereNotNull('name')->orderBy('name')->get(),
             'ageRanges' => ['18-24', '25-34', '35-44', '45-54', '55+'],
             'deviceOptions' => [
-                'desktop' => '💻 Masaüstü',
-                'mobile' => '📱 Mobil',
+                'desktop' => '💻 Desktop',
+                'mobile' => '📱 Mobile',
                 'tablet' => '📟 Tablet',
             ],
             'osOptions' => [
@@ -236,7 +250,7 @@ class EditAdCampaign extends Component
                 'windows' => '🪟 Windows',
                 'macos' => '💻 macOS',
                 'linux' => '🐧 Linux',
-                'other' => 'Diğer',
+                'other' => 'Other',
             ],
         ]);
     }

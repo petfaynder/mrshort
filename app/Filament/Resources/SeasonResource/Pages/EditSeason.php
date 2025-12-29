@@ -16,3 +16,4 @@ class EditSeason extends EditRecord
         ];
     }
 }
+

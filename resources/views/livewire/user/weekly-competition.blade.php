@@ -11,7 +11,7 @@
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="text-xs text-gray-400">Bitiş</div>
+                    <div class="text-xs text-gray-400">Ends</div>
                     <div class="text-sm font-semibold text-amber-400">
                         {{ $competition->end_date->format('d.m H:i') }}
                     </div>
@@ -33,14 +33,14 @@
                             const now = new Date().getTime();
                             const distance = this.endTime - now;
                             if (distance < 0) {
-                                this.remaining = 'Bitti!';
+                                this.remaining = 'Ended!';
                                 return;
                             }
                             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                            this.remaining = days + 'g ' + hours + 's ' + minutes + 'd ' + seconds + 's';
+                            this.remaining = days + 'd ' + hours + 'h ' + minutes + 'm ' + seconds + 's';
                         }
                     }"
                 >
@@ -55,17 +55,17 @@
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <span class="text-2xl font-bold text-amber-400">#{{ $userRank ?? '-' }}</span>
-                            <span class="text-gray-300">Sıralamanız</span>
+                            <span class="text-gray-300">Your Rank</span>
                         </div>
                         <div class="text-right">
                             <div class="text-xl font-bold text-white">{{ number_format($userEntry->score) }}</div>
-                            <div class="text-xs text-gray-400">{{ $competition->type === 'clicks' ? 'tıklama' : 'puan' }}</div>
+                            <div class="text-xs text-gray-400">{{ $competition->type === 'clicks' ? 'clicks' : 'points' }}</div>
                         </div>
                     </div>
                 </div>
             @else
                 <div class="mb-4 bg-gray-800/50 rounded-lg p-3 text-center">
-                    <p class="text-gray-400 text-sm">Yarışmaya katılmak için link kısaltın ve tıklama alın!</p>
+                    <p class="text-gray-400 text-sm">Shorten links and get clicks to join the competition!</p>
                 </div>
             @endif
 
@@ -91,7 +91,7 @@
                                     </div>
                                 @endif
                                 <span class="text-sm {{ $entry->user_id === auth()->id() ? 'text-amber-400 font-semibold' : 'text-gray-300' }}">
-                                    {{ Str::limit($entry->user->name ?? 'Kullanıcı', 15) }}
+                                    {{ Str::limit($entry->user->name ?? 'User', 15) }}
                                 </span>
                             </div>
                         </div>
@@ -99,7 +99,7 @@
                     </div>
                 @empty
                     <div class="text-center text-gray-500 py-4">
-                        Henüz katılımcı yok
+                        No participants yet
                     </div>
                 @endforelse
             </div>
@@ -111,19 +111,19 @@
                     x-data="{ open: false }"
                     @click="open = !open"
                 >
-                    <span x-show="!open">🎁 Ödülleri Gör</span>
-                    <span x-show="open">🎁 Ödülleri Gizle</span>
+                    <span x-show="!open">🎁 View Prizes</span>
+                    <span x-show="open">🎁 Hide Prizes</span>
                     <div x-show="open" class="mt-3 space-y-1 text-left">
                         @foreach($competition->prize_structure ?? [] as $prize)
                             <div class="flex justify-between text-xs">
                                 <span>
                                     @if(isset($prize['rank_to']) && $prize['rank_to'])
-                                        {{ $prize['rank'] }}-{{ $prize['rank_to'] }}. sıra
+                                        {{ $prize['rank'] }}-{{ $prize['rank_to'] }} place
                                     @else
-                                        {{ $prize['rank'] }}. sıra
+                                        {{ $prize['rank'] }} place
                                     @endif
                                 </span>
-                                <span class="text-amber-400">{{ number_format($prize['points']) }} puan</span>
+                                <span class="text-amber-400">{{ number_format($prize['points']) }} points</span>
                             </div>
                         @endforeach
                     </div>
@@ -134,8 +134,8 @@
         <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl p-5 border border-gray-700">
             <div class="text-center text-gray-400">
                 <span class="text-4xl mb-2 block">🏆</span>
-                <p>Şu anda aktif yarışma yok</p>
-                <p class="text-xs mt-1">Yakında yeni yarışmalar başlayacak!</p>
+                <p>No active competition at the moment</p>
+                <p class="text-xs mt-1">New competitions will start soon!</p>
             </div>
         </div>
     @endif

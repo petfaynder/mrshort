@@ -16,3 +16,4 @@ class ListVipLevels extends ListRecords
         ];
     }
 }
+

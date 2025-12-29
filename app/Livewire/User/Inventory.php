@@ -78,7 +78,7 @@ class Inventory extends Component
 
         if ($points <= 0 || $user->gamification_points < $points) {
             Notification::make()
-                ->title('Geçersiz veya yetersiz puan miktarı.')
+                ->title('Invalid or insufficient points amount.')
                 ->danger()
                 ->send();
             $this->cancelConversion();
@@ -92,7 +92,7 @@ class Inventory extends Component
         $user->save();
 
         Notification::make()
-            ->title($points . ' puan başarıyla ' . number_format($convertedAmount, 2) . ' birim paraya çevrildi!')
+            ->title($points . ' points successfully converted to ' . number_format($convertedAmount, 2) . ' currency units!')
             ->success()
             ->send();
 
@@ -166,17 +166,17 @@ class Inventory extends Component
         $inventoryItem = UserInventory::find($itemId);
 
         if (!$inventoryItem) {
-            Notification::make()->title('Öğe bulunamadı!')->danger()->send();
+            Notification::make()->title('Item not found!')->danger()->send();
             return;
         }
 
         if ($inventoryItem->is_active) {
-            Notification::make()->title('Bu öğe zaten aktif!')->warning()->send();
+            Notification::make()->title('This item is already active!')->warning()->send();
             return;
         }
         
         if ($inventoryItem->expires_at && $inventoryItem->expires_at <= now()) {
-            Notification::make()->title('Bu öğenin süresi dolmuş!')->danger()->send();
+            Notification::make()->title('This item has expired!')->danger()->send();
             return;
         }
 
@@ -188,7 +188,7 @@ class Inventory extends Component
         }
         $inventoryItem->save();
 
-        Notification::make()->title('"' . $inventoryItem->reward->name . '" başarıyla etkinleştirildi!')->success()->send();
+        Notification::make()->title('"' . $inventoryItem->reward->name . '" successfully activated!')->success()->send();
 
         $this->loadInventory();
         $this->closeModal();

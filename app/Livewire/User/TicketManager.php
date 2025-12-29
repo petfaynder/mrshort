@@ -63,14 +63,14 @@ class TicketManager extends Component
 
         $this->userReply = '';
         $this->selectedTicket->refresh();
-        session()->flash('message', 'Cevabınız başarıyla gönderildi.');
+        session()->flash('message', 'Your reply has been successfully sent.');
     }
 
     public function createTicket()
     {
         $this->validate();
 
-        Log::info('Ticket oluşturma denemesi:', [
+        Log::info('Attempting to create ticket:', [
             'user_id' => Auth::id(),
             'subject' => $this->newTicketSubject,
             'message' => $this->newTicketMessage,
@@ -86,10 +86,10 @@ class TicketManager extends Component
                 'priority' => $this->newTicketPriority,
                 'status' => 'open',
             ]);
-            Log::info('Ticket başarıyla oluşturuldu.');
+            Log::info('Ticket successfully created.');
         } catch (\Exception $e) {
-            Log::error('Ticket oluşturulurken hata oluştu: ' . $e->getMessage());
-            session()->flash('error', 'Destek talebi oluşturulurken bir hata oluştu: ' . $e->getMessage());
+            Log::error('Error creating ticket: ' . $e->getMessage());
+            session()->flash('error', 'An error occurred while creating support ticket: ' . $e->getMessage());
             return;
         }
 
@@ -105,7 +105,7 @@ class TicketManager extends Component
             $this->selectedTicket->save();
             $this->selectedTicket = null;
             $this->loadTickets();
-            session()->flash('message', 'Destek talebi kapatıldı.');
+            session()->flash('message', 'Support ticket closed.');
         }
     }
 

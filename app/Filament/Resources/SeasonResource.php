@@ -16,7 +16,7 @@ class SeasonResource extends Resource
     protected static ?string $model = Season::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-trophy';
-    protected static ?string $navigationGroup = 'Gamification';
+    protected static ?string $navigationGroup = 'Competitions';
     protected static ?string $navigationLabel = 'Sezonlar & Battle Pass';
     protected static ?int $navigationSort = 10;
 
@@ -183,3 +183,5 @@ class SeasonResource extends Resource
         ];
     }
 }
+
+

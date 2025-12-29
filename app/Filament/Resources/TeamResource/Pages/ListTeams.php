@@ -16,3 +16,4 @@ class ListTeams extends ListRecords
         ];
     }
 }
+

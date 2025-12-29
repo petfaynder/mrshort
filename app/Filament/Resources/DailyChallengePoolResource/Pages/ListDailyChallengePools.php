@@ -16,3 +16,4 @@ class ListDailyChallengePools extends ListRecords
         ];
     }
 }
+

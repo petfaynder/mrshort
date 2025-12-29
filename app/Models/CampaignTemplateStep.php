@@ -12,6 +12,7 @@ class CampaignTemplateStep extends Model
         'step_type',
         'wait_time',
         'show_popup',
+        'show_linked_popup',
     ];
 
     protected $casts = [

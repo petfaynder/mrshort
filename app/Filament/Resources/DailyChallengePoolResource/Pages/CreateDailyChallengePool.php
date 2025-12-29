@@ -9,3 +9,4 @@ class CreateDailyChallengePool extends CreateRecord
 {
     protected static string $resource = DailyChallengePoolResource::class;
 }
+

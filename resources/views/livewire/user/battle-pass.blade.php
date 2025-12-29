@@ -19,8 +19,8 @@
                     </div>
                 </div>
                 <div class="text-left md:text-right">
-                    <div class="text-sm text-gray-400">Kalan Süre</div>
-                    <div class="text-xl font-bold text-purple-400">{{ $season->days_remaining }} gün</div>
+                    <div class="text-sm text-gray-400">Time Remaining</div>
+                    <div class="text-xl font-bold text-purple-400">{{ $season->days_remaining }} days</div>
                     <div class="h-1.5 w-24 bg-gray-700 rounded-full mt-1">
                         <div class="h-full bg-purple-500 rounded-full" style="width: {{ $season->progress_percent }}%"></div>
                     </div>
@@ -36,7 +36,7 @@
                                 <span class="text-2xl font-bold text-white">{{ $progress->current_level }}</span>
                             </div>
                             <div>
-                                <div class="text-white font-semibold">Seviye {{ $progress->current_level }}</div>
+                                <div class="text-white font-semibold">Level {{ $progress->current_level }}</div>
                                 <div class="text-sm text-gray-400">{{ number_format($progress->xp) }} XP</div>
                             </div>
                         </div>
@@ -48,12 +48,12 @@
                             >
                                 <span wire:loading.remove wire:target="openUpgradeModal" class="material-symbols-outlined text-sm">star</span>
                                 <span wire:loading wire:target="openUpgradeModal" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
-                                Premium Al
+                                Get Premium
                             </button>
                         @else
                             <div class="flex items-center gap-2 text-amber-400">
                                 <span class="material-symbols-outlined">verified</span>
-                                <span class="font-semibold">Premium Aktif</span>
+                                <span class="font-semibold">Premium Active</span>
                             </div>
                         @endif
                     </div>
@@ -67,9 +67,9 @@
                             ></div>
                         </div>
                         <div class="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>Seviye {{ $progress->current_level }}</span>
-                            <span>{{ $progress->xp_to_next_level }} XP kaldı</span>
-                            <span>Seviye {{ $progress->current_level + 1 }}</span>
+                            <span>Level {{ $progress->current_level }}</span>
+                            <span>{{ $progress->xp_to_next_level }} XP remaining</span>
+                            <span>Level {{ $progress->current_level + 1 }}</span>
                         </div>
                     </div>
                 </div>
@@ -170,26 +170,26 @@
                 <div class="flex flex-wrap gap-4 mt-4 pt-4 border-t border-gray-700">
                     <div class="flex items-center gap-2 text-sm text-gray-400">
                         <div class="w-4 h-4 bg-amber-500 rounded"></div>
-                        <span>Premium Ödül</span>
+                        <span>Premium Reward</span>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-400">
                         <div class="w-4 h-4 bg-purple-600 rounded"></div>
-                        <span>Ücretsiz Ödül</span>
+                        <span>Free Reward</span>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-400">
                         <div class="w-4 h-4 bg-gray-700 rounded border border-gray-600"></div>
-                        <span>Kilitli</span>
+                        <span>Locked</span>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-400">
                         <div class="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
                             <span class="material-symbols-outlined text-white" style="font-size: 10px;">check</span>
                         </div>
-                        <span>Alındı</span>
+                        <span>Claimed</span>
                     </div>
                 </div>
             @else
                 <div class="text-center py-8">
-                    <p class="text-gray-400">Sezonu takip etmek için giriş yapın</p>
+                    <p class="text-gray-400">Please log in to track the season</p>
                 </div>
             @endif
         </div>
@@ -203,32 +203,32 @@
                             <span class="text-4xl">⭐</span>
                         </div>
                         <h3 class="text-2xl font-bold text-white">Premium Battle Pass</h3>
-                        <p class="text-gray-400 mt-2">Tüm premium ödüllerin kilidini aç!</p>
+                        <p class="text-gray-400 mt-2">Unlock all premium rewards!</p>
                     </div>
                     
                     <ul class="space-y-3 mb-6">
                         <li class="flex items-center gap-3 text-gray-300">
                             <span class="material-symbols-outlined text-amber-400">check_circle</span>
-                            Her seviyede 2x ödül
+                            2x rewards at every level
                         </li>
                         <li class="flex items-center gap-3 text-gray-300">
                             <span class="material-symbols-outlined text-amber-400">check_circle</span>
-                            Özel rozetler ve avatarlar
+                            Exclusive badges and avatars
                         </li>
                         <li class="flex items-center gap-3 text-gray-300">
                             <span class="material-symbols-outlined text-amber-400">check_circle</span>
-                            Premium profil temaları
+                            Premium profile themes
                         </li>
                         <li class="flex items-center gap-3 text-gray-300">
                             <span class="material-symbols-outlined text-amber-400">check_circle</span>
-                            Sezon sonu Diamond Box garantisi
+                            Guaranteed Diamond Box at season end
                         </li>
                     </ul>
                     
                     <div class="bg-gray-700/50 rounded-xl p-4 mb-6">
                         <div class="text-center">
-                            <div class="text-3xl font-bold text-amber-400">{{ number_format($season->premium_price_points) }} Puan</div>
-                            <div class="text-sm text-gray-400">veya ${{ number_format($season->premium_price_money, 2) }}</div>
+                            <div class="text-3xl font-bold text-amber-400">{{ number_format($season->premium_price_points) }} Points</div>
+                            <div class="text-sm text-gray-400">or ${{ number_format($season->premium_price_money, 2) }}</div>
                         </div>
                     </div>
                     
@@ -237,15 +237,15 @@
                             wire:click="closeUpgradeModal"
                             class="flex-1 px-4 py-3 bg-gray-700 text-gray-300 font-semibold rounded-lg hover:bg-gray-600 transition"
                         >
-                            İptal
+                            Cancel
                         </button>
                         <button 
                             wire:click="upgradeToPremium"
                             wire:loading.attr="disabled"
                             class="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-700 transition disabled:opacity-50"
                         >
-                            <span wire:loading.remove wire:target="upgradeToPremium">Satın Al</span>
-                            <span wire:loading wire:target="upgradeToPremium">İşleniyor...</span>
+                            <span wire:loading.remove wire:target="upgradeToPremium">Purchase</span>
+                            <span wire:loading wire:target="upgradeToPremium">Processing...</span>
                         </button>
                     </div>
                 </div>
@@ -254,8 +254,8 @@
     @else
         <div class="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-8 border border-gray-700 text-center">
             <span class="text-5xl mb-4 block">🏆</span>
-            <h3 class="text-xl font-bold text-white mb-2">Şu anda aktif sezon yok</h3>
-            <p class="text-gray-400">Yakında yeni sezon başlayacak!</p>
+            <h3 class="text-xl font-bold text-white mb-2">No active season at the moment</h3>
+            <p class="text-gray-400">A new season will start soon!</p>
         </div>
     @endif
 </div>

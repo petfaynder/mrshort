@@ -82,10 +82,19 @@ class Withdrawals extends Component
 
     public function submit()
     {
+        // Check if withdrawals are enabled
+        if (!setting('withdrawals_enabled', true)) {
+            session()->flash('error', 'Withdrawals are currently disabled.');
+            return;
+        }
+        
         $user = Auth::user();
+        
+        // Get minimum withdrawal amount from settings
+        $minWithdrawal = setting('min_withdrawal_amount', 5);
 
         $this->validate([
-            'withdrawal_amount' => 'required|numeric|min:5|max:' . $this->available_balance,
+            'withdrawal_amount' => 'required|numeric|min:' . $minWithdrawal . '|max:' . $this->available_balance,
             'payment_method' => 'required|in:PayPal,Bank Transfer',
             'paypal_email' => 'required_if:payment_method,PayPal|email',
             'iban' => 'required_if:payment_method,Bank Transfer',

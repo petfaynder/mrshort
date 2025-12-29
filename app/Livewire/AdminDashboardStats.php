@@ -23,7 +23,6 @@ class AdminDashboardStats extends Component
     // Kullanıcı Aktivitesi Metrikleri
     public $newUsersLast24Hours = 0;
     public $newUsersLast7Days = 0;
-    // public $activeUsers = 0; // Opsiyonel
 
     // Link Aktivitesi Metrikleri
     public $newLinksLast24Hours = 0;
@@ -44,23 +43,27 @@ class AdminDashboardStats extends Component
     public $chartLabels = [];
     public $chartData = [];
 
-
     // Detaylı Veri Tablosu Verileri
     public $dailyStatsTableData = [];
 
-    public $dateFilter = 'last_30_days'; // Varsayılan filtre
+    // Yeni Widget Verileri
+    public $recentLinks = [];
+    public $userGrowthData = ['labels' => [], 'data' => []];
+    public $earningsComparisonData = ['admin' => 0, 'publisher' => 0];
+    public $recentActivity = [];
+
+    public $dateFilter = 'last_30_days';
 
     protected $listeners = ['dateFilterChanged' => 'updateDateFilter'];
 
     public function updateDateFilter($filter)
     {
         $this->dateFilter = $filter;
-        $this->loadStats(); // Filtre değiştiğinde istatistikleri yeniden yükle
+        $this->loadStats();
     }
 
     public function mount()
     {
-        \Log::info('AdminDashboardStats mount() called.');
         $this->loadStats();
     }
 
@@ -75,27 +78,27 @@ class AdminDashboardStats extends Component
         // Kullanıcı Aktivitesi Metrikleri
         $this->newUsersLast24Hours = User::where('created_at', '>=', Carbon::now()->subDay())->count();
         $this->newUsersLast7Days = User::where('created_at', '>=', Carbon::now()->subDays(7))->count();
-        \Log::info('AdminDashboardStats loadStats() - newUsersLast24Hours değeri: ' . $this->newUsersLast24Hours);
 
         // Link Aktivitesi Metrikleri
         $this->newLinksLast24Hours = Link::where('created_at', '>=', Carbon::now()->subDay())->count();
         $this->newLinksLast7Days = Link::where('created_at', '>=', Carbon::now()->subDays(7))->count();
-        $this->totalActiveLinks = Link::count(); // Basitçe tüm linkler, 'active' durumu varsa ona göre filtrelenebilir
+        $this->totalActiveLinks = Link::count();
 
         // Operasyonel Metrikler
         $this->pendingWithdrawalRequestsCount = WithdrawalRequest::where('status', 'pending')->count();
         $this->pendingWithdrawalRequestsAmount = WithdrawalRequest::where('status', 'pending')->sum('amount');
         $this->openSupportTicketsCount = Ticket::where('status', 'open')->count();
 
-        // Hızlı Bakış İçin Özet Bilgiler
+        // Top Countries - improved query
         $this->topCountries = LinkClick::select('country', DB::raw('count(*) as total_clicks'))
             ->whereNotNull('country')
+            ->where('country', '!=', '')
             ->groupBy('country')
             ->orderByDesc('total_clicks')
             ->take(5)
             ->get()
             ->map(function ($item) {
-                $totalSystemClicks = $this->totalViews > 0 ? $this->totalViews : 1; // Sıfıra bölme hatasını engelle
+                $totalSystemClicks = $this->totalViews > 0 ? $this->totalViews : 1;
                 return [
                     'name' => $item->country,
                     'clicks' => $item->total_clicks,
@@ -109,7 +112,6 @@ class AdminDashboardStats extends Component
         $startDate = $this->getStartDateFromFilter();
         $endDate = Carbon::now();
 
-
         // İstatistik Grafiği Verileri (Günlük Tıklanma)
         $dailyClicks = LinkClick::selectRaw('DATE(created_at) as date, COUNT(*) as views')
             ->whereBetween('created_at', [$startDate, $endDate])
@@ -117,51 +119,115 @@ class AdminDashboardStats extends Component
             ->orderBy('date', 'asc')
             ->get();
 
-        $this->chartLabels = $dailyClicks->pluck('date')->toArray();
+        $this->chartLabels = $dailyClicks->pluck('date')->map(fn($d) => Carbon::parse($d)->format('M d'))->toArray();
         $this->chartData = $dailyClicks->pluck('views')->toArray();
         $this->dailyClicksData = ['labels' => $this->chartLabels, 'data' => $this->chartData];
 
+        // Detaylı Veri Tablosu - Gerçek Günlük Kazanç Hesaplaması
+        $dailyEarnings = LinkClick::selectRaw('DATE(created_at) as date, COUNT(*) as views, SUM(CASE WHEN cpm_rate > 0 THEN 1 ELSE 0 END) as paid_views, SUM(cpm_rate / 1000) as earnings')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('date')
+            ->orderBy('date', 'desc')
+            ->get();
 
-        // Detaylı Veri Tablosu Verileri (Kümülatif Yaklaşım)
-        $tableData = [];
-        $currentDate = $startDate->copy();
-
-        while ($currentDate <= $endDate) {
-            $dateStr = $currentDate->toDateString();
-            $viewsToday = LinkClick::whereDate('created_at', $dateStr)->count();
-
-            // O gün sonu itibarıyla kümülatif toplamlar (Bu, gerçek günlük kazanç değildir)
-            $totalLinkEarningsEndOfDay = User::sum('link_earnings'); 
-            $totalReferralEarningsEndOfDay = User::sum('referral_earnings'); 
+        $this->dailyStatsTableData = $dailyEarnings->map(function ($item) {
+            $views = $item->views ?? 0;
+            $paidViews = $item->paid_views ?? 0;
+            $earnings = $item->earnings ?? 0;
+            $dailyCpm = $paidViews > 0 ? ($earnings / $paidViews) * 1000 : 0;
             
-            $totalPublisherEarningsEndOfDay = $totalLinkEarningsEndOfDay + $totalReferralEarningsEndOfDay;
-            // Günlük CPM'i o günkü tıklama ve o günkü *gerçek* kazanç üzerinden hesaplamak daha doğru olur.
-            // Şimdilik, o günkü tıklamalar ve genel kümülatif kazanç üzerinden bir yaklaşım sunuluyor.
-            // Bu, ileride `earnings_transactions` tablosu ile iyileştirilmelidir.
-            $dailyCpm = 0;
-            if ($viewsToday > 0) {
-                 // Geçici olarak, günlük kazancı o günkü tıklama başına ortalama kazançla tahmin edebiliriz.
-                 // Veya bu sütunu "N/A" olarak bırakabiliriz.
-                 // $averageEarningPerClick = $this->totalPublisherEarnings / ($this->totalViews > 0 ? $this->totalViews : 1);
-                 // $estimatedDailyEarning = $viewsToday * $averageEarningPerClick;
-                 // $dailyCpm = ($estimatedDailyEarning / $viewsToday) * 1000;
-                 // Şimdilik CPM'i genel ortalama üzerinden değil, sadece tıklama varsa bir değer göstermek için boş bırakıyoruz.
-            }
-
-
-            $tableData[] = [
-                'date' => $dateStr,
-                'views' => $viewsToday,
-                'link_earnings' => number_format(0, 2), // Gerçek günlük için iyileştirme
-                'referral_earnings' => number_format(0, 2), // Gerçek günlük için iyileştirme
-                'total_publisher_earnings' => number_format(0, 2), // Gerçek günlük için iyileştirme
-                'daily_cpm' => number_format(0, 2),
+            return [
+                'date' => $item->date,
+                'views' => $views,
+                'paid_views' => $paidViews,
+                'link_earnings' => '$' . number_format($earnings, 4),
+                'referral_earnings' => '$0.00', // Referral günlük olarak ayrı hesaplanmalı
+                'total_publisher_earnings' => '$' . number_format($earnings, 4),
+                'daily_cpm' => '$' . number_format($dailyCpm, 4),
             ];
-            $currentDate->addDay();
-        }
-        $this->dailyStatsTableData = array_reverse($tableData); // En son gün en üstte
-        \Log::info('AdminDashboardStats loadStats() finished. totalPublisherEarnings: ' . $this->totalPublisherEarnings);
-        \Log::info('totalPublisherEarnings değeri: ' . $this->totalPublisherEarnings);
+        })->toArray();
+
+        // === YENİ WIDGET VERİLERİ ===
+
+        // 1. Son Kısaltılan Linkler
+        $this->recentLinks = Link::with('user')
+            ->orderByDesc('created_at')
+            ->take(10)
+            ->get()
+            ->map(function ($link) {
+                return [
+                    'short_code' => $link->short_code,
+                    'original_url' => \Str::limit($link->original_url, 40),
+                    'user' => $link->user ? $link->user->name : 'Anonymous',
+                    'clicks' => $link->clicks()->count(),
+                    'created_at' => $link->created_at->diffForHumans(),
+                ];
+            })->toArray();
+
+        // 2. Kullanıcı Büyüme Grafiği (Son 12 Hafta)
+        $userGrowth = User::selectRaw('YEARWEEK(created_at, 1) as week, COUNT(*) as count')
+            ->where('created_at', '>=', Carbon::now()->subWeeks(12))
+            ->groupBy('week')
+            ->orderBy('week', 'asc')
+            ->get();
+
+        $this->userGrowthData = [
+            'labels' => $userGrowth->pluck('week')->map(function ($week) {
+                $year = substr($week, 0, 4);
+                $weekNum = substr($week, 4);
+                return 'W' . $weekNum;
+            })->toArray(),
+            'data' => $userGrowth->pluck('count')->toArray()
+        ];
+
+        // 3. Admin Kar vs Yayıncı Kazanç
+        $totalSystemEarnings = LinkClick::sum(DB::raw('cpm_rate / 1000'));
+        $publisherPayout = User::sum('link_earnings');
+        $adminProfit = $totalSystemEarnings - $publisherPayout;
+        
+        $this->earningsComparisonData = [
+            'admin' => max(0, $adminProfit),
+            'publisher' => $publisherPayout,
+            'total' => $totalSystemEarnings
+        ];
+
+        // 4. Canlı Aktivite Feed
+        $this->recentActivity = collect()
+            ->merge(
+                User::orderByDesc('created_at')->take(5)->get()->map(fn($u) => [
+                    'type' => 'user_registered',
+                    'icon' => 'user-plus',
+                    'color' => 'sky',
+                    'message' => $u->name . ' joined',
+                    'time' => $u->created_at,
+                ])
+            )
+            ->merge(
+                Link::orderByDesc('created_at')->take(5)->get()->map(fn($l) => [
+                    'type' => 'link_created',
+                    'icon' => 'link',
+                    'color' => 'emerald',
+                    'message' => 'New link: ' . $l->short_code,
+                    'time' => $l->created_at,
+                ])
+            )
+            ->merge(
+                WithdrawalRequest::where('status', 'pending')->orderByDesc('created_at')->take(5)->get()->map(fn($w) => [
+                    'type' => 'withdrawal_pending',
+                    'icon' => 'banknotes',
+                    'color' => 'amber',
+                    'message' => 'Withdrawal: $' . number_format($w->amount, 2),
+                    'time' => $w->created_at,
+                ])
+            )
+            ->sortByDesc('time')
+            ->take(10)
+            ->map(function ($item) {
+                $item['time_ago'] = Carbon::parse($item['time'])->diffForHumans();
+                return $item;
+            })
+            ->values()
+            ->toArray();
     }
 
     private function getStartDateFromFilter()
@@ -182,29 +248,6 @@ class AdminDashboardStats extends Component
 
     public function render()
     {
-        \Log::info('AdminDashboardStats render() called. newUsersLast24Hours değeri before view: ' . $this->newUsersLast24Hours);
-        \Log::info('AdminDashboardStats render() called. totalPublisherEarnings before view: ' . $this->totalPublisherEarnings);
-        \Log::info('AdminDashboardStats render() - View\'a gönderilen veriler: ' . json_encode([
-            'totalPublisherEarnings' => $this->totalPublisherEarnings,
-            'totalLinkEarnings' => $this->totalLinkEarnings,
-            'totalReferralEarnings' => $this->totalReferralEarnings,
-            'totalViews' => $this->totalViews,
-            'newUsersLast24Hours' => $this->newUsersLast24Hours,
-            'newUsersLast7Days' => $this->newUsersLast7Days,
-            'newLinksLast24Hours' => $this->newLinksLast24Hours,
-            'newLinksLast7Days' => $this->newLinksLast7Days,
-            'totalActiveLinks' => $this->totalActiveLinks,
-            'pendingWithdrawalRequestsCount' => $this->pendingWithdrawalRequestsCount,
-            'pendingWithdrawalRequestsAmount' => $this->pendingWithdrawalRequestsAmount,
-            'openSupportTicketsCount' => $this->openSupportTicketsCount,
-            'topCountries' => $this->topCountries,
-            'recentAnnouncements' => $this->recentAnnouncements,
-            'dailyClicksData' => $this->dailyClicksData,
-            'chartLabels' => $this->chartLabels,
-            'chartData' => $this->chartData,
-            'dailyStatsTableData' => $this->dailyStatsTableData,
-            'dateFilter' => $this->dateFilter,
-        ]));
         return view('livewire.admin-dashboard-stats', [
             'totalPublisherEarnings' => $this->totalPublisherEarnings,
             'totalLinkEarnings' => $this->totalLinkEarnings,
@@ -225,6 +268,11 @@ class AdminDashboardStats extends Component
             'chartData' => $this->chartData,
             'dailyStatsTableData' => $this->dailyStatsTableData,
             'dateFilter' => $this->dateFilter,
+            // Yeni widgetlar
+            'recentLinks' => $this->recentLinks,
+            'userGrowthData' => $this->userGrowthData,
+            'earningsComparisonData' => $this->earningsComparisonData,
+            'recentActivity' => $this->recentActivity,
         ]);
     }
 }

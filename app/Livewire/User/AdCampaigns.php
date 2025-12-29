@@ -22,7 +22,7 @@ class AdCampaigns extends Component
         $campaign->delete();
         
         // Redirect with flash message
-        return redirect()->route('user.ads.index')->with('success', 'Reklam kampanyası başarıyla silindi.');
+        return redirect()->route('user.ads.index')->with('success', 'Ad campaign successfully deleted.');
     }
 
     public function updatingSearch()
