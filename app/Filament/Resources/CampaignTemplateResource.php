@@ -104,8 +104,44 @@ class CampaignTemplateResource extends Resource
                             ->multiple()
                             ->searchable()
                             ->options(function () {
-                                $countries = Country::whereNotNull('name')->orderBy('name')->pluck('name', 'iso_code');
-                                return $countries->prepend('Tüm Ülkeler', 'ALL');
+                                try {
+                                    $countries = Country::query()
+                                        ->whereNotNull('name')
+                                        ->where('name', '!=', '')
+                                        ->orderBy('name')
+                                        ->pluck('name', 'iso_code')
+                                        ->toArray();
+                                    
+                                    return ['ALL' => 'Tüm Ülkeler'] + $countries;
+                                } catch (\Exception $e) {
+                                    \Log::error('Country loading error: ' . $e->getMessage());
+                                    return ['ALL' => 'Tüm Ülkeler'];
+                                }
+                            })
+                            ->getSearchResultsUsing(function (string $search): array {
+                                try {
+                                    $countries = Country::query()
+                                        ->whereNotNull('name')
+                                        ->where('name', 'like', "%{$search}%")
+                                        ->orderBy('name')
+                                        ->limit(50)
+                                        ->pluck('name', 'iso_code')
+                                        ->toArray();
+                                    
+                                    if (str_contains(strtolower('Tüm Ülkeler'), strtolower($search)) || str_contains(strtolower('all'), strtolower($search))) {
+                                        return ['ALL' => 'Tüm Ülkeler'] + $countries;
+                                    }
+                                    
+                                    return $countries;
+                                } catch (\Exception $e) {
+                                    return [];
+                                }
+                            })
+                            ->getOptionLabelUsing(function ($value): ?string {
+                                if ($value === 'ALL') {
+                                    return 'Tüm Ülkeler';
+                                }
+                                return Country::where('iso_code', $value)->value('name');
                             })
                             ->preload()
                             ->helperText('Hangi ülkelerdeki kullanıcıları hedefleyeceğinizi seçin. "Tüm Ülkeler" seçeneği ile global hedefleme yapabilirsiniz.'),
