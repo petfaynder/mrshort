@@ -18,7 +18,7 @@
     <livewire:user.announcements />
 
     {{-- Gamification Widgets --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <div data-tutorial="gamification-widgets" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {{-- Streak Display --}}
         <livewire:user.streak-display />
         
