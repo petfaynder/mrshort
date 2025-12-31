@@ -235,6 +235,10 @@ class WithdrawalRequestResource extends Resource
                     ->color('success')
                     ->action(function (WithdrawalRequest $record): void {
                         $record->update(['status' => 'approved']);
+                        
+                        // Send email notification to user
+                        \App\Services\EmailService::sendWithdrawalStatusEmail($record, 'approved');
+                        
                         \Filament\Notifications\Notification::make()
                             ->title('Talep onaylandı')
                             ->success()
@@ -254,6 +258,10 @@ class WithdrawalRequestResource extends Resource
                     ->color('success')
                     ->action(function (WithdrawalRequest $record): void {
                         $record->update(['status' => 'completed']);
+                        
+                        // Send email notification to user
+                        \App\Services\EmailService::sendWithdrawalStatusEmail($record, 'completed');
+                        
                         \Filament\Notifications\Notification::make()
                             ->title('Ödeme tamamlandı')
                             ->success()
@@ -269,6 +277,10 @@ class WithdrawalRequestResource extends Resource
                     ->color('danger')
                     ->action(function (WithdrawalRequest $record): void {
                         $record->update(['status' => 'cancelled']);
+                        
+                        // Send email notification to user
+                        \App\Services\EmailService::sendWithdrawalStatusEmail($record, 'cancelled', 'Your withdrawal request was rejected by admin.');
+                        
                         \Filament\Notifications\Notification::make()
                             ->title('Talep reddedildi')
                             ->warning()

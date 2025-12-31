@@ -93,6 +93,16 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        // Send welcome email to user
+        \App\Services\EmailService::sendWelcomeEmail($user);
+        
+        // Send admin notification about new user
+        \App\Services\EmailService::sendAdminNotification('new_user', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'registered_at' => $user->created_at->format('M d, Y H:i'),
+        ]);
+
         Auth::login($user);
 
         return redirect(route('dashboard', absolute: false))->with('status', 'Successfully registered! Welcome to our platform.');

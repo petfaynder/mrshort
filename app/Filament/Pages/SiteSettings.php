@@ -40,6 +40,18 @@ class SiteSettings extends Page implements HasForms
         $defaults = [
             'popup_admin_weight' => 70,
             'popup_user_campaigns_enabled' => true,
+            'queue_emails' => true,
+            'queue_analytics' => false,
+            'cache_ttl_default' => 3600,
+            'cache_ttl_leaderboard' => 3600,
+            'cache_ttl_settings' => 3600,
+        ];
+        
+        // Toggle fields that need boolean conversion
+        $booleanFields = [
+            'popup_user_campaigns_enabled',
+            'queue_emails',
+            'queue_analytics',
         ];
         
         // Initialize with defaults
@@ -52,7 +64,7 @@ class SiteSettings extends Page implements HasForms
         foreach ($settings as $setting) {
             $dbValue = SiteSetting::get($setting->key);
             // Convert '0' and '1' strings back to boolean for toggles
-            if (in_array($setting->key, ['popup_user_campaigns_enabled']) && !is_bool($dbValue)) {
+            if (in_array($setting->key, $booleanFields) && !is_bool($dbValue)) {
                 $dbValue = $dbValue === '1' || $dbValue === 1 || $dbValue === true;
             }
             $this->data[$setting->key] = $dbValue;
@@ -815,16 +827,13 @@ class SiteSettings extends Page implements HasForms
                         Toggle::make('queue_emails')
                             ->label('Queue Email Sending')
                             ->default(true)
-                            ->helperText('Send emails in background instead of blocking'),
+                            ->helperText('Send emails in background instead of blocking requests'),
                         Toggle::make('queue_analytics')
                             ->label('Queue Analytics Processing')
-                            ->default(true)
-                            ->helperText('Process click analytics in background'),
-                        Toggle::make('queue_webhooks')
-                            ->label('Queue Webhook Calls')
-                            ->default(true)
-                            ->helperText('Send webhook notifications in background'),
-                    ])->columns(3),
+                            ->default(false)
+                            ->disabled()
+                            ->helperText('Coming Soon - Process click analytics in background'),
+                    ])->columns(2),
                 Section::make('Cache Management')
                     ->description('Clear various caches')
                     ->schema([

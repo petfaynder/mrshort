@@ -211,13 +211,5 @@ class SiteSetting extends Model
     {
         return self::isQueueEnabled('analytics');
     }
-
-    /**
-     * Check if webhooks should be queued
-     */
-    public static function shouldQueueWebhooks(): bool
-    {
-        return self::isQueueEnabled('webhooks');
-    }
 }
 
