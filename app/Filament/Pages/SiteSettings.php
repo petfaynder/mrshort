@@ -81,6 +81,7 @@ class SiteSettings extends Page implements HasForms
                         $this->getIntegrationTab(),
                         $this->getAdvertisingTab(),
                         $this->getWordPressTab(),
+                        $this->getPerformanceTab(),
                     ])
                     ->columnSpanFull(),
             ])
@@ -724,6 +725,7 @@ class SiteSettings extends Page implements HasForms
             'timezone' => 'general', 'price_' => 'currency',
             'popup_' => 'advertising',
             'wordpress_' => 'wordpress',
+            'cache_' => 'performance', 'queue_' => 'performance',
         ];
         
         foreach ($prefixes as $prefix => $group) {
@@ -740,5 +742,144 @@ class SiteSettings extends Page implements HasForms
         if (is_numeric($value)) return 'number';
         if (is_array($value)) return 'json';
         return 'string';
+    }
+
+    protected function getPerformanceTab(): Tab
+    {
+        return Tab::make('Performance')
+            ->icon('heroicon-o-bolt')
+            ->schema([
+                Section::make('System Status')
+                    ->description('Current performance system status')
+                    ->schema([
+                        \Filament\Forms\Components\Placeholder::make('cache_driver')
+                            ->label('Cache Driver')
+                            ->content(fn () => strtoupper(config('cache.default'))),
+                        \Filament\Forms\Components\Placeholder::make('session_driver')
+                            ->label('Session Driver')
+                            ->content(fn () => strtoupper(config('session.driver'))),
+                        \Filament\Forms\Components\Placeholder::make('queue_driver')
+                            ->label('Queue Driver')
+                            ->content(fn () => strtoupper(config('queue.default'))),
+                        \Filament\Forms\Components\Placeholder::make('redis_status')
+                            ->label('Redis Status')
+                            ->content(function () {
+                                try {
+                                    if (config('cache.default') === 'redis') {
+                                        \Illuminate\Support\Facades\Redis::ping();
+                                        return new \Illuminate\Support\HtmlString('<span class="text-green-500 font-semibold">✓ Connected</span>');
+                                    }
+                                    return new \Illuminate\Support\HtmlString('<span class="text-gray-500">Not configured</span>');
+                                } catch (\Exception $e) {
+                                    return new \Illuminate\Support\HtmlString('<span class="text-red-500 font-semibold">✗ Disconnected</span>');
+                                }
+                            }),
+                        \Filament\Forms\Components\Placeholder::make('opcache_status')
+                            ->label('OPcache Status')
+                            ->content(function () {
+                                if (function_exists('opcache_get_status')) {
+                                    $status = @opcache_get_status(false);
+                                    if ($status && $status['opcache_enabled']) {
+                                        $memory = round($status['memory_usage']['used_memory'] / 1024 / 1024, 1);
+                                        return new \Illuminate\Support\HtmlString("<span class='text-green-500 font-semibold'>✓ Enabled ({$memory}MB used)</span>");
+                                    }
+                                }
+                                return new \Illuminate\Support\HtmlString('<span class="text-yellow-500">Disabled</span>');
+                            }),
+                        \Filament\Forms\Components\Placeholder::make('php_version')
+                            ->label('PHP Version')
+                            ->content(fn () => PHP_VERSION),
+                    ])->columns(3),
+                Section::make('Cache Settings')
+                    ->description('Configure caching behavior')
+                    ->schema([
+                        TextInput::make('cache_ttl_default')
+                            ->label('Default Cache TTL (seconds)')
+                            ->numeric()
+                            ->default(3600)
+                            ->helperText('How long to cache data by default (3600 = 1 hour)'),
+                        TextInput::make('cache_ttl_leaderboard')
+                            ->label('Leaderboard Cache TTL (seconds)')
+                            ->numeric()
+                            ->default(3600)
+                            ->helperText('Leaderboard refresh interval'),
+                        TextInput::make('cache_ttl_settings')
+                            ->label('Settings Cache TTL (seconds)')
+                            ->numeric()
+                            ->default(3600)
+                            ->helperText('How long site settings are cached'),
+                    ])->columns(3),
+                Section::make('Queue Settings')
+                    ->description('Background job processing settings')
+                    ->schema([
+                        Toggle::make('queue_emails')
+                            ->label('Queue Email Sending')
+                            ->default(true)
+                            ->helperText('Send emails in background instead of blocking'),
+                        Toggle::make('queue_analytics')
+                            ->label('Queue Analytics Processing')
+                            ->default(true)
+                            ->helperText('Process click analytics in background'),
+                        Toggle::make('queue_webhooks')
+                            ->label('Queue Webhook Calls')
+                            ->default(true)
+                            ->helperText('Send webhook notifications in background'),
+                    ])->columns(3),
+                Section::make('Cache Management')
+                    ->description('Clear various caches')
+                    ->schema([
+                        \Filament\Forms\Components\Actions::make([
+                            \Filament\Forms\Components\Actions\Action::make('clear_app_cache')
+                                ->label('Clear Application Cache')
+                                ->icon('heroicon-o-trash')
+                                ->color('danger')
+                                ->requiresConfirmation()
+                                ->action(function () {
+                                    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+                                    Notification::make()
+                                        ->title('Application cache cleared')
+                                        ->success()
+                                        ->send();
+                                }),
+                            \Filament\Forms\Components\Actions\Action::make('clear_view_cache')
+                                ->label('Clear View Cache')
+                                ->icon('heroicon-o-eye-slash')
+                                ->color('warning')
+                                ->requiresConfirmation()
+                                ->action(function () {
+                                    \Illuminate\Support\Facades\Artisan::call('view:clear');
+                                    Notification::make()
+                                        ->title('View cache cleared')
+                                        ->success()
+                                        ->send();
+                                }),
+                            \Filament\Forms\Components\Actions\Action::make('clear_config_cache')
+                                ->label('Clear Config Cache')
+                                ->icon('heroicon-o-cog-6-tooth')
+                                ->color('warning')
+                                ->requiresConfirmation()
+                                ->action(function () {
+                                    \Illuminate\Support\Facades\Artisan::call('config:clear');
+                                    Notification::make()
+                                        ->title('Config cache cleared')
+                                        ->success()
+                                        ->send();
+                                }),
+                            \Filament\Forms\Components\Actions\Action::make('optimize')
+                                ->label('Optimize Application')
+                                ->icon('heroicon-o-rocket-launch')
+                                ->color('success')
+                                ->requiresConfirmation()
+                                ->modalDescription('This will cache config, routes, and views for better performance.')
+                                ->action(function () {
+                                    \Illuminate\Support\Facades\Artisan::call('optimize');
+                                    Notification::make()
+                                        ->title('Application optimized')
+                                        ->success()
+                                        ->send();
+                                }),
+                        ])->fullWidth(),
+                    ]),
+            ]);
     }
 }

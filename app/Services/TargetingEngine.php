@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Country;
 use App\Models\CpmRate;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Cache;
 
 class TargetingEngine
@@ -62,7 +63,7 @@ class TargetingEngine
     {
         $cacheKey = 'reach_estimate_' . md5(serialize($targetingRules));
 
-        return Cache::remember($cacheKey, 3600, function() use ($targetingRules) {
+        return Cache::remember($cacheKey, SiteSetting::getCacheTtl('default'), function() use ($targetingRules) {
             $baseReach = 1000000; // 1M temel erişim
 
             // Coğrafi faktörler
@@ -225,7 +226,7 @@ class TargetingEngine
     {
         $cacheKey = 'cities_for_countries_' . implode('_', $countryCodes);
 
-        return Cache::remember($cacheKey, 3600, function() use ($countryCodes) {
+        return Cache::remember($cacheKey, SiteSetting::getCacheTtl('default'), function() use ($countryCodes) {
             return Country::whereIn('iso_code', $countryCodes)
                 ->with('cities')
                 ->get()

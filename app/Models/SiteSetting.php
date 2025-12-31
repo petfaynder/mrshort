@@ -32,7 +32,7 @@ class SiteSetting extends Model
     {
         $cacheKey = "site_setting_{$key}";
         
-        return Cache::remember($cacheKey, 3600, function () use ($key, $default) {
+        return Cache::remember($cacheKey, self::getCacheTtl('settings'), function () use ($key, $default) {
             $setting = self::where('key', $key)->first();
             
             if (!$setting) {
@@ -77,7 +77,7 @@ class SiteSetting extends Model
      */
     public static function getAllGrouped(): array
     {
-        return Cache::remember('site_settings_all', 3600, function () {
+        return Cache::remember('site_settings_all', self::getCacheTtl('settings'), function () {
             $settings = self::orderBy('group')->orderBy('order')->get();
             
             $grouped = [];
@@ -94,7 +94,7 @@ class SiteSetting extends Model
      */
     public static function getByGroup(string $group): array
     {
-        return Cache::remember("site_settings_group_{$group}", 3600, function () use ($group) {
+        return Cache::remember("site_settings_group_{$group}", self::getCacheTtl('settings'), function () use ($group) {
             $settings = self::where('group', $group)->orderBy('order')->get();
             
             $result = [];
@@ -164,4 +164,53 @@ class SiteSetting extends Model
         $decoded = json_decode($this->options, true);
         return is_array($decoded) ? $decoded : [];
     }
+
+    /**
+     * Get cache TTL for a specific type
+     */
+    public static function getCacheTtl(string $type = 'default'): int
+    {
+        $key = "cache_ttl_{$type}";
+        $default = match($type) {
+            'leaderboard' => 3600,
+            'settings' => 3600,
+            default => 3600,
+        };
+        
+        return (int) self::get($key, $default);
+    }
+
+    /**
+     * Check if a specific queue type is enabled
+     */
+    public static function isQueueEnabled(string $type): bool
+    {
+        $key = "queue_{$type}";
+        return (bool) self::get($key, true);
+    }
+
+    /**
+     * Check if emails should be queued
+     */
+    public static function shouldQueueEmails(): bool
+    {
+        return self::isQueueEnabled('emails');
+    }
+
+    /**
+     * Check if analytics should be queued
+     */
+    public static function shouldQueueAnalytics(): bool
+    {
+        return self::isQueueEnabled('analytics');
+    }
+
+    /**
+     * Check if webhooks should be queued
+     */
+    public static function shouldQueueWebhooks(): bool
+    {
+        return self::isQueueEnabled('webhooks');
+    }
 }
+
