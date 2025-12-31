@@ -32,7 +32,7 @@ class SiteSetting extends Model
     {
         $cacheKey = "site_setting_{$key}";
         
-        return Cache::remember($cacheKey, self::getCacheTtl('settings'), function () use ($key, $default) {
+        return Cache::remember($cacheKey, 3600, function () use ($key, $default) {
             $setting = self::where('key', $key)->first();
             
             if (!$setting) {
@@ -170,14 +170,21 @@ class SiteSetting extends Model
      */
     public static function getCacheTtl(string $type = 'default'): int
     {
-        $key = "cache_ttl_{$type}";
         $default = match($type) {
             'leaderboard' => 3600,
             'settings' => 3600,
             default => 3600,
         };
         
-        return (int) self::get($key, $default);
+        // Direct DB query to avoid infinite recursion
+        $key = "cache_ttl_{$type}";
+        $setting = self::where('key', $key)->first();
+        
+        if (!$setting || !$setting->value) {
+            return $default;
+        }
+        
+        return (int) $setting->value;
     }
 
     /**
