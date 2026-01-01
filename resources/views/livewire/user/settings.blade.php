@@ -170,6 +170,111 @@
             </div>
         </div>
 
+        {{-- Telegram Traffic Bonus --}}
+        <div class="rounded-xl border border-solid border-blue-500/30 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-gray-800 p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-heading-light dark:text-heading-dark text-[22px] font-bold leading-tight tracking-[-0.015em]">Telegram Traffic Bonus</h2>
+                    <p class="text-text-light dark:text-text-dark text-sm">Earn +10% CPM for verified Telegram traffic</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                {{-- Status Indicator --}}
+                <div class="flex items-center justify-between p-4 rounded-lg bg-white/50 dark:bg-gray-700/30">
+                    <div class="flex items-center gap-3">
+                        @if($telegramBonusStatus === 'active')
+                            <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                            <div>
+                                <p class="font-semibold text-green-600 dark:text-green-400">Active</p>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">
+                                    @if($telegramMatchRate)
+                                        Last verification: {{ number_format($telegramMatchRate, 1) }}% Telegram traffic
+                                    @else
+                                        Awaiting first verification (500 clicks)
+                                    @endif
+                                </p>
+                            </div>
+                        @elseif($telegramBonusStatus === 'cooldown')
+                            <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
+                            <div>
+                                <p class="font-semibold text-yellow-600 dark:text-yellow-400">Cooldown</p>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">Available on {{ $telegramCooldownEndsAt }}</p>
+                            </div>
+                        @else
+                            <span class="w-3 h-3 bg-gray-400 rounded-full"></span>
+                            <div>
+                                <p class="font-semibold text-gray-600 dark:text-gray-400">Inactive</p>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">Enable to start earning bonus CPM</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Toggle Button --}}
+                    @if($telegramBonusStatus === 'active')
+                        <button wire:click="disableTelegramBonus" 
+                                wire:loading.attr="disabled"
+                                class="px-4 py-2 text-sm font-medium text-red-600 bg-red-100 hover:bg-red-200 rounded-lg transition-colors">
+                            <span wire:loading.remove wire:target="disableTelegramBonus">Disable</span>
+                            <span wire:loading wire:target="disableTelegramBonus">...</span>
+                        </button>
+                    @elseif($telegramBonusStatus === 'cooldown')
+                        <button disabled class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
+                            Cooldown
+                        </button>
+                    @else
+                        <button wire:click="openTelegramBonusModal"
+                                class="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors">
+                            Enable
+                        </button>
+                    @endif
+                </div>
+
+                {{-- Info Box --}}
+                <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1 bg-gray-50 dark:bg-gray-700/30 rounded-lg p-3">
+                    <p>✓ <strong>+10% CPM bonus</strong> on all your link earnings</p>
+                    <p>⚡ Verification every <strong>500 clicks</strong></p>
+                    <p>📊 At least <strong>70% traffic</strong> must come from Telegram</p>
+                    <p>⚠️ <strong>7-day cooldown</strong> if verification fails</p>
+                </div>
+            </div>
+
+            {{-- Enable Modal --}}
+            @if($showTelegramBonusModal)
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color: rgba(0, 0, 0, 0.75);">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
+                        <h3 class="text-xl font-bold">Enable Telegram Traffic Bonus</h3>
+                        <p class="text-white/80 text-sm">Confirm to start earning +10% CPM</p>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600 dark:text-gray-300 text-sm">
+                            By enabling this bonus, you confirm that at least 70% of your traffic comes from Telegram. 
+                            Traffic will be verified every 500 clicks, and the bonus will be revoked if verification fails.
+                        </p>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-700/30 px-6 py-4 flex gap-3">
+                        <button wire:click="closeTelegramBonusModal"
+                                class="flex-1 px-4 py-2.5 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors font-medium text-sm">
+                            Cancel
+                        </button>
+                        <button wire:click="enableTelegramBonus"
+                                wire:loading.attr="disabled"
+                                class="flex-1 px-4 py-2.5 text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-colors font-medium text-sm">
+                            <span wire:loading.remove wire:target="enableTelegramBonus">Enable Bonus</span>
+                            <span wire:loading wire:target="enableTelegramBonus">Enabling...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            @endif
+        </div>
+
         {{-- Theme Preference --}}
         <div class="rounded-xl border border-solid border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-6">
             <h2 class="text-heading-light dark:text-heading-dark text-[22px] font-bold leading-tight tracking-[-0.015em] mb-6">Theme Preference</h2>

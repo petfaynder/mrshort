@@ -32,6 +32,7 @@ class AdCampaign extends Model
         'budget',
         'run_until_budget_depleted',
         'campaign_schedule',
+        'is_telegram_promotion',
     ];
 
     protected $casts = [
@@ -49,6 +50,7 @@ class AdCampaign extends Model
         'budget' => 'decimal:2',
         'run_until_budget_depleted' => 'boolean',
         'campaign_schedule' => 'json',
+        'is_telegram_promotion' => 'boolean',
     ];
 
     /**

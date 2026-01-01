@@ -176,24 +176,25 @@
 </div>
 
 <script>
+    // Password toggle function (global scope for onclick access)
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.getElementById('password-toggle-icon');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.textContent = 'visibility_off';
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.textContent = 'visibility';
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const formItems = document.querySelectorAll('.animate-form-item');
         formItems.forEach((item, index) => {
             item.style.animationDelay = `${0.1 * index}s`;
             item.classList.add('animate-form-item');
         });
-
-        function togglePasswordVisibility() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.getElementById('password-toggle-icon');
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.textContent = 'visibility_off';
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.textContent = 'visibility';
-            }
-        }
 
         // Generic form submission loading animation
         const forms = document.querySelectorAll('form');

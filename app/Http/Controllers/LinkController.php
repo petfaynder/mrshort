@@ -396,6 +396,17 @@ class LinkController extends Controller
                     $earning += $vipBonus;
                 }
 
+                // Apply Telegram Traffic Bonus (+10%)
+                if ($user->hasTelegramBonus()) {
+                    $telegramBonusService = app(\App\Services\TelegramBonusService::class);
+                    $telegramBonus = $earning * ($telegramBonusService->getCpmBonusMultiplier() - 1);
+                    $earning += $telegramBonus;
+                    \Log::info('Telegram bonus applied.', [
+                        'user_id' => $user->id,
+                        'telegram_bonus' => $telegramBonus,
+                    ]);
+                }
+
                 $user->link_earnings += $earning;
                 $user->earnings = $user->link_earnings + $user->referral_earnings;
                 
@@ -416,6 +427,21 @@ class LinkController extends Controller
                         $referrerUser->save();
                     }
                 }
+
+                // Telegram Traffic Verification - Increment counter and check
+                if ($user->telegram_bonus_enabled) {
+                    $telegramBonusService = app(\App\Services\TelegramBonusService::class);
+                    $newClickCount = $telegramBonusService->incrementVerificationCounter($user);
+                    
+                    if ($telegramBonusService->needsVerification($user->fresh())) {
+                        // Dispatch verification job
+                        \App\Jobs\VerifyTelegramTrafficJob::dispatch($user->fresh());
+                        \Log::info('Telegram verification job dispatched.', [
+                            'user_id' => $user->id,
+                            'click_count' => $newClickCount,
+                        ]);
+                    }
+                }
                 
                 \Log::info('User earnings updated after ad completion.', [
                     'user_id' => $user->id,
@@ -423,6 +449,7 @@ class LinkController extends Controller
                 ]);
             }
         }
+
         
         // Redirect to the original destination URL
         return Redirect::to($link->original_url);
@@ -524,7 +551,11 @@ class LinkController extends Controller
             // Detect visitor info for targeting
             $popupVisitorInfo = VisitorDetectionService::detect($request);
             
-            $userPopupCampaign = AdCampaign::where('campaign_type', 'user')
+            // Check if link owner has Telegram bonus enabled
+            $linkOwnerHasTelegramBonus = $link->user?->telegram_bonus_enabled ?? false;
+            
+            // Get all matching campaigns
+            $matchingCampaigns = AdCampaign::where('campaign_type', 'user')
                 ->where('approval_status', 'approved')
                 ->where('is_active', true)
                 ->get()
@@ -553,8 +584,39 @@ class LinkController extends Controller
                     }
                     
                     return true;
-                })
-                ->first();
+                });
+            
+            // Priority-based campaign selection
+            $userPopupCampaign = null;
+            
+            if ($linkOwnerHasTelegramBonus) {
+                // Telegram-bonus users: prioritize Telegram promotion campaigns
+                $userPopupCampaign = $matchingCampaigns
+                    ->where('is_telegram_promotion', true)
+                    ->first();
+                
+                // Fallback to any campaign if no Telegram campaign found
+                if (!$userPopupCampaign) {
+                    $userPopupCampaign = $matchingCampaigns->first();
+                }
+                
+                if ($userPopupCampaign?->is_telegram_promotion) {
+                    \Log::info('Telegram campaign prioritized for Telegram-bonus user.', [
+                        'campaign_id' => $userPopupCampaign->id,
+                        'link_user_id' => $link->user_id,
+                    ]);
+                }
+            } else {
+                // Non-Telegram users: prefer non-Telegram campaigns first
+                $userPopupCampaign = $matchingCampaigns
+                    ->where('is_telegram_promotion', false)
+                    ->first();
+                
+                // Fallback to any campaign (including Telegram) if none found
+                if (!$userPopupCampaign) {
+                    $userPopupCampaign = $matchingCampaigns->first();
+                }
+            }
             
             if ($userPopupCampaign && isset($userPopupCampaign->targeting_rules['url'])) {
                 $userPopupUrl = $userPopupCampaign->targeting_rules['url'];

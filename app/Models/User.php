@@ -65,6 +65,14 @@ class User extends Authenticatable implements FilamentUser
         'admin_message_ticket_id',
         'deactivation_reason',
         'deactivated_at',
+        // Telegram Traffic Bonus
+        'telegram_bonus_enabled',
+        'telegram_bonus_enabled_at',
+        'telegram_bonus_verified_at',
+        'telegram_bonus_failed_at',
+        'telegram_verification_clicks',
+        'telegram_referrer_match_rate',
+        'telegram_bonus_decision_made',
     ];
 
     /**
@@ -87,6 +95,12 @@ class User extends Authenticatable implements FilamentUser
             'password' => 'hashed',
             'tutorial_completed_at' => 'datetime',
             'last_login_at' => 'datetime',
+            // Telegram Bonus
+            'telegram_bonus_enabled' => 'boolean',
+            'telegram_bonus_enabled_at' => 'datetime',
+            'telegram_bonus_verified_at' => 'datetime',
+            'telegram_bonus_failed_at' => 'datetime',
+            'telegram_bonus_decision_made' => 'boolean',
         ];
     }
 
@@ -219,5 +233,113 @@ class User extends Authenticatable implements FilamentUser
     public function getIsAdminAttribute(): bool
     {
         return $this->hasRole('admin') || $this->email === 'akartolga0@gmail.com';
+    }
+
+    // ==========================================
+    // Telegram Traffic Bonus Methods
+    // ==========================================
+
+    /**
+     * Check if user has active telegram bonus
+     */
+    public function hasTelegramBonus(): bool
+    {
+        return $this->telegram_bonus_enabled && $this->canUseTelegramBonus();
+    }
+
+    /**
+     * Check if user can use telegram bonus (not in cooldown)
+     */
+    public function canUseTelegramBonus(): bool
+    {
+        // Check if in cooldown period (7 days after failure)
+        if ($this->telegram_bonus_failed_at) {
+            $cooldownEnds = $this->telegram_bonus_failed_at->addDays(7);
+            if (now()->lt($cooldownEnds)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check if user can enable telegram bonus
+     */
+    public function canEnableTelegramBonus(): bool
+    {
+        // Already enabled
+        if ($this->telegram_bonus_enabled) {
+            return false;
+        }
+
+        return $this->canUseTelegramBonus();
+    }
+
+    /**
+     * Enable telegram bonus for this user
+     */
+    public function enableTelegramBonus(): void
+    {
+        $this->update([
+            'telegram_bonus_enabled' => true,
+            'telegram_bonus_enabled_at' => now(),
+            'telegram_bonus_decision_made' => true,
+            'telegram_verification_clicks' => 0,
+            'telegram_bonus_failed_at' => null, // Clear any previous failure
+        ]);
+    }
+
+    /**
+     * Disable telegram bonus
+     */
+    public function disableTelegramBonus(bool $failed = false): void
+    {
+        $data = [
+            'telegram_bonus_enabled' => false,
+            'telegram_verification_clicks' => 0,
+        ];
+
+        if ($failed) {
+            $data['telegram_bonus_failed_at'] = now();
+        }
+
+        $this->update($data);
+    }
+
+    /**
+     * Get cooldown end date if in cooldown
+     */
+    public function getTelegramCooldownEndsAt(): ?\Carbon\Carbon
+    {
+        if (!$this->telegram_bonus_failed_at) {
+            return null;
+        }
+
+        $cooldownEnds = $this->telegram_bonus_failed_at->addDays(7);
+        
+        if (now()->gte($cooldownEnds)) {
+            return null; // Cooldown has passed
+        }
+
+        return $cooldownEnds;
+    }
+
+    /**
+     * Skip telegram bonus decision (user chose not to enable)
+     */
+    public function skipTelegramBonusDecision(): void
+    {
+        $this->update([
+            'telegram_bonus_decision_made' => true,
+        ]);
+    }
+
+    /**
+     * Check if user needs to make telegram bonus decision (after tutorial)
+     */
+    public function needsTelegramBonusDecision(): bool
+    {
+        return $this->tutorial_completed_at 
+            && !$this->telegram_bonus_decision_made;
     }
 }

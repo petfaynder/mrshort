@@ -28,6 +28,13 @@ class Settings extends Component
     public $allowAnalytics;
     public $allowPersonalizedAds;
 
+    // Telegram Traffic Bonus
+    public $telegramBonusEnabled;
+    public $telegramBonusStatus;
+    public $telegramCooldownEndsAt;
+    public $telegramMatchRate;
+    public $showTelegramBonusModal = false;
+
     public function mount()
     {
         $user = Auth::user();
@@ -45,9 +52,28 @@ class Settings extends Component
             $this->bankName = $details['bank_name'] ?? '';
         }
 
-        $this->themePreference = $user->theme_preference ?? 'light';
+        $this->themePreference = $user->theme_preference ?? 'dark';
         $this->allowAnalytics = (bool) $user->allow_analytics;
         $this->allowPersonalizedAds = (bool) $user->allow_personalized_ads;
+
+        // Telegram Bonus
+        $this->loadTelegramBonusStatus();
+    }
+
+    public function loadTelegramBonusStatus()
+    {
+        $user = Auth::user();
+        $this->telegramBonusEnabled = $user->telegram_bonus_enabled;
+        $this->telegramMatchRate = $user->telegram_referrer_match_rate;
+        $this->telegramCooldownEndsAt = $user->getTelegramCooldownEndsAt()?->format('M d, Y');
+        
+        if ($user->telegram_bonus_enabled) {
+            $this->telegramBonusStatus = 'active';
+        } elseif ($this->telegramCooldownEndsAt) {
+            $this->telegramBonusStatus = 'cooldown';
+        } else {
+            $this->telegramBonusStatus = 'inactive';
+        }
     }
 
     public function getSessionsProperty()
@@ -165,6 +191,39 @@ class Settings extends Component
         ]);
 
         $this->dispatch('settings-updated', message: 'Privacy settings updated successfully.');
+    }
+
+    // Telegram Bonus Methods
+    public function openTelegramBonusModal()
+    {
+        $this->showTelegramBonusModal = true;
+    }
+
+    public function closeTelegramBonusModal()
+    {
+        $this->showTelegramBonusModal = false;
+    }
+
+    public function enableTelegramBonus()
+    {
+        $user = Auth::user();
+        
+        if ($user->canEnableTelegramBonus()) {
+            $user->enableTelegramBonus();
+            $this->loadTelegramBonusStatus();
+            $this->showTelegramBonusModal = false;
+            session()->flash('success', '🎉 Telegram Traffic Bonus enabled! You will earn +10% CPM for verified Telegram traffic.');
+        } else {
+            session()->flash('error', 'Unable to enable Telegram bonus at this time.');
+        }
+    }
+
+    public function disableTelegramBonus()
+    {
+        $user = Auth::user();
+        $user->disableTelegramBonus();
+        $this->loadTelegramBonusStatus();
+        session()->flash('info', 'Telegram Traffic Bonus has been disabled.');
     }
 
     public function render()

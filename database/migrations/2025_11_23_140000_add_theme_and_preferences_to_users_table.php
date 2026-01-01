@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('theme_preference')->default('light'); // 'light' or 'dark'
+            $table->string('theme_preference')->default('dark'); // 'light' or 'dark'
             $table->boolean('allow_analytics')->default(true);
             $table->boolean('allow_personalized_ads')->default(false);
         });

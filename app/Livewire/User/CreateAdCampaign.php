@@ -53,6 +53,10 @@ class CreateAdCampaign extends Component
     public $daily_budget = 1; // Minimum başlangıç bütçesi
     public $bidding_strategy = 'cpm'; // Pop-up'lar için CPM daha uygun olabilir
 
+    // Telegram Promotion Detection
+    public $isTelegramPromotion = false;
+    public $manualTelegramPromotion = false; // User manually declares Telegram promotion
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'popup_url' => 'required|url|max:2048',
@@ -107,6 +111,27 @@ class CreateAdCampaign extends Component
         $this->calculateCostAndTraffic();
     }
 
+    public function updatedPopupUrl()
+    {
+        // Check if popup_url is a Telegram promotion URL (auto-detect)
+        $telegramService = app(\App\Services\TelegramBonusService::class);
+        $autoDetected = $telegramService->isTelegramPromotionUrl($this->popup_url);
+        
+        // Combine auto-detection with manual selection
+        $this->isTelegramPromotion = $autoDetected || $this->manualTelegramPromotion;
+        $this->calculateCostAndTraffic();
+    }
+
+    public function updatedManualTelegramPromotion()
+    {
+        // When user manually toggles, recalculate
+        $telegramService = app(\App\Services\TelegramBonusService::class);
+        $autoDetected = $telegramService->isTelegramPromotionUrl($this->popup_url);
+        
+        $this->isTelegramPromotion = $autoDetected || $this->manualTelegramPromotion;
+        $this->calculateCostAndTraffic();
+    }
+
     public function openConfirmationModal()
     {
         $this->validate();
@@ -143,7 +168,16 @@ class CreateAdCampaign extends Component
 
         // Maliyet hesaplama
         $estimatedImpressions = $this->desired_clicks; // Basitlik adına tıklama = gösterim varsayımı
-        $this->calculated_cost = ($estimatedImpressions / 1000) * $averageAdvertiserCpmRate;
+        $baseCost = ($estimatedImpressions / 1000) * $averageAdvertiserCpmRate;
+        
+        // Apply Telegram promotion premium (+25%)
+        if ($this->isTelegramPromotion) {
+            $telegramService = app(\App\Services\TelegramBonusService::class);
+            $this->calculated_cost = $baseCost * $telegramService->getAdvertiserTelegramMultiplier();
+        } else {
+            $this->calculated_cost = $baseCost;
+        }
+        
         $this->daily_budget = max(1, ceil($this->calculated_cost / 30)); // Aylık maliyetin 1/30'u günlük bütçe, min 1$
 
         // Tahmini ve Mevcut Trafik hesaplaması (Basit bir örnek)
@@ -204,6 +238,7 @@ class CreateAdCampaign extends Component
             'available_traffic' => $this->available_traffic,
             'payment_status' => 'unpaid', // Set initial status
             'payment_provider' => $this->payment_method,
+            'is_telegram_promotion' => $this->isTelegramPromotion,
         ]);
 
         // Handle Payment

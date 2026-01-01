@@ -132,7 +132,7 @@
             <span>{{ $errors->first('email') }}</span>
         </p>
     @endif
-    <button class="flex h-12 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-5 text-base font-bold leading-normal tracking-[0.015em] text-white transition-colors hover:bg-primary/90" onclick="this.form.submit(); this.disabled = true; this.innerHTML = '<span class="spinner"></span><span class="ml-2">Sending Link...</span>';">
+    <button type="submit" class="flex h-12 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-5 text-base font-bold leading-normal tracking-[0.015em] text-white transition-colors hover:bg-primary/90">
         <span class="truncate">Send Reset Link</span>
     </button>
 </form>

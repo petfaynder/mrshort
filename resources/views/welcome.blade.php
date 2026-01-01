@@ -27,7 +27,7 @@
     @include('partials.header')
 
     <!-- Hero Section (Minimalist & Typography) -->
-    <div class="relative h-screen w-full flex flex-col justify-center items-center hero-section bg-[#050505] overflow-hidden">
+    <div class="relative min-h-screen w-full flex flex-col justify-center items-center hero-section bg-[#050505] overflow-hidden py-20 lg:py-24">
         
         <!-- Subtle Background Grid -->
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
@@ -43,13 +43,13 @@
             </div>
 
             <!-- Massive Typography -->
-            <h1 class="text-7xl md:text-9xl font-bold tracking-tighter leading-none mb-8 text-white gsap-hero-element">
+            <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tighter leading-none mb-6 md:mb-8 text-white gsap-hero-element">
                 SHRINK.<br/>
                 <span class="text-gray-600 transition-colors duration-500 hover:text-white cursor-default">SHARE.</span><br/>
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-electric-blue to-bright-magenta animate-gradient-x">EARN.</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl font-light gsap-hero-element">
+            <p class="text-lg sm:text-xl md:text-2xl text-gray-400 mb-8 md:mb-12 max-w-2xl font-light gsap-hero-element px-4">
                 Monetize your traffic with the highest paying rates in the market. Simple, fast, and secure.
             </p>
 
@@ -110,7 +110,7 @@
                 </div>
 
                 <!-- Result Display -->
-                <div x-show="shortened" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform -translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0"
+                <div x-cloak x-show="shortened" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform -translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0"
                      class="mt-4 p-4 bg-green-500/10 border border-green-500/20 rounded-2xl flex items-center justify-between backdrop-blur-md">
                     <div class="flex items-center gap-3 overflow-hidden">
                         <span class="material-symbols-outlined text-green-400">check_circle</span>
@@ -124,7 +124,7 @@
                 </div>
                 
                 <!-- Error Display -->
-                <div x-show="error" x-transition class="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm flex items-center gap-3 backdrop-blur-md">
+                <div x-cloak x-show="error" x-transition class="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm flex items-center gap-3 backdrop-blur-md">
                     <span class="material-symbols-outlined">error</span>
                     <span x-text="error"></span>
                 </div>

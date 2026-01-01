@@ -25,6 +25,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('competition:end')->hourly();
         $schedule->command('vip:monthly-reset')->monthlyOn(1, '00:00');
         $schedule->command('team:weekly-reset')->weeklyOn(1, '00:00');
+        
+        // CPM Campaign Management
+        $schedule->command('cpm:check-expired-campaigns')->hourly();
     }
 
     /**

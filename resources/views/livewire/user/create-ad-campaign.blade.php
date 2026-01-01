@@ -45,12 +45,51 @@
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-[#6B7280] dark:text-[#9CA3AF] mb-2" for="target-url">Target URL *</label>
-                        <input wire:model="popup_url" class="w-full bg-[#FFFFFF] dark:bg-[#374151] border border-[#E5E7EB] dark:border-[#374151] text-[#111827] dark:text-[#F9FAFB] rounded-md focus:ring-[#3B82F6] focus:border-[#3B82F6] placeholder-[#9CA3AF] dark:placeholder-[#6B7280]" id="target-url" placeholder="https://example.com/campaign" type="url"/>
+                        <input wire:model.live="popup_url" class="w-full bg-[#FFFFFF] dark:bg-[#374151] border border-[#E5E7EB] dark:border-[#374151] text-[#111827] dark:text-[#F9FAFB] rounded-md focus:ring-[#3B82F6] focus:border-[#3B82F6] placeholder-[#9CA3AF] dark:placeholder-[#6B7280]" id="target-url" placeholder="https://example.com/campaign" type="url"/>
                         @error('popup_url') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         <p class="mt-2 text-xs text-[#6B7280] dark:text-[#9CA3AF]">The destination link for your campaign (e.g., https://example.com/promo)</p>
+                        
+                        {{-- Telegram Premium Pricing Notice --}}
+                        @if($isTelegramPromotion)
+                        <div class="mt-3 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200 dark:border-blue-800">
+                            <div class="flex items-start gap-3">
+                                <div class="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-semibold text-blue-800 dark:text-blue-300">Telegram Channel Promotion</p>
+                                    <p class="text-xs text-blue-700 dark:text-blue-400 mt-1">
+                                        Telegram channel promotions include a <strong>+25% premium</strong> due to higher conversion potential. 
+                                        This premium is automatically applied to your campaign cost.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        {{-- Manual Telegram Promotion Checkbox --}}
+                        <div class="mt-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-600">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" 
+                                       wire:model.live="manualTelegramPromotion"
+                                       class="mt-1 w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <div>
+                                    <span class="text-sm font-medium text-[#111827] dark:text-[#F9FAFB]">
+                                        This is a Telegram Channel Promotion
+                                    </span>
+                                    <p class="text-xs text-[#6B7280] dark:text-[#9CA3AF] mt-1">
+                                        Check this box if your target URL leads to a Telegram channel (even if using a URL shortener like bit.ly). 
+                                        A +25% premium will be applied.
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
+
 
             <!-- Targeting -->
             <div class="bg-[#FFFFFF] dark:bg-[#1F2937] p-6 md:p-8 rounded-lg shadow-sm border border-[#E5E7EB] dark:border-[#374151]">

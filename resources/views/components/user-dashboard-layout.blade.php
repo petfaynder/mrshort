@@ -75,6 +75,9 @@
 {{-- Deactivated Account Modal (Non-closeable) --}}
 <livewire:user.deactivated-account-modal />
 
+{{-- Telegram Traffic Bonus Modal (Post-tutorial) --}}
+<livewire:user.telegram-bonus-modal />
+
 <div class="flex h-screen overflow-hidden">
     <aside class="w-64 bg-card-light dark:bg-card-dark flex flex-col p-4 border-r border-border-light dark:border-border-dark overflow-y-auto">
         <div class="flex items-center gap-2 px-4 py-2 mb-8">
