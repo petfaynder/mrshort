@@ -67,12 +67,13 @@ class GoogleController extends Controller
             return redirect()->route('dashboard');
             
         } catch (\Exception $e) {
-            // Log the error for debugging
+            // Log the error for debugging (detailed info stays in logs only)
             Log::error('Google OAuth Error: ' . $e->getMessage());
             Log::error('Stack trace: ' . $e->getTraceAsString());
             
+            // Show generic message to user - don't expose internal error details
             return redirect()->route('login')
-                ->with('error', 'Google authentication failed: ' . $e->getMessage());
+                ->with('error', 'Google authentication failed. Please try again or contact support.');
         }
     }
 }

@@ -20,12 +20,11 @@ class PaymentController extends Controller
     {
         $data = $request->all();
 
-        // Validate Signature
-        // Note: In production, enable this. For testing without real keys, you might bypass or log failure.
-        // if (!$this->cryptomusService->validateSignature($data)) {
-        //     Log::warning('Cryptomus invalid signature', $data);
-        //     return response()->json(['error' => 'Invalid signature'], 400);
-        // }
+        // Validate Signature - CRITICAL for production security
+        if (!$this->cryptomusService->validateSignature($data)) {
+            Log::warning('Cryptomus invalid signature', $data);
+            return response()->json(['error' => 'Invalid signature'], 400);
+        }
 
         $orderId = $data['order_id'] ?? null;
         $status = $data['status'] ?? null; // paid, paid_over, wrong_amount, process, fail, cancel, system_fail, refund_process, refund_fail, paid_late

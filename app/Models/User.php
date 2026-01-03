@@ -224,7 +224,7 @@ class User extends Authenticatable implements FilamentUser
     public function canAccessPanel(Panel $panel): bool
     {
         if ($panel->getId() === 'admin') {
-            return $this->hasRole('admin') || $this->email === 'akartolga0@gmail.com';
+            return $this->hasRole('admin');
         }
 
         return false;
@@ -232,7 +232,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function getIsAdminAttribute(): bool
     {
-        return $this->hasRole('admin') || $this->email === 'akartolga0@gmail.com';
+        return $this->hasRole('admin');
     }
 
     // ==========================================
