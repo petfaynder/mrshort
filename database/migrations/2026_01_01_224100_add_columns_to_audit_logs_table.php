@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('audit_logs', function (Blueprint $table) {
-            $table->foreignId('user_id')->nullable()->after('id')->constrained()->nullOnDelete();
+            // Using unsignedBigInteger instead of foreignId to avoid engine compatibility issues
+            $table->unsignedBigInteger('user_id')->nullable()->after('id');
             $table->string('action', 100)->after('user_id')->index();
             $table->text('description')->nullable()->after('action');
             $table->string('model_type')->nullable()->after('description');
@@ -35,7 +36,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('audit_logs', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
             $table->dropIndex(['action']);
             $table->dropIndex(['created_at']);
             $table->dropColumn([
