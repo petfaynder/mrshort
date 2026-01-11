@@ -11,12 +11,6 @@
         display: none;
     }
 
-    /* Fix for double-scroll issue - prevent html from being scrollable */
-    html {
-        overflow: hidden;
-        height: 100%;
-    }
-
     /* Prevent sr-only inputs from triggering window scroll on focus */
     .sr-only:focus {
         scroll-margin: 0;
