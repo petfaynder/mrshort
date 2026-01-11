@@ -201,11 +201,39 @@
                         </li>
                     </ul>
                 </li>
-                <li class="mb-2">
-                    <a data-tutorial="nav-contact" class="flex items-center gap-3 px-4 py-2 rounded-lg {{ request()->routeIs('user.contact') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" href="{{ route('user.contact') }}">
-                        <span class="material-symbols-outlined">contact_support</span>
-                        Contact Us
-                    </a>
+                <li class="mb-2" x-data="{ open: {{ request()->routeIs('user.contact') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="flex items-center justify-between w-full px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark {{ request()->routeIs('user.contact') ? 'bg-blue-50 dark:bg-blue-900/30' : '' }}">
+                        <span class="flex items-center gap-3">
+                            <span class="material-symbols-outlined">help</span>
+                            Help & Support
+                        </span>
+                        <span class="material-symbols-outlined transition-transform duration-200" :class="{ 'rotate-180': open }">expand_more</span>
+                    </button>
+                    <ul x-cloak x-show="open" x-collapse class="mt-2 ml-4 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-2">
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark" 
+                               href="https://help.mrshort.io" 
+                               target="_blank">
+                                <span class="material-symbols-outlined text-lg">menu_book</span>
+                                Knowledge Base
+                                <span class="material-symbols-outlined text-xs ml-auto opacity-50">open_in_new</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm {{ request()->routeIs('feedback.*') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" 
+                               href="{{ route('feedback.index') }}">
+                                <span class="material-symbols-outlined text-lg">lightbulb</span>
+                                Feature Requests
+                            </a>
+                        </li>
+                        <li>
+                            <a data-tutorial="nav-contact" class="flex items-center gap-3 px-4 py-2 rounded-lg text-sm {{ request()->routeIs('user.contact') ? 'bg-blue-100 dark:bg-blue-900/50 text-primary font-semibold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark' }}" 
+                               href="{{ route('user.contact') }}">
+                                <span class="material-symbols-outlined text-lg">mail</span>
+                                Contact Us
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </nav>

@@ -82,4 +82,27 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
     </div>
     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 </div>
+
+
+<!--[if BLOCK]><![endif]--><?php if(session()->has('message')): ?>
+    <?php if (isset($component)) { $__componentOriginalf98a32c06d8462f5513d0fb3554f9141 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalf98a32c06d8462f5513d0fb3554f9141 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.toast-notification','data' => ['type' => 'success']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('toast-notification'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['type' => 'success']); ?><?php echo e(session('message')); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalf98a32c06d8462f5513d0fb3554f9141)): ?>
+<?php $attributes = $__attributesOriginalf98a32c06d8462f5513d0fb3554f9141; ?>
+<?php unset($__attributesOriginalf98a32c06d8462f5513d0fb3554f9141); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalf98a32c06d8462f5513d0fb3554f9141)): ?>
+<?php $component = $__componentOriginalf98a32c06d8462f5513d0fb3554f9141; ?>
+<?php unset($__componentOriginalf98a32c06d8462f5513d0fb3554f9141); ?>
+<?php endif; ?>
+<?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 <?php /**PATH C:\Users\Tolga\Desktop\Proje Siteleri\linkkısaltmaservisi2\resources\views/livewire/user/performance-overview.blade.php ENDPATH**/ ?>

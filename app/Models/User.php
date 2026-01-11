@@ -342,4 +342,21 @@ class User extends Authenticatable implements FilamentUser
         return $this->tutorial_completed_at 
             && !$this->telegram_bonus_decision_made;
     }
+    /**
+     * Feedback System Relationships
+     */
+    public function feedbackPosts(): HasMany
+    {
+        return $this->hasMany(FeedbackPost::class);
+    }
+
+    public function feedbackVotes(): HasMany
+    {
+        return $this->hasMany(FeedbackVote::class);
+    }
+
+    public function feedbackComments(): HasMany
+    {
+        return $this->hasMany(FeedbackComment::class);
+    }
 }

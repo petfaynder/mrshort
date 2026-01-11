@@ -92,6 +92,9 @@ class EditAdCampaign extends Component
         $this->popup_url = $targetingRules['popup_url'] ?? '';
         $this->originalPopupUrl = $this->popup_url; // Store original URL
 
+        // Load desired_clicks from targeting_rules (or fall back to estimated_traffic)
+        $this->desired_clicks = $targetingRules['desired_clicks'] ?? $this->adCampaign->estimated_traffic ?? 1000;
+
         $this->calculateCostAndTraffic();
     }
 
@@ -220,6 +223,7 @@ class EditAdCampaign extends Component
             'is_popup_campaign' => true,
             'popup_title' => $this->name,
             'popup_content' => 'This is a user pop-up ad.',
+            'desired_clicks' => $this->desired_clicks, // Preserve desired clicks
         ]);
         $this->adCampaign->update(['targeting_rules' => $updatedTargetingRules]);
 

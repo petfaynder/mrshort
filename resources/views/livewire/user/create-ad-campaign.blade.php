@@ -105,8 +105,8 @@
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-2 border border-[#E5E7EB] dark:border-[#374151] rounded-md">
                             @foreach($countries as $country)
-                                <label wire:key="country-{{ $country->id }}" x-show="'{{ strtolower($country->name) }}'.includes(countrySearch.toLowerCase())" class="flex items-center space-x-2 cursor-pointer p-1 hover:bg-[#F3F4F6] dark:hover:bg-[#111827] rounded">
-                                    <input type="checkbox" wire:model.live="selectedCountries" value="{{ $country->iso_code }}" class="rounded border-gray-300 text-[#3B82F6] focus:ring-[#3B82F6] bg-gray-100 dark:bg-gray-700">
+                                <label wire:key="country-{{ $country->id }}" x-show="$el.textContent.toLowerCase().includes(countrySearch.toLowerCase())" class="flex items-center space-x-2 cursor-pointer p-1 hover:bg-[#F3F4F6] dark:hover:bg-[#111827] rounded">
+                                    <input type="checkbox" wire:model="selectedCountries" value="{{ $country->iso_code }}" class="rounded border-gray-300 text-[#3B82F6] focus:ring-[#3B82F6] bg-gray-100 dark:bg-gray-700">
                                     <span class="fi fi-{{ strtolower($country->iso_code) }} mr-1"></span>
                                     <span class="text-sm text-[#111827] dark:text-[#F9FAFB]">{{ $country->name }}</span>
                                 </label>
@@ -120,8 +120,8 @@
                         <label class="block text-sm font-medium text-[#6B7280] dark:text-[#9CA3AF] mb-3">Target Age Groups *</label>
                         <div class="flex flex-wrap gap-3">
                             @foreach($ageRanges as $range)
-                                <label wire:key="age-{{ $loop->index }}" class="cursor-pointer">
-                                    <input type="checkbox" wire:model.live="selectedAgeRanges" value="{{ $range }}" class="sr-only peer">
+                                <label wire:key="age-{{ $loop->index }}" class="cursor-pointer relative">
+                                    <input type="checkbox" wire:model="selectedAgeRanges" value="{{ $range }}" class="absolute inset-0 opacity-0 cursor-pointer peer">
                                     <div class="px-4 py-2 rounded-full text-sm font-medium bg-[#F3F4F6] dark:bg-[#374151] text-[#111827] dark:text-[#F9FAFB] peer-checked:bg-[#DBEAFE] dark:peer-checked:bg-[#1E40AF] peer-checked:text-blue-800 dark:peer-checked:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                                         {{ $range }}
                                     </div>
@@ -136,8 +136,8 @@
                         <label class="block text-sm font-medium text-[#6B7280] dark:text-[#9CA3AF] mb-3">Target Devices *</label>
                         <div class="flex flex-wrap gap-3">
                              @foreach($deviceOptions as $key => $label)
-                                <label wire:key="device-{{ $key }}" class="cursor-pointer">
-                                    <input type="checkbox" wire:model.live="selectedDevices" value="{{ $key }}" class="sr-only peer">
+                                <label wire:key="device-{{ $key }}" class="cursor-pointer relative">
+                                    <input type="checkbox" wire:model="selectedDevices" value="{{ $key }}" class="absolute inset-0 opacity-0 cursor-pointer peer">
                                     <div class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-[#F3F4F6] dark:bg-[#374151] text-[#111827] dark:text-[#F9FAFB] peer-checked:bg-[#DBEAFE] dark:peer-checked:bg-[#1E40AF] peer-checked:text-blue-800 dark:peer-checked:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                                         @if($key == 'desktop') <span class="material-symbols-outlined text-base">desktop_windows</span>
                                         @elseif($key == 'mobile') <span class="material-symbols-outlined text-base">smartphone</span>
@@ -156,8 +156,8 @@
                         <label class="block text-sm font-medium text-[#6B7280] dark:text-[#9CA3AF] mb-3">Target Operating Systems *</label>
                         <div class="flex flex-wrap gap-3">
                              @foreach($osOptions as $key => $label)
-                                <label wire:key="os-{{ $key }}" class="cursor-pointer">
-                                    <input type="checkbox" wire:model.live="selectedOs" value="{{ $key }}" class="sr-only peer">
+                                <label wire:key="os-{{ $key }}" class="cursor-pointer relative">
+                                    <input type="checkbox" wire:model="selectedOs" value="{{ $key }}" class="absolute inset-0 opacity-0 cursor-pointer peer">
                                     <div class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-[#F3F4F6] dark:bg-[#374151] text-[#111827] dark:text-[#F9FAFB] peer-checked:bg-[#DBEAFE] dark:peer-checked:bg-[#1E40AF] peer-checked:text-blue-800 dark:peer-checked:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                                         {{ $label }}
                                     </div>
@@ -259,6 +259,37 @@
                             </div>
                             <p class="mt-1 text-xs text-[#6B7280] dark:text-[#9CA3AF]">
                                 Pay securely with USDT, BTC, ETH and more via Cryptomus.
+                            </p>
+                        </div>
+                    </label>
+
+                    <!-- Pay with Credit Card (Gumroad) -->
+                    <label class="relative flex items-center p-4 rounded-lg border {{ $payment_method === 'card' ? 'border-[#3B82F6] bg-blue-50 dark:bg-blue-900/20' : 'border-[#E5E7EB] dark:border-[#374151] hover:bg-gray-50 dark:hover:bg-gray-800' }} cursor-pointer transition-all">
+                        <input type="radio" wire:model.live="payment_method" value="card" class="h-4 w-4 text-[#3B82F6] border-gray-300 focus:ring-[#3B82F6] bg-gray-100 dark:bg-gray-700">
+                        <div class="ml-4 flex-1">
+                            <div class="flex items-center justify-between">
+                                <span class="block text-sm font-medium text-[#111827] dark:text-[#F9FAFB]">
+                                    Pay with Credit Card
+                                </span>
+                                <div class="flex items-center gap-1">
+                                    <svg class="h-6 w-auto" viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="48" height="32" rx="4" fill="#1A1F71"/>
+                                        <path d="M19.5 21H16.5L18.5 11H21.5L19.5 21Z" fill="white"/>
+                                        <path d="M28.5 11.2C27.8 11 26.8 10.8 25.6 10.8C22.6 10.8 20.5 12.3 20.5 14.5C20.5 16.1 22 17 23.1 17.5C24.2 18 24.6 18.4 24.6 18.9C24.6 19.7 23.6 20 22.7 20C21.5 20 20.8 19.8 19.8 19.4L19.4 19.2L19 21.8C19.7 22.1 21 22.4 22.3 22.4C25.5 22.4 27.5 20.9 27.5 18.5C27.5 17.2 26.7 16.2 25 15.5C24 15 23.4 14.7 23.4 14.1C23.4 13.6 24 13.1 25.2 13.1C26.2 13.1 26.9 13.3 27.5 13.5L27.8 13.6L28.5 11.2Z" fill="white"/>
+                                        <path d="M33.5 11H31.2C30.5 11 30 11.2 29.7 11.9L25.5 21H28.7L29.3 19.3H33.2L33.5 21H36.5L33.9 11H33.5ZM30.2 17.1C30.5 16.3 31.5 13.7 31.5 13.7C31.5 13.7 31.7 13.1 31.9 12.7L32.1 13.6C32.1 13.6 32.7 16.3 32.9 17.1H30.2Z" fill="white"/>
+                                        <path d="M14.5 11L11.5 17.8L11.2 16.3C10.7 14.7 9.2 13 7.5 12.2L10.2 21H13.4L17.7 11H14.5Z" fill="white"/>
+                                        <path d="M9.5 11H4.5L4.5 11.2C8.3 12.1 10.8 14.4 11.5 17.1L10.7 11.9C10.6 11.3 10.1 11 9.5 11Z" fill="#F9A533"/>
+                                    </svg>
+                                    <svg class="h-6 w-auto" viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="48" height="32" rx="4" fill="#F5F5F5"/>
+                                        <circle cx="19" cy="16" r="8" fill="#EB001B"/>
+                                        <circle cx="29" cy="16" r="8" fill="#F79E1B"/>
+                                        <path d="M24 10C26.1 11.7 27.5 14.2 27.5 17C27.5 19.8 26.1 22.3 24 24C21.9 22.3 20.5 19.8 20.5 17C20.5 14.2 21.9 11.7 24 10Z" fill="#FF5F00"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="mt-1 text-xs text-[#6B7280] dark:text-[#9CA3AF]">
+                                Pay securely with Visa, Mastercard via Gumroad.
                             </p>
                         </div>
                     </label>
@@ -367,7 +398,9 @@
                                 @if($payment_method === 'balance')
                                     Balance (${{ number_format(Auth::user()->earnings, 2) }})
                                 @elseif($payment_method === 'crypto')
-                                    Cryptomus
+                                    Cryptomus (Crypto)
+                                @elseif($payment_method === 'card')
+                                    Credit Card (Gumroad)
                                 @else
                                     Not Selected
                                 @endif

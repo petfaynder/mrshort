@@ -16,6 +16,7 @@ use App\Enums\StepType;
 use App\Enums\AdType;
 use Carbon\Carbon; // Add this import
 use App\Services\CryptomusService; // Add Service
+use App\Services\GumroadService; // Add Gumroad Service
 use Illuminate\Support\Facades\Log; // Add Log
 
 class CreateAdCampaign extends Component
@@ -71,7 +72,7 @@ class CreateAdCampaign extends Component
         'start_date' => 'nullable|date',
         'end_date' => 'nullable|date|after_or_equal:start_date|required_if:run_until_budget_depleted,false',
         'daily_click_limit' => 'nullable|integer|min:0', // Günlük tıklama limiti 0 olabilir (limitsiz)
-        'payment_method' => 'required|in:balance,crypto',
+        'payment_method' => 'required|in:balance,crypto,card',
     ];
 
     public function mount()
@@ -256,6 +257,16 @@ class CreateAdCampaign extends Component
                 $campaign->update(['payment_status' => 'failed']);
                 return;
             }
+        } elseif ($this->payment_method === 'card') {
+            try {
+                $gumroadService = app(GumroadService::class);
+                $paymentUrl = $gumroadService->createPaymentUrl($this->calculated_cost, $campaign->id);
+                return redirect($paymentUrl);
+            } catch (\Exception $e) {
+                $this->addError('payment_method', 'Failed to initiate card payment: ' . $e->getMessage());
+                $campaign->update(['payment_status' => 'failed']);
+                return;
+            }
         }
 
         // Pop-up reklam içeriğini doğrudan AdCampaign modelinde saklayalım.
@@ -284,6 +295,7 @@ class CreateAdCampaign extends Component
                 'is_popup_campaign' => true, // Bu kampanyanın bir pop-up kampanyası olduğunu işaretle
                 'popup_title' => $this->name,
                 'popup_content' => 'This is a user pop-up ad.',
+                'desired_clicks' => $this->desired_clicks, // Store desired clicks for edit page
             ]),
         ]);
 

@@ -40,6 +40,11 @@ return [
         'payment_key' => env('CRYPTOMUS_PAYMENT_KEY'),
     ],
 
+    'gumroad' => [
+        'product_id' => env('GUMROAD_PRODUCT_ID'),
+        'access_token' => env('GUMROAD_ACCESS_TOKEN'),
+    ],
+
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),

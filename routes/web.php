@@ -99,7 +99,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/battle-pass', \App\Livewire\User\BattlePass::class)->name('user.battle-pass');
     Route::get('/user/teams', \App\Livewire\User\TeamManager::class)->name('user.teams');
     Route::get('/user/vip', \App\Livewire\User\VipProgress::class)->name('user.vip');
+    Route::get('/user/vip', \App\Livewire\User\VipProgress::class)->name('user.vip');
 });
+
+// Feedback System Routes (Publicly Accessible)
+Route::get('/feedback', \App\Livewire\Feedback\FeedbackBoard::class)->name('feedback.index');
+Route::get('/feedback/roadmap', \App\Livewire\Feedback\Roadmap::class)->name('feedback.roadmap');
+Route::get('/feedback/{slug}', \App\Livewire\Feedback\FeedbackDetail::class)->name('feedback.show');
 
 Route::middleware('auth')->group(function () {
     Route::get('/user/achievements', \App\Livewire\User\Achievements::class)->name('user.achievements');
@@ -113,6 +119,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::post('/payment/cryptomus/callback', [PaymentController::class, 'cryptomusCallback'])->name('payment.cryptomus.callback');
+Route::post('/payment/gumroad/callback', [PaymentController::class, 'gumroadCallback'])->name('payment.gumroad.callback');
 
 Route::middleware('auth')->group(function () {
     // ... (existing auth routes)
