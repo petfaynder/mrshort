@@ -60,11 +60,7 @@
                     </button>
                 </div>
                 
-                @if (session()->has('message'))
-                    <div class="mt-3 text-green-500 text-sm">
-                        {{ session('message') }}
-                    </div>
-                @endif
+
             </form>
         </div>
 
@@ -91,15 +87,7 @@
                         <span wire:loading wire:target="updateProfileInformation">{{ __('Saving...') }}</span>
                     </button>
 
-                    @if (session('success') && !session('password_success'))
-                        <p
-                            x-data="{ show: true }"
-                            x-show="show"
-                            x-transition
-                            x-init="setTimeout(() => show = false, 2000)"
-                            class="text-sm text-gray-600 dark:text-gray-400"
-                        >{{ __('Saved.') }}</p>
-                    @endif
+
                 </div>
             </form>
         </div>
@@ -133,15 +121,7 @@
                         <span wire:loading wire:target="updatePassword">{{ __('Saving...') }}</span>
                     </button>
 
-                    @if (session('success') && session('password_success'))
-                        <p
-                            x-data="{ show: true }"
-                            x-show="show"
-                            x-transition
-                            x-init="setTimeout(() => show = false, 2000)"
-                            class="text-sm text-gray-600 dark:text-gray-400"
-                        >{{ __('Saved.') }}</p>
-                    @endif
+
                 </div>
             </form>
         </div>
@@ -358,3 +338,17 @@
         </div>
     </div>
 </div>
+
+{{-- Toast Notifications --}}
+@if (session()->has('message'))
+    <x-toast-notification type="success">{{ session('message') }}</x-toast-notification>
+@endif
+@if (session()->has('success'))
+    <x-toast-notification type="success">{{ session('success') }}</x-toast-notification>
+@endif
+@if (session()->has('error'))
+    <x-toast-notification type="error">{{ session('error') }}</x-toast-notification>
+@endif
+@if (session()->has('info'))
+    <x-toast-notification type="info">{{ session('info') }}</x-toast-notification>
+@endif

@@ -19,24 +19,7 @@
         });
     ">
 
-    {{-- Session Messages (for other actions like reply, close etc.) --}}
-    @if (session()->has('message'))
-        <div class="flex items-center gap-3 bg-green-900/50 border border-green-800 text-green-300 text-sm rounded-lg p-4 mb-8">
-            <span class="material-symbols-outlined flex-shrink-0">check_circle</span>
-            <div>
-                <span class="font-semibold">Success:</span> {{ session('message') }}
-            </div>
-        </div>
-    @endif
-
-    @if (session()->has('error'))
-        <div class="flex items-center gap-3 bg-red-900/50 border border-red-800 text-red-300 text-sm rounded-lg p-4 mb-8">
-            <span class="material-symbols-outlined flex-shrink-0">error</span>
-            <div>
-                <span class="font-semibold">Error:</span> {{ session('error') }}
-            </div>
-        </div>
-    @endif
+    {{-- Session Messages handled by toast at end of file --}}
 
     {{-- Main Content --}}
     <div class="flex items-center gap-3 bg-blue-900/50 border border-blue-800 text-blue-300 text-sm rounded-lg p-4 mb-8">
@@ -299,3 +282,11 @@
         </div>
     </div>
 </div>
+
+{{-- Toast Notifications --}}
+@if (session()->has('message'))
+    <x-toast-notification type="success">{{ session('message') }}</x-toast-notification>
+@endif
+@if (session()->has('error'))
+    <x-toast-notification type="error">{{ session('error') }}</x-toast-notification>
+@endif

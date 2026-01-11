@@ -1,10 +1,6 @@
 <div>
     <div class="mx-auto max-w-7xl">
-        @if (session()->has('success'))
-            <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-green-200 dark:text-green-800" role="alert">
-                {{ session('success') }}
-            </div>
-        @endif
+
         <div class="flex flex-wrap justify-between gap-3 mb-8">
             <div class="flex min-w-72 flex-col gap-2">
                 <h1 class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Withdrawals</h1>
@@ -234,3 +230,11 @@
         </div>
     </div>
 </div>
+
+{{-- Toast Notifications --}}
+@if (session()->has('success'))
+    <x-toast-notification type="success">{{ session('success') }}</x-toast-notification>
+@endif
+@if (session()->has('error'))
+    <x-toast-notification type="error">{{ session('error') }}</x-toast-notification>
+@endif

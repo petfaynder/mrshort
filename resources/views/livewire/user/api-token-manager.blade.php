@@ -61,17 +61,16 @@
         </div>
     </div>
 
-    {{-- Flash Messages --}}
+    {{-- New Token Display (kept inline - needs to be copied) --}}
     @if (session()->has('newToken'))
         <div class="mt-6 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded" role="alert">
             <p class="font-bold">New API Token (Please copy it, it won't be shown again):</p>
             <p class="mt-2 font-mono break-all bg-yellow-50 p-2 rounded border border-yellow-200">{{ session('newToken') }}</p>
         </div>
     @endif
-
-    @if (session()->has('message'))
-        <div class="mt-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded" role="alert">
-            <p>{{ session('message') }}</p>
-        </div>
-    @endif
 </div>
+
+{{-- Toast Notifications --}}
+@if (session()->has('message'))
+    <x-toast-notification type="success">{{ session('message') }}</x-toast-notification>
+@endif

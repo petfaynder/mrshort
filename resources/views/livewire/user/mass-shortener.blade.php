@@ -33,3 +33,8 @@
         </div>
     @endif
 </div>
+
+{{-- Toast Notifications --}}
+@if (session()->has('message'))
+    <x-toast-notification type="success">{{ session('message') }}</x-toast-notification>
+@endif

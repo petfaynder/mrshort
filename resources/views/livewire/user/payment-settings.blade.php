@@ -18,11 +18,9 @@
         </div>
         {{-- The save button is now in the parent view (settings.index) to trigger the 2FA modal --}}
     </form>
-
-    {{-- Flash Messages --}}
-    @if (session()->has('message'))
-        <div class="mt-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4" role="alert">
-            <p>{{ session('message') }}</p>
-        </div>
-    @endif
 </div>
+
+{{-- Toast Notifications --}}
+@if (session()->has('message'))
+    <x-toast-notification type="success">{{ session('message') }}</x-toast-notification>
+@endif

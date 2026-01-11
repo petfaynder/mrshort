@@ -74,16 +74,15 @@
             <p class="text-gray-600">You have no withdrawal requests yet.</p>
         @endif
     </div>
-
-    {{-- General Flash Messages --}}
-    @if (session()->has('message'))
-        <div class="mt-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4" role="alert">
-            <p>{{ session('message') }}</p>
-        </div>
-    @endif
-     @if (session()->has('error'))
-        <div class="mt-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
-            <p>{{ session('error') }}</p>
-        </div>
-    @endif
 </div>
+
+{{-- Toast Notifications --}}
+@if (session()->has('message'))
+    <x-toast-notification type="success">{{ session('message') }}</x-toast-notification>
+@endif
+@if (session()->has('success'))
+    <x-toast-notification type="success">{{ session('success') }}</x-toast-notification>
+@endif
+@if (session()->has('error'))
+    <x-toast-notification type="error">{{ session('error') }}</x-toast-notification>
+@endif
