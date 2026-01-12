@@ -777,12 +777,16 @@
             });
         }
         
-        // Initialize when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initAnimations);
-        } else {
-            initAnimations();
-        }
+        // CRITICAL: Delay GSAP init until AFTER first paint
+        // This prevents blocking LCP element render
+        window.addEventListener('load', function() {
+            // Use requestIdleCallback if available, otherwise setTimeout
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(initAnimations, { timeout: 2000 });
+            } else {
+                setTimeout(initAnimations, 100);
+            }
+        });
     </script>
     <style>
         @keyframes float {
