@@ -106,9 +106,14 @@ class ReportsManager extends Component
             ];
         })->sortByDesc('total');
 
+        // Harita için sadece geçerli ülke kodlarına sahip verileri kullan
+        // "Unknown" (null country) değerleri amCharts haritasında poligon ile eşleşmediği için
+        // heat rule hesaplamasını bozuyor - bu yüzden filtreliyoruz
+        $validCountryData = $clicksByCountry->filter(fn($item) => $item['country'] !== null);
+        
         $this->clicksByCountryChartData = [
-            'labels' => $clicksByCountry->pluck('country.iso_code')->map(fn($iso) => $iso ?? 'Unknown')->toArray(),
-            'data' => $clicksByCountry->pluck('total')->toArray(),
+            'labels' => $validCountryData->pluck('country.iso_code')->toArray(),
+            'data' => $validCountryData->pluck('total')->toArray(),
         ];
 
         $this->heatmapData = $clicksByCountry->map(function ($item) {
