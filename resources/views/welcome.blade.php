@@ -20,71 +20,7 @@
     <link rel="icon" href="{{ setting('favicon_url') }}" type="image/x-icon">
     @endif
     
-    {{-- CRITICAL CSS - Renders immediately without waiting for main CSS --}}
-    <style>
-    /* Base - prevents FOUC */
-    html, body {
-        margin: 0;
-        padding: 0;
-        background: #050505;
-        color: #ffffff;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-    
-    /* LCP Hero Section */
-    .lcp-hero {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        background: #050505;
-        overflow: hidden;
-        position: relative;
-        padding: 5rem 1rem;
-    }
-    
-    .lcp-hero-title {
-        font-weight: 700;
-        letter-spacing: -0.05em;
-        line-height: 0.9;
-        color: white;
-        font-size: clamp(3rem, 12vw, 9rem);
-        margin-bottom: 1.5rem;
-        text-align: center;
-        z-index: 10;
-    }
-    .lcp-hero-title .gray { color: #4b5563; transition: color 0.5s; }
-    .lcp-hero-title .gray:hover { color: white; cursor: default; }
-    .lcp-hero-title .gradient {
-        background: linear-gradient(to right, #00BFFF, #FF00FF);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    @media (min-width: 768px) { .lcp-hero-title { margin-bottom: 2rem; } }
-    
-    /* Hero visual elements - added via JS after LCP */
-    .hero-grid-bg, .hero-spotlight { display: none; }
-    </style>
-    
-    {{-- ASYNC CSS - Does NOT block render --}}
-    @php
-        $manifest = json_decode(file_get_contents(public_path('build/.vite/manifest.json')), true);
-        $cssFile = $manifest['resources/css/app.css']['file'] ?? null;
-        $jsFile = $manifest['resources/js/app.js']['file'] ?? null;
-    @endphp
-    
-    @if($cssFile)
-    <link rel="preload" as="style" href="{{ asset('build/' . $cssFile) }}">
-    <link rel="stylesheet" href="{{ asset('build/' . $cssFile) }}" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="{{ asset('build/' . $cssFile) }}"></noscript>
-    @endif
-    
-    {{-- JS with defer --}}
-    @if($jsFile)
-    <script defer src="{{ asset('build/' . $jsFile) }}"></script>
-    @endif
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     {{-- Async load fonts to prevent render blocking --}}
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap">
@@ -101,18 +37,71 @@
     
     {{-- Custom Front Head Code from Settings --}}
     {!! setting('front_head_code', '') !!}
+    
+    {{-- CRITICAL CSS for LCP - Renders before main CSS loads --}}
+    <style>
+    /* Base - prevent flash */
+    html, body { margin: 0; padding: 0; background: #050505; color: #fff; }
+    
+    /* Hero container */
+    .hero-section {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: #050505;
+        position: relative;
+        overflow: hidden;
+        padding: 5rem 1rem;
+    }
+    
+    /* LCP Element - H1 */
+    .lcp-hero-title {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.05em;
+        line-height: 0.9;
+        color: white;
+        font-size: clamp(3rem, 12vw, 9rem);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        z-index: 1;
+    }
+    .lcp-hero-title .gray { color: #4b5563; transition: color 0.5s; }
+    .lcp-hero-title .gray:hover { color: white; cursor: default; }
+    .lcp-hero-title .gradient {
+        background: linear-gradient(to right, #00BFFF, #FF00FF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    @media (min-width: 768px) { .lcp-hero-title { margin-bottom: 2rem; } }
+    
+    /* Decorative elements - will be added by JS after LCP */
+    .hero-grid, .hero-spotlight { position: absolute; inset: 0; pointer-events: none; }
+    .hero-grid {
+        background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+        background-size: 24px 24px;
+    }
+    .hero-spotlight {
+        width: 800px; height: 800px;
+        background: radial-gradient(circle, rgba(0,191,255,0.1), transparent 60%);
+        filter: blur(150px);
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+    }
+    </style>
 </head>
 <body class="bg-[#050505] text-white font-display overflow-x-hidden">
     @include('partials.header')
 
     <!-- Hero Section (Minimalist & Typography) -->
-    <div class="relative min-h-screen w-full flex flex-col justify-center items-center hero-section bg-[#050505] overflow-hidden py-20 lg:py-24">
+    <div class="hero-section relative w-full">
         
-        <!-- Subtle Background Grid -->
-        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        
-        <!-- Center Spotlight -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-electric-blue/10 rounded-full blur-[150px]"></div>
+        <!-- Grid and Spotlight will be added by JS after LCP -->
 
         <div class="relative z-10 w-full max-w-5xl px-4 flex flex-col items-center text-center">
             
@@ -844,6 +833,18 @@
         // CRITICAL: Delay GSAP init until AFTER first paint
         // This prevents blocking LCP element render
         window.addEventListener('load', function() {
+            // Inject hero decorative elements AFTER LCP
+            const heroSection = document.querySelector('.hero-section');
+            if (heroSection) {
+                const grid = document.createElement('div');
+                grid.className = 'hero-grid';
+                heroSection.insertBefore(grid, heroSection.firstChild);
+                
+                const spotlight = document.createElement('div');
+                spotlight.className = 'hero-spotlight';
+                heroSection.insertBefore(spotlight, heroSection.firstChild);
+            }
+            
             // Use requestIdleCallback if available, otherwise setTimeout
             if ('requestIdleCallback' in window) {
                 requestIdleCallback(initAnimations, { timeout: 2000 });
