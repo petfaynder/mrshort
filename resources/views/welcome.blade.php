@@ -864,8 +864,40 @@
         }
     </style>
     
-{{-- Cookie Consent Banner --}}
-@livewire('cookie-consent')
+{{-- Cookie Consent Banner - Pure JS (no Livewire) --}}
+@if(setting('display_cookie_notification', true))
+<div x-data="{ 
+    show: false,
+    init() {
+        this.show = !this.getCookie('cookie_consent');
+    },
+    getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    },
+    accept() {
+        const d = new Date();
+        d.setTime(d.getTime() + (365*24*60*60*1000));
+        document.cookie = 'cookie_consent=accepted;expires=' + d.toUTCString() + ';path=/';
+        this.show = false;
+    }
+}" x-cloak>
+    <div x-show="show" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="fixed bottom-0 left-0 right-0 z-50 p-4 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="text-sm text-gray-300">
+                <p>We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.</p>
+            </div>
+            <div class="flex gap-3">
+                <button @click="accept()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    Accept
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 
 {{-- Custom Footer Code from Settings --}}
 {!! setting('footer_code', '') !!}
