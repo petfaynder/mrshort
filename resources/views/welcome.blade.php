@@ -20,7 +20,71 @@
     <link rel="icon" href="{{ setting('favicon_url') }}" type="image/x-icon">
     @endif
     
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- CRITICAL CSS - Renders immediately without waiting for main CSS --}}
+    <style>
+    /* Base - prevents FOUC */
+    html, body {
+        margin: 0;
+        padding: 0;
+        background: #050505;
+        color: #ffffff;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    
+    /* LCP Hero Section */
+    .lcp-hero {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: #050505;
+        overflow: hidden;
+        position: relative;
+        padding: 5rem 1rem;
+    }
+    
+    .lcp-hero-title {
+        font-weight: 700;
+        letter-spacing: -0.05em;
+        line-height: 0.9;
+        color: white;
+        font-size: clamp(3rem, 12vw, 9rem);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        z-index: 10;
+    }
+    .lcp-hero-title .gray { color: #4b5563; transition: color 0.5s; }
+    .lcp-hero-title .gray:hover { color: white; cursor: default; }
+    .lcp-hero-title .gradient {
+        background: linear-gradient(to right, #00BFFF, #FF00FF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    @media (min-width: 768px) { .lcp-hero-title { margin-bottom: 2rem; } }
+    
+    /* Hero visual elements - added via JS after LCP */
+    .hero-grid-bg, .hero-spotlight { display: none; }
+    </style>
+    
+    {{-- ASYNC CSS - Does NOT block render --}}
+    @php
+        $manifest = json_decode(file_get_contents(public_path('build/.vite/manifest.json')), true);
+        $cssFile = $manifest['resources/css/app.css']['file'] ?? null;
+        $jsFile = $manifest['resources/js/app.js']['file'] ?? null;
+    @endphp
+    
+    @if($cssFile)
+    <link rel="preload" as="style" href="{{ asset('build/' . $cssFile) }}">
+    <link rel="stylesheet" href="{{ asset('build/' . $cssFile) }}" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="{{ asset('build/' . $cssFile) }}"></noscript>
+    @endif
+    
+    {{-- JS with defer --}}
+    @if($jsFile)
+    <script defer src="{{ asset('build/' . $jsFile) }}"></script>
+    @endif
     
     {{-- Async load fonts to prevent render blocking --}}
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap">
@@ -37,29 +101,6 @@
     
     {{-- Custom Front Head Code from Settings --}}
     {!! setting('front_head_code', '') !!}
-    
-    {{-- CRITICAL CSS for LCP - H1 renders without waiting for main CSS --}}
-    <style>
-    .lcp-hero-title {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        font-weight: 700;
-        letter-spacing: -0.05em;
-        line-height: 0.9;
-        color: white;
-        font-size: clamp(3rem, 12vw, 9rem);
-        margin-bottom: 1.5rem;
-        text-align: center;
-    }
-    .lcp-hero-title .gray { color: #4b5563; transition: color 0.5s; }
-    .lcp-hero-title .gray:hover { color: white; cursor: default; }
-    .lcp-hero-title .gradient {
-        background: linear-gradient(to right, #00BFFF, #FF00FF);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    @media (min-width: 768px) { .lcp-hero-title { margin-bottom: 2rem; } }
-    </style>
 </head>
 <body class="bg-[#050505] text-white font-display overflow-x-hidden">
     @include('partials.header')
