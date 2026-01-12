@@ -37,6 +37,29 @@
     
     {{-- Custom Front Head Code from Settings --}}
     {!! setting('front_head_code', '') !!}
+    
+    {{-- CRITICAL CSS: Inline styles for LCP element to avoid render-blocking --}}
+    <style>
+    .hero-title {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1;
+        font-size: clamp(3rem, 12vw, 8rem);
+        color: white;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    .hero-title-gray { color: #4b5563; transition: color 0.5s; }
+    .hero-title-gray:hover { color: white; cursor: default; }
+    .hero-title-gradient {
+        background: linear-gradient(to right, #00BFFF, #FF00FF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    @media (min-width: 768px) { .hero-title { font-size: clamp(4rem, 10vw, 10rem); margin-bottom: 2rem; } }
+    </style>
 </head>
 <body class="bg-[#050505] text-white font-display overflow-x-hidden">
     @include('partials.header')
@@ -57,11 +80,11 @@
                 <span class="text-sm font-mono text-gray-400 tracking-wider">THE #1 URL SHORTENER</span>
             </div>
 
-            <!-- Massive Typography -->
-            <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tighter leading-none mb-6 md:mb-8 text-white hero-animate-in-delay-1">
+            <!-- Massive Typography - CRITICAL: No Tailwind, no animation for fast LCP -->
+            <h1 class="hero-title">
                 SHRINK.<br/>
-                <span class="text-gray-600 transition-colors duration-500 hover:text-white cursor-default">SHARE.</span><br/>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-electric-blue to-bright-magenta animate-gradient-x">EARN.</span>
+                <span class="hero-title-gray">SHARE.</span><br/>
+                <span class="hero-title-gradient">EARN.</span>
             </h1>
 
             <p class="text-lg sm:text-xl md:text-2xl text-gray-400 mb-8 md:mb-12 max-w-2xl font-light hero-animate-in-delay-2 px-4">
