@@ -4,6 +4,12 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     
+    {{-- Preconnect to critical third-party origins --}}
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://lh3.googleusercontent.com">
+    
     {{-- SEO Meta Tags from Site Settings --}}
     <title>{{ setting('seo_meta_title', setting('site_name', 'MrShort') . ' - Monetize Your Links | Highest CPM Rates') }}</title>
     <meta name="description" content="{{ setting('seo_description', 'Turn your links into revenue. Get the highest CPM rates in the industry, instant payouts, and powerful analytics.') }}"/>
@@ -15,10 +21,19 @@
     @endif
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
+    
+    {{-- Async load fonts to prevent render blocking --}}
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet"></noscript>
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"></noscript>
+    
+    {{-- Defer GSAP to prevent render blocking --}}
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
     
     {{-- Custom Front Head Code from Settings --}}
     {!! setting('front_head_code', '') !!}
@@ -38,18 +53,18 @@
         <div class="relative z-10 w-full max-w-5xl px-4 flex flex-col items-center text-center">
             
             <!-- Badge -->
-            <div class="inline-flex items-center px-5 py-2 rounded-full border border-gray-800 bg-gray-900/50 backdrop-blur-sm mb-8 gsap-hero-element">
+            <div class="inline-flex items-center px-5 py-2 rounded-full border border-gray-800 bg-gray-900/50 backdrop-blur-sm mb-8 hero-animate-in">
                 <span class="text-sm font-mono text-gray-400 tracking-wider">THE #1 URL SHORTENER</span>
             </div>
 
             <!-- Massive Typography -->
-            <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tighter leading-none mb-6 md:mb-8 text-white gsap-hero-element">
+            <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tighter leading-none mb-6 md:mb-8 text-white hero-animate-in-delay-1">
                 SHRINK.<br/>
                 <span class="text-gray-600 transition-colors duration-500 hover:text-white cursor-default">SHARE.</span><br/>
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-electric-blue to-bright-magenta animate-gradient-x">EARN.</span>
             </h1>
 
-            <p class="text-lg sm:text-xl md:text-2xl text-gray-400 mb-8 md:mb-12 max-w-2xl font-light gsap-hero-element px-4">
+            <p class="text-lg sm:text-xl md:text-2xl text-gray-400 mb-8 md:mb-12 max-w-2xl font-light hero-animate-in-delay-2 px-4">
                 Monetize your traffic with the highest paying rates in the market. Simple, fast, and secure.
             </p>
 
@@ -95,7 +110,7 @@
                     this.copied = true;
                     setTimeout(() => { this.copied = false; }, 2000);
                 }
-            }" class="w-full max-w-2xl mx-auto lg:mx-0 gsap-hero-element relative z-30">
+            }" class="w-full max-w-2xl mx-auto lg:mx-0 hero-animate-in-delay-3 relative z-30">
                 
                 <div class="bg-white/5 border border-white/10 p-2 rounded-full backdrop-blur-md shadow-2xl hover:border-white/20 transition-colors duration-300">
                     <form @submit.prevent="submit" class="flex w-full relative">
@@ -318,7 +333,7 @@
                     <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 opacity-80 group-hover:scale-110 transition-transform">format_quote</span>
                     <p class="text-gray-400 flex-grow italic leading-relaxed text-lg mb-6">"This is hands-down the best link monetization service I've ever used. The CPM rates are fantastic, and the dashboard is incredibly intuitive. I saw my earnings double in the first month!"</p>
                     <div class="flex items-center pt-6 border-t border-white/5">
-                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-electric-blue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUA-JqtWZLz752Xs5rAxzxIPHcGqikmXdoUr2DdCIL6cZRZ067lEMc7HP5vjx_41MyK29dOzneCCOPJF_htoEHsEKOLkkWZqv6NaZigLi-BmU3G5t1TD-AbzgUnYL3aEvOx8Y2mZEY_pJ4E7obYCWLmtPYynTR0_nlKEExjq7odZu7XtEkM3lSRSrT0BfaIE_GG9jxdYq5yl_umK5lQQVQEZM63p3nSdG0VhvMdM5dS6_yF99E3UBTLMDJt1dS1zyPddPLLbgY"/>
+                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-electric-blue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUA-JqtWZLz752Xs5rAxzxIPHcGqikmXdoUr2DdCIL6cZRZ067lEMc7HP5vjx_41MyK29dOzneCCOPJF_htoEHsEKOLkkWZqv6NaZigLi-BmU3G5t1TD-AbzgUnYL3aEvOx8Y2mZEY_pJ4E7obYCWLmtPYynTR0_nlKEExjq7odZu7XtEkM3lSRSrT0BfaIE_GG9jxdYq5yl_umK5lQQVQEZM63p3nSdG0VhvMdM5dS6_yF99E3UBTLMDJt1dS1zyPddPLLbgY=s88" width="48" height="48" loading="lazy" decoding="async"/>
                         <div>
                             <p class="font-bold text-white">Sarah J.</p>
                             <p class="text-sm text-gray-500">Content Creator</p>
@@ -331,7 +346,7 @@
                     <span class="material-symbols-outlined text-5xl text-bright-magenta mb-6 opacity-80 group-hover:scale-110 transition-transform">format_quote</span>
                     <p class="text-gray-400 flex-grow italic leading-relaxed text-lg mb-6">"The API integration was a breeze. We've automated our entire link shortening process and it's been a game-changer for our business. Reliable, fast, and profitable."</p>
                     <div class="flex items-center pt-6 border-t border-white/5">
-                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-bright-magenta" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1xjircuAW9GDYcKX8HKmJv2_qFhZoDPQcIy5quRBbtaDQDCnWzhLdJV1vb7b0aRS5LEQXwEhQ1YvfXhbRn4fXXdSpVQFvlEkDvEKW4vw7K3X7tBN5nEli0lSMK0PXQE47GxwlvW90njRyD2wvhWJesfrHHF025GlrzNs_yuWdrXxScWgedCLai3n45-XMrwZT73wP7wVkb9fSya_MyYsmokITzB_Pd2gYwG_m0LniDN_KHaxAUETbbVtBEECChpMC5r3b877h"/>
+                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-bright-magenta" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1xjircuAW9GDYcKX8HKmJv2_qFhZoDPQcIy5quRBbtaDQDCnWzhLdJV1vb7b0aRS5LEQXwEhQ1YvfXhbRn4fXXdSpVQFvlEkDvEKW4vw7K3X7tBN5nEli0lSMK0PXQE47GxwlvW90njRyD2wvhWJesfrHHF025GlrzNs_yuWdrXxScWgedCLai3n45-XMrwZT73wP7wVkb9fSya_MyYsmokITzB_Pd2gYwG_m0LniDN_KHaxAUETbbVtBEECChpMC5r3b877h=s88" width="48" height="48" loading="lazy" decoding="async"/>
                         <div>
                             <p class="font-bold text-white">Mike R.</p>
                             <p class="text-sm text-gray-500">App Developer</p>
@@ -344,7 +359,7 @@
                     <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 opacity-80 group-hover:scale-110 transition-transform">format_quote</span>
                     <p class="text-gray-400 flex-grow italic leading-relaxed text-lg mb-6">"I love the global reach and competitive rates for my country. Payouts are always on time, and the support team is genuinely helpful. Highly recommended for anyone looking to monetize their traffic."</p>
                     <div class="flex items-center pt-6 border-t border-white/5">
-                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-electric-blue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfNnaC4Spa9QmjB_AYXhcX-LhOgKO33Up1x47Wk-PP097jgAVzQ3FEi9OhNaOyWPUAcgGQV-LrqgpA0FVGIl70bPA-E1rL5OUVVhwzt1Ax5ufO5lTkJxec-JRbsiDN5Lii-L62c7KEIqJxSBiOLSehLGAiYwJQkYloKgIwRNcU7EdvrHPZBytw0a8FZ8W9ueYg9By-bYeECd_BpI02YxwYa67Z2ACsZTpx4cgyJ4leZbHenlRs0vzbdrjHaKAWdvKFortt3d2D"/>
+                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-electric-blue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfNnaC4Spa9QmjB_AYXhcX-LhOgKO33Up1x47Wk-PP097jgAVzQ3FEi9OhNaOyWPUAcgGQV-LrqgpA0FVGIl70bPA-E1rL5OUVVhwzt1Ax5ufO5lTkJxec-JRbsiDN5Lii-L62c7KEIqJxSBiOLSehLGAiYwJQkYloKgIwRNcU7EdvrHPZBytw0a8FZ8W9ueYg9By-bYeECd_BpI02YxwYa67Z2ACsZTpx4cgyJ4leZbHenlRs0vzbdrjHaKAWdvKFortt3d2D=s88" width="48" height="48" loading="lazy" decoding="async"/>
                         <div>
                             <p class="font-bold text-white">Aisha K.</p>
                             <p class="text-sm text-gray-500">Blogger</p>
@@ -678,18 +693,15 @@
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            gsap.registerPlugin(ScrollTrigger);
+        // Wait for GSAP to be available (since it's deferred)
+        function initAnimations() {
+            if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+                // GSAP not loaded yet, try again shortly
+                setTimeout(initAnimations, 50);
+                return;
+            }
             
-            // Hero Animation (Minimalist)
-            gsap.from(".gsap-hero-element", {
-                duration: 1,
-                y: 50,
-                opacity: 0,
-                stagger: 0.2,
-                ease: "power3.out",
-                delay: 0.2
-            });
+            gsap.registerPlugin(ScrollTrigger);
 
             // Section Scroll Animations
             gsap.utils.toArray('.gsap-reveal').forEach(section => {
@@ -763,7 +775,14 @@
                     }
                 });
             });
-        });
+        }
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAnimations);
+        } else {
+            initAnimations();
+        }
     </script>
     <style>
         @keyframes float {
