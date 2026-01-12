@@ -869,7 +869,12 @@
 <div x-data="{ 
     show: false,
     init() {
-        this.show = !this.getCookie('cookie_consent');
+        // Delay showing to avoid interfering with LCP measurement
+        setTimeout(() => {
+            if (!this.getCookie('cookie_consent')) {
+                this.show = true;
+            }
+        }, 3000);
     },
     getCookie(name) {
         const value = `; ${document.cookie}`;
