@@ -38,27 +38,27 @@
     {{-- Custom Front Head Code from Settings --}}
     {!! setting('front_head_code', '') !!}
     
-    {{-- CRITICAL CSS: Inline styles for LCP element to avoid render-blocking --}}
+    {{-- CRITICAL CSS for LCP - H1 renders without waiting for main CSS --}}
     <style>
-    .hero-title {
+    .lcp-hero-title {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        line-height: 1;
-        font-size: clamp(3rem, 12vw, 8rem);
+        font-weight: 700;
+        letter-spacing: -0.05em;
+        line-height: 0.9;
         color: white;
+        font-size: clamp(3rem, 12vw, 9rem);
         margin-bottom: 1.5rem;
         text-align: center;
     }
-    .hero-title-gray { color: #4b5563; transition: color 0.5s; }
-    .hero-title-gray:hover { color: white; cursor: default; }
-    .hero-title-gradient {
+    .lcp-hero-title .gray { color: #4b5563; transition: color 0.5s; }
+    .lcp-hero-title .gray:hover { color: white; cursor: default; }
+    .lcp-hero-title .gradient {
         background: linear-gradient(to right, #00BFFF, #FF00FF);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
-    @media (min-width: 768px) { .hero-title { font-size: clamp(4rem, 10vw, 10rem); margin-bottom: 2rem; } }
+    @media (min-width: 768px) { .lcp-hero-title { margin-bottom: 2rem; } }
     </style>
 </head>
 <body class="bg-[#050505] text-white font-display overflow-x-hidden">
@@ -80,11 +80,11 @@
                 <span class="text-sm font-mono text-gray-400 tracking-wider">THE #1 URL SHORTENER</span>
             </div>
 
-            <!-- Massive Typography - CRITICAL: No Tailwind, no animation for fast LCP -->
-            <h1 class="hero-title">
+            <!-- Massive Typography - CRITICAL: No Tailwind, no animation, inline CSS for fast LCP -->
+            <h1 class="lcp-hero-title">
                 SHRINK.<br/>
-                <span class="hero-title-gray">SHARE.</span><br/>
-                <span class="hero-title-gradient">EARN.</span>
+                <span class="gray">SHARE.</span><br/>
+                <span class="gradient">EARN.</span>
             </h1>
 
             <p class="text-lg sm:text-xl md:text-2xl text-gray-400 mb-8 md:mb-12 max-w-2xl font-light hero-animate-in-delay-2 px-4">
