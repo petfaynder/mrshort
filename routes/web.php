@@ -141,7 +141,9 @@ Route::post('/guest/shorten', [LinkController::class, 'apiStore'])->name('guest.
 // Shortlink captcha verification (POST only - captcha shown in interstitial overlay)
 Route::post('/go/{code}/captcha', [LinkController::class, 'verifyCaptcha'])->name('shortlink.captcha.verify');
 
-Route::get('/{code}', [LinkController::class, 'redirect'])->name('shortlink.redirect');
+Route::get('/{code}', [LinkController::class, 'redirect'])
+    ->name('shortlink.redirect')
+    ->where('code', '^(?!admin|api|auth|livewire|storage|sanctum|filament|user|dashboard|profile|page|blog|feedback|login|register|logout|password|verify|confirm).*$');
 
 // Reklam Adımı Gösterim Route
 Route::get('/link/{link:code}/step/{stepNumber}', [LinkController::class, 'showAdStep'])

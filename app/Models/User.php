@@ -56,6 +56,7 @@ class User extends Authenticatable implements FilamentUser
         'referred_by_user_id',
         'payment_method',
         'payment_account',
+        'is_admin',            // Admin access
         'theme_preference',
         'allow_analytics',
         'allow_personalized_ads',
@@ -93,6 +94,7 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
             'tutorial_completed_at' => 'datetime',
             'last_login_at' => 'datetime',
             // Telegram Bonus
@@ -224,16 +226,13 @@ class User extends Authenticatable implements FilamentUser
     public function canAccessPanel(Panel $panel): bool
     {
         if ($panel->getId() === 'admin') {
-            return $this->hasRole('admin');
+            return $this->is_admin;
         }
 
         return false;
     }
 
-    public function getIsAdminAttribute(): bool
-    {
-        return $this->hasRole('admin');
-    }
+
 
     // ==========================================
     // Telegram Traffic Bonus Methods
