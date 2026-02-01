@@ -42,6 +42,9 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     pcntl \
     intl
 
+# Copy custom PHP configuration (max_input_vars, memory limits, etc.)
+COPY .docker/php.ini /usr/local/etc/php/conf.d/99-custom.ini
+
 # Copy application files from previous stages
 COPY --from=composer /app/vendor/ /var/www/html/vendor/
 COPY --from=npm /app/public/ /var/www/html/public/
