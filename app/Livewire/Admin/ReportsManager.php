@@ -39,12 +39,24 @@ class ReportsManager extends Component implements HasForms, HasTable
     public $userEmail;
     public $searchUserQuery;
     public $foundUsers = [];
+    
+    // Pagination for links table
+    public int $linksPage = 1;
+    public int $linksPerPage = 25;
 
     protected $queryString = ['startDate', 'endDate', 'selectedPreset', 'userId', 'userEmail'];
 
     public function mount(): void
     {
-        $this->form->fill();
+        // Initialize data array with defaults
+        $this->data = [
+            'userId' => null,
+            'startDate' => null,
+            'endDate' => null,
+            'selectedPreset' => 'last_7_days',
+        ];
+        
+        $this->selectedPreset = 'last_7_days';
         $this->applyPreset();
     }
 
@@ -52,44 +64,28 @@ class ReportsManager extends Component implements HasForms, HasTable
     {
         return $form
             ->schema([
-                TextInput::make('searchUserQuery')
-                    ->label('Kullanıcı Ara')
-                    ->placeholder('Kullanıcı adı veya e-posta ile ara')
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(fn () => $this->searchUsers()),
                 Select::make('userId')
                     ->label('Kullanıcı Seç')
-                    ->options(function () {
-                        if ($this->searchUserQuery) {
-                            return $this->foundUsers->pluck('name', 'id')->toArray();
-                        }
-                        if ($this->userId) {
-                            $user = User::find($this->userId);
-                            return $user ? [$user->id => $user->name . ' (' . $user->email . ')'] : [];
-                        }
-                        return [];
-                    })
+                    ->options(fn () => User::limit(100)->pluck('name', 'id'))
                     ->searchable()
+                    ->getSearchResultsUsing(fn (string $search): array => 
+                        User::where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->limit(50)
+                            ->pluck('name', 'id')
+                            ->toArray()
+                    )
+                    ->getOptionLabelUsing(fn ($value): ?string => User::find($value)?->name)
                     ->nullable()
-                    ->reactive()
-                    ->afterStateUpdated(function ($state) {
-                        if ($state) {
-                            $user = User::find($state);
-                            $this->userEmail = $user->email;
-                        } else {
-                            $this->userEmail = null;
-                        }
-                        $this->searchUserQuery = null;
-                        $this->foundUsers = [];
-                    }),
+                    ->live(),
                 DatePicker::make('startDate')
                     ->label('Başlangıç Tarihi')
-                    ->reactive()
-                    ->afterStateUpdated(fn () => $this->selectedPreset = null),
+                    ->live()
+                    ->afterStateUpdated(fn () => $this->data['selectedPreset'] = null),
                 DatePicker::make('endDate')
                     ->label('Bitiş Tarihi')
-                    ->reactive()
-                    ->afterStateUpdated(fn () => $this->selectedPreset = null),
+                    ->live()
+                    ->afterStateUpdated(fn () => $this->data['selectedPreset'] = null),
                 Select::make('selectedPreset')
                     ->label('Hızlı Seçim')
                     ->options([
@@ -99,9 +95,10 @@ class ReportsManager extends Component implements HasForms, HasTable
                         'last_365_days' => 'Son 1 Yıl',
                         'all_time' => 'Tüm Zamanlar',
                     ])
-                    ->reactive()
+                    ->live()
                     ->afterStateUpdated(fn () => $this->applyPreset()),
             ])
+            ->columns(4)
             ->statePath('data');
     }
  
@@ -114,7 +111,7 @@ class ReportsManager extends Component implements HasForms, HasTable
         $this->userEmail = $this->data['userEmail'] ?? null;
 
         $clicksByCountryChartData = $this->getClicksByCountryChartData();
-        $clicksByLink = $this->getClicksByLink();
+        $allClicksByLink = $this->getClicksByLink();
         $clicksByReferrer = $this->getClicksByReferrer();
         $clicksByDeviceType = $this->getClicksByDeviceType();
         $clicksByOs = $this->getClicksByOs();
@@ -123,10 +120,18 @@ class ReportsManager extends Component implements HasForms, HasTable
         $uniqueClicksByLink = $this->getUniqueClicksByLink();
         $clicksByBotStatus = $this->getClicksByBotStatus();
         $clicksByRecentClickCount = $this->getClicksByRecentClickCount();
+        
+        // Pagination for links
+        $totalLinks = $allClicksByLink->count();
+        $totalLinkPages = max(1, ceil($totalLinks / $this->linksPerPage));
+        $this->linksPage = min($this->linksPage, $totalLinkPages);
+        $clicksByLink = $allClicksByLink->slice(($this->linksPage - 1) * $this->linksPerPage, $this->linksPerPage)->values();
  
         return view('livewire.admin.reports-manager', [
             'clicksByCountryChartData' => $clicksByCountryChartData,
             'clicksByLink' => $clicksByLink,
+            'totalLinks' => $totalLinks,
+            'totalLinkPages' => $totalLinkPages,
             'clicksByReferrer' => $clicksByReferrer,
             'clicksByDeviceType' => $clicksByDeviceType,
             'clicksByOs' => $clicksByOs,
@@ -242,39 +247,69 @@ class ReportsManager extends Component implements HasForms, HasTable
     {
         $this->selectedPreset = null;
     }
+    
+    // Links pagination methods
+    public function goToLinksPage(int $page): void
+    {
+        $this->linksPage = $page;
+    }
+    
+    public function previousLinksPage(): void
+    {
+        if ($this->linksPage > 1) {
+            $this->linksPage--;
+        }
+    }
+    
+    public function nextLinksPage(): void
+    {
+        $this->linksPage++;
+    }
  
     private function applyPreset()
     {
         $now = now();
-        switch ($this->selectedPreset) {
+        $preset = $this->data['selectedPreset'] ?? $this->selectedPreset ?? 'last_7_days';
+        
+        switch ($preset) {
             case 'last_7_days':
-                $this->startDate = $now->copy()->subDays(6)->startOfDay()->toDateString();
-                $this->endDate = $now->endOfDay()->toDateString();
+                $startDate = $now->copy()->subDays(6)->startOfDay()->toDateString();
+                $endDate = $now->endOfDay()->toDateString();
                 break;
             case 'last_30_days':
-                $this->startDate = $now->copy()->subDays(29)->startOfDay()->toDateString();
-                $this->endDate = $now->endOfDay()->toDateString();
+                $startDate = $now->copy()->subDays(29)->startOfDay()->toDateString();
+                $endDate = $now->endOfDay()->toDateString();
                 break;
             case 'last_90_days':
-                $this->startDate = $now->copy()->subDays(89)->startOfDay()->toDateString();
-                $this->endDate = $now->endOfDay()->toDateString();
+                $startDate = $now->copy()->subDays(89)->startOfDay()->toDateString();
+                $endDate = $now->endOfDay()->toDateString();
                 break;
             case 'last_365_days':
-                $this->startDate = $now->copy()->subDays(364)->startOfDay()->toDateString();
-                $this->endDate = $now->endOfDay()->toDateString();
+                $startDate = $now->copy()->subDays(364)->startOfDay()->toDateString();
+                $endDate = $now->endOfDay()->toDateString();
                 break;
             case 'all_time':
-                $this->startDate = null;
-                $this->endDate = null;
+                $startDate = null;
+                $endDate = null;
                 break;
             default:
-                // Handle custom date range if needed, or default to last 7 days
-                if (!$this->startDate || !$this->endDate) {
-                     $this->selectedPreset = 'last_7_days';
-                     $this->applyPreset();
-                }
+                $startDate = $now->copy()->subDays(6)->startOfDay()->toDateString();
+                $endDate = $now->endOfDay()->toDateString();
+                $preset = 'last_7_days';
                 break;
         }
+        
+        // Update both component properties AND form data
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+        $this->selectedPreset = $preset;
+        
+        $this->data['startDate'] = $startDate;
+        $this->data['endDate'] = $endDate;
+        $this->data['selectedPreset'] = $preset;
+        
+        // Refill form with updated data
+        $this->form->fill($this->data);
     }
  
     private function getBaseQuery(): Builder

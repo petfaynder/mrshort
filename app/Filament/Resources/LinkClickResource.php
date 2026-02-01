@@ -67,7 +67,7 @@ class LinkClickResource extends Resource
                 Tables\Columns\TextColumn::make('referrer')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('is_bot')
+                Tables\Columns\IconColumn::make('is_bot')
                     ->boolean()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')

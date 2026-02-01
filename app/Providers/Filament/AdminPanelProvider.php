@@ -112,6 +112,10 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Support')
                     ->icon('heroicon-o-lifebuoy')
                     ->collapsed(true),
+                NavigationGroup::make()
+                    ->label('Raporlar')
+                    ->icon('heroicon-o-chart-bar')
+                    ->collapsed(false),
             ])
             ->resources([
                 // User Management
