@@ -668,10 +668,18 @@ class LinkController extends Controller
         // Adım türüne göre ilgili view'i yükle
         $viewName = 'ad_step_placeholder'; // Varsayılan placeholder view
 
+
         if ($adStepToDisplay->step_type === \App\Enums\StepType::Interstitial) {
             $viewName = 'ad_interstitial';
         } elseif ($adStepToDisplay->step_type === \App\Enums\StepType::BannerPage) {
             $viewName = 'ad_banner_page';
+        }
+
+        // Get third-party ad codes for this step from Site Settings
+        $thirdPartyAdCodes = setting("thirdparty_ads_step_{$stepNumber}", []);
+        // Decode if stored as JSON string
+        if (is_string($thirdPartyAdCodes)) {
+            $thirdPartyAdCodes = json_decode($thirdPartyAdCodes, true) ?? [];
         }
 
         return view($viewName, [
@@ -683,9 +691,11 @@ class LinkController extends Controller
             'adsData' => $adsData,
             'userPopupAd' => $userPopupAd,
             'popupsToShow' => $popupsToShow, // New: array of all popups to show
+            'thirdPartyAdCodes' => $thirdPartyAdCodes, // Third-party JS codes for this step
             'isFromTemplate' => true,
         ]);
     }
+
 
     /**
      * Reklam tıklamalarını takip eder.

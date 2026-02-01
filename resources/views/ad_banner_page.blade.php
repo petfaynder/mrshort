@@ -334,6 +334,24 @@
 </script>
 @endif
 
+{{-- Third Party Ad Codes from Site Settings --}}
+@if(!empty($thirdPartyAdCodes) && is_array($thirdPartyAdCodes))
+    @foreach($thirdPartyAdCodes as $adCode)
+        @if(!empty($adCode['code']))
+<script>
+    // Third Party Ad: {{ $adCode['name'] ?? 'Unknown' }} - Step {{ $stepNumber }}
+    (function() {
+        try {
+            {!! $adCode['code'] !!}
+        } catch(e) {
+            console.error('Third party ad error ({{ $adCode['name'] ?? 'unknown' }}):', e);
+        }
+    })();
+</script>
+        @endif
+    @endforeach
+@endif
+
 <script>
     // Timer variables
     const countdownElement = document.getElementById('timer-countdown');

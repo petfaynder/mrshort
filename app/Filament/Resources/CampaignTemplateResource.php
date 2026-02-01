@@ -385,26 +385,13 @@ class CampaignTemplateResource extends Resource
                                                         ->helperText('Banner için özel JavaScript kodu ekleyebilirsiniz. URL veya görsel yerine bu kod çalıştırılır.'),
                                                 ],
                                                 AdType::Popup->value => [
-                                                    TextInput::make('ad_data.title')
-                                                        ->label('Başlık')
-                                                        ->required()
-                                                        ->helperText('Pop-up penceresinin başlığı.'),
                                                     TextInput::make('ad_data.url')
-                                                        ->label('Hedef URL')
+                                                        ->label('Pop-under URL')
                                                         ->url()
                                                         ->required()
-                                                        ->helperText('Pop-up tıklandığında gidilecek URL.'),
-                                                    Textarea::make('ad_data.content')
-                                                        ->label('İçerik')
-                                                        ->rows(3)
-                                                        ->required()
-                                                        ->helperText('Pop-up penceresinde gösterilecek metin içeriği.'),
-                                                    Textarea::make('ad_data.custom_js') // Custom JS for pop-ups
-                                                        ->label('Özel JavaScript Kodu')
-                                                        ->rows(6)
-                                                        ->nullable()
-                                                        ->extraAttributes(['class' => 'font-mono text-sm'])
-                                                        ->helperText('Pop-up için özel JavaScript kodu ekleyebilirsiniz.'),
+                                                        ->helperText('Kullanıcı sayfaya tıkladığında arka planda açılacak URL.'),
+                                                    Placeholder::make('popup_js_info')
+                                                        ->content(new HtmlString('<p class="text-sm text-amber-600 dark:text-amber-400">⚠️ Üçüncü parti pop-under JS kodları Site Settings → Advertising bölümünden sayfa bazlı olarak eklenmektedir.</p>')),
                                                 ],
                                                 AdType::Html->value => [
                                                     Textarea::make('ad_data.content')

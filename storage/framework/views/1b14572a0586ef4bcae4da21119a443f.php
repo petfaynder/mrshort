@@ -5,6 +5,12 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     
     
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://lh3.googleusercontent.com">
+    
+    
     <title><?php echo e(setting('seo_meta_title', setting('site_name', 'MrShort') . ' - Monetize Your Links | Highest CPM Rates')); ?></title>
     <meta name="description" content="<?php echo e(setting('seo_description', 'Turn your links into revenue. Get the highest CPM rates in the industry, instant payouts, and powerful analytics.')); ?>"/>
     <meta name="keywords" content="<?php echo e(setting('seo_keywords', 'link shortener, url shortener, earn money, monetize links')); ?>"/>
@@ -15,42 +21,104 @@
     <?php endif; ?>
     
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
+    
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet"></noscript>
+    
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"></noscript>
+    
+    
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
     
     
     <?php echo setting('front_head_code', ''); ?>
 
+    
+    
+    <style>
+    /* Base - prevent flash */
+    html, body { margin: 0; padding: 0; background: #050505; color: #fff; }
+    
+    /* Hero container */
+    .hero-section {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: #050505;
+        position: relative;
+        overflow: hidden;
+        padding: 5rem 1rem;
+    }
+    
+    /* LCP Element - H1 */
+    .lcp-hero-title {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.05em;
+        line-height: 0.9;
+        color: white;
+        font-size: clamp(3rem, 12vw, 9rem);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        z-index: 1;
+    }
+    .lcp-hero-title .gray { color: #4b5563; transition: color 0.5s; }
+    .lcp-hero-title .gray:hover { color: white; cursor: default; }
+    .lcp-hero-title .gradient {
+        background: linear-gradient(to right, #00BFFF, #FF00FF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    @media (min-width: 768px) { .lcp-hero-title { margin-bottom: 2rem; } }
+    
+    /* Decorative elements - will be added by JS after LCP */
+    .hero-grid, .hero-spotlight { position: absolute; inset: 0; pointer-events: none; }
+    .hero-grid {
+        background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+        background-size: 24px 24px;
+    }
+    .hero-spotlight {
+        width: 800px; height: 800px;
+        background: radial-gradient(circle, rgba(0,191,255,0.1), transparent 60%);
+        filter: blur(150px);
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+    }
+    </style>
 </head>
 <body class="bg-[#050505] text-white font-display overflow-x-hidden">
     <?php echo $__env->make('partials.header', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <!-- Hero Section (Minimalist & Typography) -->
-    <div class="relative min-h-screen w-full flex flex-col justify-center items-center hero-section bg-[#050505] overflow-hidden py-20 lg:py-24">
+    <div class="hero-section relative w-full">
         
-        <!-- Subtle Background Grid -->
-        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        
-        <!-- Center Spotlight -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-electric-blue/10 rounded-full blur-[150px]"></div>
+        <!-- Grid and Spotlight will be added by JS after LCP -->
 
         <div class="relative z-10 w-full max-w-5xl px-4 flex flex-col items-center text-center">
             
             <!-- Badge -->
-            <div class="inline-flex items-center px-5 py-2 rounded-full border border-gray-800 bg-gray-900/50 backdrop-blur-sm mb-8 gsap-hero-element">
+            <div class="inline-flex items-center px-5 py-2 rounded-full border border-gray-800 bg-gray-900/50 backdrop-blur-sm mb-8 hero-animate-in">
                 <span class="text-sm font-mono text-gray-400 tracking-wider">THE #1 URL SHORTENER</span>
             </div>
 
-            <!-- Massive Typography -->
-            <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tighter leading-none mb-6 md:mb-8 text-white gsap-hero-element">
+            <!-- Massive Typography - CRITICAL: No Tailwind, no animation, inline CSS for fast LCP -->
+            <h1 class="lcp-hero-title">
                 SHRINK.<br/>
-                <span class="text-gray-600 transition-colors duration-500 hover:text-white cursor-default">SHARE.</span><br/>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-electric-blue to-bright-magenta animate-gradient-x">EARN.</span>
+                <span class="gray">SHARE.</span><br/>
+                <span class="gradient">EARN.</span>
             </h1>
 
-            <p class="text-lg sm:text-xl md:text-2xl text-gray-400 mb-8 md:mb-12 max-w-2xl font-light gsap-hero-element px-4">
+            <p class="text-lg sm:text-xl md:text-2xl text-gray-400 mb-8 md:mb-12 max-w-2xl font-light hero-animate-in-delay-2 px-4">
                 Monetize your traffic with the highest paying rates in the market. Simple, fast, and secure.
             </p>
 
@@ -96,7 +164,7 @@
                     this.copied = true;
                     setTimeout(() => { this.copied = false; }, 2000);
                 }
-            }" class="w-full max-w-2xl mx-auto lg:mx-0 gsap-hero-element relative z-30">
+            }" class="w-full max-w-2xl mx-auto lg:mx-0 hero-animate-in-delay-3 relative z-30">
                 
                 <div class="bg-white/5 border border-white/10 p-2 rounded-full backdrop-blur-md shadow-2xl hover:border-white/20 transition-colors duration-300">
                     <form @submit.prevent="submit" class="flex w-full relative">
@@ -319,7 +387,7 @@
                     <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 opacity-80 group-hover:scale-110 transition-transform">format_quote</span>
                     <p class="text-gray-400 flex-grow italic leading-relaxed text-lg mb-6">"This is hands-down the best link monetization service I've ever used. The CPM rates are fantastic, and the dashboard is incredibly intuitive. I saw my earnings double in the first month!"</p>
                     <div class="flex items-center pt-6 border-t border-white/5">
-                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-electric-blue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUA-JqtWZLz752Xs5rAxzxIPHcGqikmXdoUr2DdCIL6cZRZ067lEMc7HP5vjx_41MyK29dOzneCCOPJF_htoEHsEKOLkkWZqv6NaZigLi-BmU3G5t1TD-AbzgUnYL3aEvOx8Y2mZEY_pJ4E7obYCWLmtPYynTR0_nlKEExjq7odZu7XtEkM3lSRSrT0BfaIE_GG9jxdYq5yl_umK5lQQVQEZM63p3nSdG0VhvMdM5dS6_yF99E3UBTLMDJt1dS1zyPddPLLbgY"/>
+                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-electric-blue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUA-JqtWZLz752Xs5rAxzxIPHcGqikmXdoUr2DdCIL6cZRZ067lEMc7HP5vjx_41MyK29dOzneCCOPJF_htoEHsEKOLkkWZqv6NaZigLi-BmU3G5t1TD-AbzgUnYL3aEvOx8Y2mZEY_pJ4E7obYCWLmtPYynTR0_nlKEExjq7odZu7XtEkM3lSRSrT0BfaIE_GG9jxdYq5yl_umK5lQQVQEZM63p3nSdG0VhvMdM5dS6_yF99E3UBTLMDJt1dS1zyPddPLLbgY=s88" width="48" height="48" loading="lazy" decoding="async"/>
                         <div>
                             <p class="font-bold text-white">Sarah J.</p>
                             <p class="text-sm text-gray-500">Content Creator</p>
@@ -332,7 +400,7 @@
                     <span class="material-symbols-outlined text-5xl text-bright-magenta mb-6 opacity-80 group-hover:scale-110 transition-transform">format_quote</span>
                     <p class="text-gray-400 flex-grow italic leading-relaxed text-lg mb-6">"The API integration was a breeze. We've automated our entire link shortening process and it's been a game-changer for our business. Reliable, fast, and profitable."</p>
                     <div class="flex items-center pt-6 border-t border-white/5">
-                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-bright-magenta" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1xjircuAW9GDYcKX8HKmJv2_qFhZoDPQcIy5quRBbtaDQDCnWzhLdJV1vb7b0aRS5LEQXwEhQ1YvfXhbRn4fXXdSpVQFvlEkDvEKW4vw7K3X7tBN5nEli0lSMK0PXQE47GxwlvW90njRyD2wvhWJesfrHHF025GlrzNs_yuWdrXxScWgedCLai3n45-XMrwZT73wP7wVkb9fSya_MyYsmokITzB_Pd2gYwG_m0LniDN_KHaxAUETbbVtBEECChpMC5r3b877h"/>
+                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-bright-magenta" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1xjircuAW9GDYcKX8HKmJv2_qFhZoDPQcIy5quRBbtaDQDCnWzhLdJV1vb7b0aRS5LEQXwEhQ1YvfXhbRn4fXXdSpVQFvlEkDvEKW4vw7K3X7tBN5nEli0lSMK0PXQE47GxwlvW90njRyD2wvhWJesfrHHF025GlrzNs_yuWdrXxScWgedCLai3n45-XMrwZT73wP7wVkb9fSya_MyYsmokITzB_Pd2gYwG_m0LniDN_KHaxAUETbbVtBEECChpMC5r3b877h=s88" width="48" height="48" loading="lazy" decoding="async"/>
                         <div>
                             <p class="font-bold text-white">Mike R.</p>
                             <p class="text-sm text-gray-500">App Developer</p>
@@ -345,7 +413,7 @@
                     <span class="material-symbols-outlined text-5xl text-electric-blue mb-6 opacity-80 group-hover:scale-110 transition-transform">format_quote</span>
                     <p class="text-gray-400 flex-grow italic leading-relaxed text-lg mb-6">"I love the global reach and competitive rates for my country. Payouts are always on time, and the support team is genuinely helpful. Highly recommended for anyone looking to monetize their traffic."</p>
                     <div class="flex items-center pt-6 border-t border-white/5">
-                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-electric-blue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfNnaC4Spa9QmjB_AYXhcX-LhOgKO33Up1x47Wk-PP097jgAVzQ3FEi9OhNaOyWPUAcgGQV-LrqgpA0FVGIl70bPA-E1rL5OUVVhwzt1Ax5ufO5lTkJxec-JRbsiDN5Lii-L62c7KEIqJxSBiOLSehLGAiYwJQkYloKgIwRNcU7EdvrHPZBytw0a8FZ8W9ueYg9By-bYeECd_BpI02YxwYa67Z2ACsZTpx4cgyJ4leZbHenlRs0vzbdrjHaKAWdvKFortt3d2D"/>
+                        <img alt="User avatar" class="w-12 h-12 rounded-full mr-4 border-2 border-electric-blue" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfNnaC4Spa9QmjB_AYXhcX-LhOgKO33Up1x47Wk-PP097jgAVzQ3FEi9OhNaOyWPUAcgGQV-LrqgpA0FVGIl70bPA-E1rL5OUVVhwzt1Ax5ufO5lTkJxec-JRbsiDN5Lii-L62c7KEIqJxSBiOLSehLGAiYwJQkYloKgIwRNcU7EdvrHPZBytw0a8FZ8W9ueYg9By-bYeECd_BpI02YxwYa67Z2ACsZTpx4cgyJ4leZbHenlRs0vzbdrjHaKAWdvKFortt3d2D=s88" width="48" height="48" loading="lazy" decoding="async"/>
                         <div>
                             <p class="font-bold text-white">Aisha K.</p>
                             <p class="text-sm text-gray-500">Blogger</p>
@@ -677,20 +745,18 @@
 
     <?php echo $__env->make('partials.footer', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            gsap.registerPlugin(ScrollTrigger);
+        // Wait for GSAP to be available (since it's deferred)
+        function initAnimations() {
+            if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+                // GSAP not loaded yet, try again shortly
+                setTimeout(initAnimations, 50);
+                return;
+            }
             
-            // Hero Animation (Minimalist)
-            gsap.from(".gsap-hero-element", {
-                duration: 1,
-                y: 50,
-                opacity: 0,
-                stagger: 0.2,
-                ease: "power3.out",
-                delay: 0.2
-            });
+            gsap.registerPlugin(ScrollTrigger);
 
             // Section Scroll Animations
             gsap.utils.toArray('.gsap-reveal').forEach(section => {
@@ -764,6 +830,29 @@
                     }
                 });
             });
+        }
+        
+        // CRITICAL: Delay GSAP init until AFTER first paint
+        // This prevents blocking LCP element render
+        window.addEventListener('load', function() {
+            // Inject hero decorative elements AFTER LCP
+            const heroSection = document.querySelector('.hero-section');
+            if (heroSection) {
+                const grid = document.createElement('div');
+                grid.className = 'hero-grid';
+                heroSection.insertBefore(grid, heroSection.firstChild);
+                
+                const spotlight = document.createElement('div');
+                spotlight.className = 'hero-spotlight';
+                heroSection.insertBefore(spotlight, heroSection.firstChild);
+            }
+            
+            // Use requestIdleCallback if available, otherwise setTimeout
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(initAnimations, { timeout: 2000 });
+            } else {
+                setTimeout(initAnimations, 100);
+            }
         });
     </script>
     <style>
@@ -847,22 +936,44 @@
     </style>
     
 
-<?php
-$__split = function ($name, $params = []) {
-    return [$name, $params];
-};
-[$__name, $__params] = $__split('cookie-consent');
-
-$__html = app('livewire')->mount($__name, $__params, 'lw-4241845453-0', $__slots ?? [], get_defined_vars());
-
-echo $__html;
-
-unset($__html);
-unset($__name);
-unset($__params);
-unset($__split);
-if (isset($__slots)) unset($__slots);
-?>
+<?php if(setting('display_cookie_notification', true)): ?>
+<div x-data="{ 
+    show: false,
+    init() {
+        // Delay showing to avoid interfering with LCP measurement
+        setTimeout(() => {
+            if (!this.getCookie('cookie_consent')) {
+                this.show = true;
+            }
+        }, 3000);
+    },
+    getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    },
+    accept() {
+        const d = new Date();
+        d.setTime(d.getTime() + (365*24*60*60*1000));
+        document.cookie = 'cookie_consent=accepted;expires=' + d.toUTCString() + ';path=/';
+        this.show = false;
+    }
+}" x-cloak>
+    <div x-show="show" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="fixed bottom-0 left-0 right-0 z-50 p-4 bg-gray-900/95 backdrop-blur-sm border-t border-gray-800">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="text-sm text-gray-300">
+                <p>We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.</p>
+            </div>
+            <div class="flex gap-3">
+                <button @click="accept()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                    Accept
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 
 <?php echo setting('footer_code', ''); ?>

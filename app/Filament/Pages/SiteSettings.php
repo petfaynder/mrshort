@@ -10,6 +10,7 @@ use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -604,6 +605,30 @@ class SiteSettings extends Page implements HasForms
 
     protected function getAdvertisingTab(): Tab
     {
+        // Helper function to create repeater for each step
+        $createStepRepeater = function (int $stepNumber) {
+            return Repeater::make("thirdparty_ads_step_{$stepNumber}")
+                ->label("{$stepNumber}. Sayfa Reklam Kodları")
+                ->schema([
+                    TextInput::make('name')
+                        ->label('Reklam Adı')
+                        ->placeholder('Örn: AdMaven Pop-under, PropellerAds In-Page Push')
+                        ->required(),
+                    Textarea::make('code')
+                        ->label('JS Kodu')
+                        ->rows(4)
+                        ->required()
+                        ->extraAttributes(['class' => 'font-mono text-sm'])
+                        ->helperText('Reklam firmasından aldığınız tam script kodunu yapıştırın'),
+                ])
+                ->columns(1)
+                ->collapsible()
+                ->collapsed()
+                ->itemLabel(fn (array $state): ?string => $state['name'] ?? 'Yeni Reklam Kodu')
+                ->addActionLabel('Yeni Reklam Kodu Ekle')
+                ->defaultItems(0);
+        };
+
         return Tab::make('Advertising')
             ->icon('heroicon-o-megaphone')
             ->schema([
@@ -625,6 +650,22 @@ class SiteSettings extends Page implements HasForms
                             ->default(true)
                             ->helperText('When disabled, only admin pop-unders will be shown'),
                     ]),
+                Section::make('Sayfa Bazlı Üçüncü Parti Reklam Kodları')
+                    ->description('Her reklam geçiş sayfası için ayrı üçüncü parti reklam kodları ekleyin. Pop-under, in-page push, native ads vs. her türlü JS kodu desteklenir. Her sayfaya birden fazla kod ekleyebilirsiniz.')
+                    ->schema([
+                        $createStepRepeater(1),
+                        $createStepRepeater(2),
+                        $createStepRepeater(3),
+                        $createStepRepeater(4),
+                        $createStepRepeater(5),
+                        $createStepRepeater(6),
+                        $createStepRepeater(7),
+                        $createStepRepeater(8),
+                        $createStepRepeater(9),
+                        $createStepRepeater(10),
+                    ])
+                    ->columns(1)
+                    ->collapsible(),
             ]);
     }
 
@@ -736,6 +777,7 @@ class SiteSettings extends Page implements HasForms
             'maintenance_' => 'general', 'display_' => 'general', 'fake_' => 'general',
             'timezone' => 'general', 'price_' => 'currency',
             'popup_' => 'advertising',
+            'thirdparty_ads_' => 'advertising',
             'wordpress_' => 'wordpress',
             'cache_' => 'performance', 'queue_' => 'performance',
         ];
