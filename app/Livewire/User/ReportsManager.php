@@ -85,7 +85,8 @@ class ReportsManager extends Component
 
         $query = LinkClick::whereHas('link', function ($query) use ($user) {
                                 $query->where('user_id', $user->id);
-                            });
+                            })
+                            ->where('is_skipped', false);
 
         if ($this->startDate) {
             $query->whereBetween('created_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59']);

@@ -39,10 +39,12 @@ class PerformanceOverview extends Component
 
         // Top Countries Logic
         $totalViews = LinkClick::whereIn('link_id', $linkIds)
+            ->where('is_skipped', false)
             ->whereBetween('link_clicks.created_at', [$startDate, $endDate])
             ->count();
 
         $this->topCountries = LinkClick::whereIn('link_id', $linkIds)
+            ->where('is_skipped', false)
             ->whereBetween('link_clicks.created_at', [$startDate, $endDate])
             ->join('countries', 'link_clicks.country_id', '=', 'countries.id')
             ->select('countries.name', 'countries.iso_code', DB::raw('count(*) as total_clicks'))
@@ -63,6 +65,7 @@ class PerformanceOverview extends Component
         $this->monthlyGoal = $user->monthly_goal ?? 100;
         // Recalculate earnings for accurate goal tracking
         $publisherEarnings = LinkClick::whereIn('link_id', $linkIds)
+            ->where('is_skipped', false)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('cpm_rate') / 1000;
             

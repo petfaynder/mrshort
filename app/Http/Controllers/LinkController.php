@@ -362,11 +362,39 @@ class LinkController extends Controller
         // Prevent duplicate recordings
         session()->forget('pending_click_' . $code);
         
+        // === CLICK REDUCTION SYSTEM ===
+        $isSkipped = false;
+        $originalCpmRate = $pendingClickData['cpm_rate'];
+        $originalShouldPay = $pendingClickData['should_pay'];
+        
+        if ($originalShouldPay && (bool) setting('click_reduction_enabled', false)) {
+            $userId = $pendingClickData['user_id'];
+            $guaranteeCount = (int) setting('click_guarantee_count', 5);
+            
+            // Count user's total paid clicks (not skipped)
+            $userTotalPaidClicks = LinkClick::whereHas('link', fn($q) => $q->where('user_id', $userId))
+                ->where('cpm_rate', '>', 0)
+                ->where('is_skipped', false)
+                ->count();
+            
+            // First X paid clicks are guaranteed
+            if ($userTotalPaidClicks >= $guaranteeCount) {
+                $ratio = (float) setting('click_record_ratio', 100) / 100;
+                $randomValue = mt_rand(1, 10000) / 10000;
+                $isSkipped = $randomValue > $ratio;
+            }
+        }
+        
+        // If skipped, set cpm_rate to 0 and mark as skipped
+        $recordCpmRate = $isSkipped ? 0 : $originalCpmRate;
+        $recordShouldPay = $isSkipped ? false : $originalShouldPay;
+        // === END CLICK REDUCTION ===
+        
         // Record the click to database
         $linkClick = $link->clicks()->create([
             'ip_address' => $pendingClickData['ip_address'],
             'country_id' => $pendingClickData['country_id'],
-            'cpm_rate' => $pendingClickData['cpm_rate'],
+            'cpm_rate' => $recordCpmRate,
             'country' => $pendingClickData['country_iso_code'],
             'city' => $pendingClickData['city'],
             'referrer' => $pendingClickData['referrer'],
@@ -375,16 +403,18 @@ class LinkController extends Controller
             'browser' => $pendingClickData['browser'],
             'is_bot' => $pendingClickData['is_bot'],
             'recent_click_count' => $pendingClickData['recent_click_count'],
+            'is_skipped' => $isSkipped,
         ]);
         
         \Log::info('Click recorded after ad flow completion.', [
             'link_id' => $link->id,
             'click_id' => $linkClick->id,
-            'should_pay' => $pendingClickData['should_pay']
+            'should_pay' => $recordShouldPay,
+            'is_skipped' => $isSkipped
         ]);
         
-        // Update user earnings ONLY if this is a paid view
-        if ($pendingClickData['user_id'] && $pendingClickData['should_pay']) {
+        // Update user earnings ONLY if this is a paid view and NOT skipped
+        if ($pendingClickData['user_id'] && $recordShouldPay && !$isSkipped) {
             $user = \App\Models\User::find($pendingClickData['user_id']);
             if ($user) {
                 $cpmRate = $pendingClickData['cpm_rate'];

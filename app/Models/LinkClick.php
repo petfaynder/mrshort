@@ -20,6 +20,7 @@ class LinkClick extends Model
         'os', // Eklendi
         'browser', // Eklendi
         'referrer', // Eklendi
+        'is_skipped', // Click reduction için
     ];
 
     protected static function boot()
@@ -27,6 +28,11 @@ class LinkClick extends Model
         parent::boot();
 
         static::created(function ($linkClick) {
+            // Skip gamification for skipped/reduced clicks
+            if ($linkClick->is_skipped) {
+                return;
+            }
+            
             if ($linkClick->link && $linkClick->link->user_id) {
                 $userId = $linkClick->link->user_id;
                 $user = $linkClick->link->user;

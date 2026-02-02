@@ -55,6 +55,7 @@ class EarningsChart extends Component
         $endDate = Carbon::parse($this->selectedMonth)->endOfMonth();
 
         $query = LinkClick::whereIn('link_id', $linkIds)
+            ->where('is_skipped', false)
             ->whereBetween('created_at', [$startDate, $endDate]);
 
         $dailyClicks = $query->selectRaw('DATE(created_at) as date, count(*) as total_clicks')

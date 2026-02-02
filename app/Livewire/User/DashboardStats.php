@@ -32,6 +32,7 @@ class DashboardStats extends Component
         $endDate = Carbon::parse($month)->endOfMonth();
 
         $query = LinkClick::whereIn('link_id', $linkIds)
+            ->where('is_skipped', false)
             ->whereBetween('created_at', [$startDate, $endDate]);
 
         $clicks = $query->get();

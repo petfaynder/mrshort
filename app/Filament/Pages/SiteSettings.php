@@ -314,6 +314,30 @@ class SiteSettings extends Page implements HasForms
                             ->helperText('Clicks from these sites are not paid')
                             ->rows(2),
                     ])->columns(2),
+                Section::make('Advanced')
+                    ->schema([
+                        Toggle::make('click_reduction_enabled')
+                            ->label('Enable Click Sampling')
+                            ->default(false)
+                            ->helperText('When enabled, only a percentage of clicks will be recorded'),
+                        TextInput::make('click_record_ratio')
+                            ->label('Record Ratio (%)')
+                            ->numeric()
+                            ->minValue(10)
+                            ->maxValue(100)
+                            ->default(100)
+                            ->suffix('%')
+                            ->helperText('Percentage of clicks to record (100 = all)'),
+                        TextInput::make('click_guarantee_count')
+                            ->label('Guaranteed First Clicks')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(50)
+                            ->default(5)
+                            ->helperText('First X paid clicks are always recorded for each user'),
+                    ])->columns(3)
+                    ->collapsed()
+                    ->collapsible(),
             ]);
     }
 
