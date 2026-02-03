@@ -141,11 +141,7 @@ Route::post('/guest/shorten', [LinkController::class, 'apiStore'])->name('guest.
 // Shortlink captcha verification (POST only - captcha shown in interstitial overlay)
 Route::post('/go/{code}/captcha', [LinkController::class, 'verifyCaptcha'])->name('shortlink.captcha.verify');
 
-Route::get('/{code}', [LinkController::class, 'redirect'])
-    ->name('shortlink.redirect')
-    ->where('code', '^(?!admin|api|auth|livewire|storage|sanctum|filament|user|dashboard|profile|page|blog|feedback|login|register|logout|password|verify|confirm).*$');
-
-// Reklam Adımı Gösterim Route
+// Reklam Adımı Gösterim Route (MUST be before /{code} catch-all)
 Route::get('/link/{link:code}/step/{stepNumber}', [LinkController::class, 'showAdStep'])
     ->name('link.ad_step')
     ->whereNumber('stepNumber'); // stepNumber'ın sayı olmasını sağla
@@ -153,6 +149,11 @@ Route::get('/link/{link:code}/step/{stepNumber}', [LinkController::class, 'showA
 // Click completion after all ad steps viewed
 Route::get('/link/{link:code}/complete', [LinkController::class, 'recordClickAndRedirect'])
     ->name('link.complete');
+
+// Shortlink redirect (catch-all - MUST be LAST)
+Route::get('/{code}', [LinkController::class, 'redirect'])
+    ->name('shortlink.redirect')
+    ->where('code', '^(?!admin|api|auth|livewire|storage|sanctum|filament|user|dashboard|profile|page|blog|feedback|login|register|logout|password|verify|confirm|link).*$');
 
 // Reklam Tıklama Takip Route (Yeni)
 Route::post('/ads/track-click/{adType}/{adId}', [LinkController::class, 'trackAdClick'])->name('ads.track-click');

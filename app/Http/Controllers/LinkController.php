@@ -298,6 +298,11 @@ class LinkController extends Controller
                 // Get all active templates and filter by targeting rules
                 $activeTemplates = CampaignTemplate::where('is_active', true)->get();
                 
+                if ($activeTemplates->isEmpty()) {
+                    \Log::warning('No active campaign templates found.');
+                    return Redirect::to($link->original_url);
+                }
+                
                 $matchingTemplates = $activeTemplates->filter(function($template) use ($visitorInfo) {
                     return VisitorDetectionService::matchesTargeting($visitorInfo, $template);
                 });
@@ -332,8 +337,12 @@ class LinkController extends Controller
                     'campaignTemplateId' => $selectedCampaignTemplate->id,
                 ];
                 
-                \Log::info('Redirecting to ad step.', ['routeParams' => $routeParams]);
-                return redirect()->route('link.ad_step', $routeParams);
+                $generatedUrl = route('link.ad_step', $routeParams);
+                \Log::info('Redirecting to ad step.', [
+                    'routeParams' => $routeParams,
+                    'generatedUrl' => $generatedUrl,
+                ]);
+                return redirect()->to($generatedUrl);
             } else {
                 // If no active campaigns are found at all, redirect to the original URL.
                 return Redirect::to($link->original_url);
@@ -492,17 +501,43 @@ class LinkController extends Controller
     {
         $campaignTemplateId = $request->query('campaignTemplateId');
 
+        \Log::info('showAdStep called.', [
+            'link_code' => $link->code ?? 'N/A',
+            'stepNumber' => $stepNumber,
+            'campaignTemplateId' => $campaignTemplateId,
+            'full_url' => $request->fullUrl(),
+        ]);
+
         $adStepToDisplay = null;
         $campaignTemplate = null;
 
         if ($campaignTemplateId) {
             $campaignTemplate = CampaignTemplate::with('campaignTemplateSteps.campaignTemplateAds')->find($campaignTemplateId);
+            \Log::info('CampaignTemplate lookup result.', [
+                'campaignTemplateId' => $campaignTemplateId,
+                'found' => $campaignTemplate ? true : false,
+                'is_active' => $campaignTemplate?->is_active,
+                'steps_count' => $campaignTemplate?->campaignTemplateSteps?->count() ?? 0,
+            ]);
+            
             if ($campaignTemplate) {
                 $adStepToDisplay = $campaignTemplate->campaignTemplateSteps()->where('step_number', $stepNumber)->first();
+                \Log::info('AdStep lookup result.', [
+                    'step_number_requested' => $stepNumber,
+                    'step_found' => $adStepToDisplay ? true : false,
+                    'available_step_numbers' => $campaignTemplate->campaignTemplateSteps->pluck('step_number')->toArray(),
+                ]);
             }
+        } else {
+            \Log::warning('showAdStep: No campaignTemplateId provided in query string.');
         }
 
         if (!$link || !$campaignTemplate || !$adStepToDisplay) {
+            \Log::warning('showAdStep: Redirecting to homepage due to missing data.', [
+                'has_link' => (bool) $link,
+                'has_campaignTemplate' => (bool) $campaignTemplate,
+                'has_adStepToDisplay' => (bool) $adStepToDisplay,
+            ]);
             return redirect('/')->with('error', 'Geçersiz link, kampanya veya adım.');
         }
 
