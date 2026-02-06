@@ -153,8 +153,13 @@ class LinkController extends Controller
         $link = Link::where('code', $code)->first();
 
         if ($link) {
-            // Note: Captcha is now shown as overlay in interstitial page (ad_interstitial.blade.php)
-            // No redirect needed here - the interstitial view handles captcha display
+            // Check if link is blocked (DMCA or other violation)
+            if ($link->is_blocked) {
+                return response()->view('errors.blocked-link', ['code' => $code], 403);
+            }
+            
+            // Note: Captcha is now shown as overlay in ad page
+            // No redirect needed here - the ad view handles captcha display
             
             $countryId = null;
             $countryIsoCode = null;
@@ -731,14 +736,8 @@ class LinkController extends Controller
         }
 
         // Adım türüne göre ilgili view'i yükle
-        $viewName = 'ad_step_placeholder'; // Varsayılan placeholder view
-
-
-        if ($adStepToDisplay->step_type === \App\Enums\StepType::Interstitial) {
-            $viewName = 'ad_interstitial';
-        } elseif ($adStepToDisplay->step_type === \App\Enums\StepType::BannerPage) {
-            $viewName = 'ad_banner_page';
-        }
+        // Tüm adım tipleri artık BannerPage olarak render edilecek (Interstitial kaldırıldı)
+        $viewName = 'ad_banner_page';
 
         // Get third-party ad codes for this step from Site Settings
         $thirdPartyAdCodes = setting("thirdparty_ads_step_{$stepNumber}", []);

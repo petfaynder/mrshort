@@ -40,6 +40,10 @@ Route::get('/api-documentation', function () {
     return view('pages.api-documentation');
 })->name('api.documentation');
 
+// DMCA Complaint Route
+Route::get('/dmca/{linkCode}', \App\Livewire\DmcaComplaintForm::class)->name('dmca.complaint');
+
+
 // Blog Routes
 Route::get('/blog', [\App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/category/{slug}', [\App\Http\Controllers\BlogController::class, 'category'])->name('blog.category');
