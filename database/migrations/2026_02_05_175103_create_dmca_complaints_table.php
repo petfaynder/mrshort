@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('dmca_complaints', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('link_id')->nullable()->constrained('links')->nullOnDelete();
+            $table->unsignedBigInteger('link_id')->nullable()->index();
             $table->string('link_code', 50);
             $table->text('original_url');
             $table->string('complaint_type', 50); // copyright, malware, illegal, phishing, sexual_content, other
