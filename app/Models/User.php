@@ -130,6 +130,14 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(WithdrawalRequest::class);
     }
 
+    /**
+     * Get the ad campaigns for the user.
+     */
+    public function adCampaigns(): HasMany
+    {
+        return $this->hasMany(\App\Models\AdCampaign::class);
+    }
+
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);

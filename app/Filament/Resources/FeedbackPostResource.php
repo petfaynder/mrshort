@@ -91,6 +91,18 @@ class FeedbackPostResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('approve')
+                    ->label('Approve')
+                    ->icon('heroicon-o-check')
+                    ->color('success')
+                    ->action(fn (FeedbackPost $record) => $record->update(['status' => 'planned']))
+                    ->visible(fn (FeedbackPost $record) => $record->status === 'review'),
+                Tables\Actions\Action::make('reject')
+                    ->label('Reject')
+                    ->icon('heroicon-o-x-mark')
+                    ->color('danger')
+                    ->action(fn (FeedbackPost $record) => $record->update(['status' => 'declined']))
+                    ->visible(fn (FeedbackPost $record) => $record->status !== 'declined'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -160,6 +160,28 @@ class SeasonResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('replicateSeason')
+                    ->label('Clone Season')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->requiresConfirmation()
+                    ->action(function (Season $record) {
+                        $newSeason = $record->replicate();
+                        $newSeason->name = $newSeason->name . ' (Copy)';
+                        $newSeason->is_active = false;
+                        $newSeason->save();
+
+                        foreach ($record->rewards as $reward) {
+                            $newReward = $reward->replicate();
+                            $newReward->season_id = $newSeason->id;
+                            $newReward->save();
+                        }
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title('Season cloned successfully')
+                            ->body('Season and all rewards have been duplicated.')
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

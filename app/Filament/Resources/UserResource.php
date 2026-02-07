@@ -309,7 +309,10 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\AdCampaignsRelationManager::class,
+            RelationManagers\WithdrawalsRelationManager::class,
+            RelationManagers\TicketsRelationManager::class,
+            RelationManagers\LinksRelationManager::class,
         ];
     }
 

@@ -43,17 +43,21 @@ class UserAdCampaignResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->label('Campaign Name')
-                            ->disabled(),
+                            ->required()
+                            ->maxLength(255),
                         Forms\Components\Select::make('user_id')
-                            ->label('Created By')
+                            ->label('Created By (User)')
                             ->relationship('user', 'name')
-                            ->disabled(),
+                            ->searchable()
+                            ->preload()
+                            ->required(),
                         Forms\Components\Select::make('approval_status')
                             ->options([
                                 'pending' => 'Pending',
                                 'approved' => 'Approved',
                                 'rejected' => 'Rejected',
                             ])
+                            ->default('approved')
                             ->required(),
                         Forms\Components\Textarea::make('rejection_reason')
                             ->label('Rejection Reason')
@@ -63,16 +67,25 @@ class UserAdCampaignResource extends Resource
                     ->schema([
                         Forms\Components\KeyValue::make('targeting_rules')
                             ->label('Targeting Rules')
-                            ->disabled(),
+                            ->keyLabel('Rule Type (url, country, etc)')
+                            ->valueLabel('Value')
+                            ->reorderable(),
                     ]),
-                Forms\Components\Section::make('Statistics')
+                Forms\Components\Section::make('Statistics & Budget')
                     ->schema([
+                        Forms\Components\TextInput::make('budget')
+                            ->label('Budget')
+                            ->prefix('$')
+                            ->numeric()
+                            ->default(0)
+                            ->required(),
                         Forms\Components\TextInput::make('total_impressions')
+                            ->numeric()
+                            ->default(0)
                             ->disabled(),
                         Forms\Components\TextInput::make('total_clicks')
-                            ->disabled(),
-                        Forms\Components\TextInput::make('budget')
-                            ->prefix('$')
+                            ->numeric()
+                            ->default(0)
                             ->disabled(),
                     ])->columns(3),
             ]);
@@ -183,6 +196,7 @@ class UserAdCampaignResource extends Resource
     {
         return [
             'index' => Pages\ListUserAdCampaigns::route('/'),
+            'create' => Pages\CreateUserAdCampaign::route('/create'),
             'view' => Pages\ViewUserAdCampaign::route('/{record}'),
             'edit' => Pages\EditUserAdCampaign::route('/{record}/edit'),
         ];
@@ -190,6 +204,6 @@ class UserAdCampaignResource extends Resource
 
     public static function canCreate(): bool
     {
-        return false; // Admin cannot create user campaigns
+        return true; 
     }
 }

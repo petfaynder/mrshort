@@ -94,6 +94,17 @@ class DomainResource extends Resource
                     ->label('Active Status'),
             ])
             ->actions([
+                Tables\Actions\Action::make('verify_dns')
+                    ->label('Verify DNS')
+                    ->icon('heroicon-o-signal')
+                    ->action(function (Domain $record) {
+                        $ip = gethostbyname($record->domain);
+                        Notification::make()
+                            ->title('DNS Verification')
+                            ->body("Domain resolves to: {$ip}")
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Actions\Action::make('setActive')
                     ->label('Set as Active')
                     ->icon('heroicon-o-check-circle')

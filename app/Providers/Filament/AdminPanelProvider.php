@@ -150,6 +150,7 @@ class AdminPanelProvider extends PanelProvider
                 
                 // Support
                 \App\Filament\Resources\TicketResource::class,
+                \App\Filament\Resources\DmcaComplaintResource::class,
                 
                 // Advertising System
                 \App\Filament\Resources\CampaignTemplateResource::class,

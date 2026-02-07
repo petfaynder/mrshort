@@ -144,6 +144,12 @@ class BlogPostResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\Action::make('view_on_site')
+                    ->label('View on Site')
+                    ->icon('heroicon-o-eye')
+                    ->url(fn (BlogPost $record) => url('/blog/' . $record->slug))
+                    ->openUrlInNewTab()
+                    ->visible(fn (BlogPost $record) => $record->is_published),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])

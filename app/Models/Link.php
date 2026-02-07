@@ -18,6 +18,7 @@ class Link extends Model
         'title',
         'expires_at',
         'is_hidden',
+        'is_blocked',
         'campaign_template_id',
         'use_wordpress',
     ];

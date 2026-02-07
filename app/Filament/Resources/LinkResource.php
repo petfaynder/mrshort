@@ -149,6 +149,11 @@ class LinkResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('visit')
+                    ->label('Visit')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->url(fn (Link $record) => $record->original_url)
+                    ->openUrlInNewTab(),
                 Tables\Actions\Action::make('hide')
                     ->label('Hide')
                     ->action(function (\App\Models\Link $record) {

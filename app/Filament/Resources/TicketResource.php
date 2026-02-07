@@ -247,6 +247,13 @@ class TicketResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->label('Reply')
                     ->icon('heroicon-o-chat-bubble-left-right'),
+                Tables\Actions\Action::make('resolve')
+                    ->label('Quick Resolve')
+                    ->icon('heroicon-o-check')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->action(fn (Ticket $record) => $record->update(['status' => 'resolved']))
+                    ->visible(fn (Ticket $record) => !in_array($record->status, ['resolved', 'closed'])),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

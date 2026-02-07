@@ -292,8 +292,14 @@
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
             <p class="text-sm text-gray-500">© <?php echo e(date('Y')); ?> <?php echo e(config('app.name')); ?>. All rights reserved.</p>
             <div class="flex space-x-6 mt-2 md:mt-0">
-                <a class="text-sm text-gray-500 hover:text-indigo-600" href="#">Privacy Policy</a>
-                <a class="text-sm text-gray-500 hover:text-indigo-600" href="#">Terms of Use</a>
+                <a class="text-sm text-gray-500 hover:text-indigo-600" href="<?php echo e(route('privacy.policy')); ?>">Privacy Policy</a>
+                <a class="text-sm text-gray-500 hover:text-indigo-600" href="<?php echo e(route('terms.of.service')); ?>">Terms of Use</a>
+                <a class="text-sm text-gray-400 hover:text-red-500 flex items-center gap-1" href="<?php echo e(route('dmca.complaint', ['linkCode' => $link->code])); ?>" target="_blank" rel="noopener">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    Report DMCA
+                </a>
             </div>
         </div>
     </footer>

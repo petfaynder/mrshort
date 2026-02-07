@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\UserAdCampaignResource\Pages;
 
 use App\Filament\Resources\UserAdCampaignResource;
+use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
 class ListUserAdCampaigns extends ListRecords
@@ -11,6 +12,8 @@ class ListUserAdCampaigns extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+            Actions\CreateAction::make(),
+        ];
     }
 }
