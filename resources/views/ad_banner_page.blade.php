@@ -340,33 +340,6 @@
 </script>
 @endif
 
-{{-- Third Party Ad Codes from Site Settings --}}
-@if(!empty($thirdPartyAdCodes) && is_array($thirdPartyAdCodes))
-    @foreach($thirdPartyAdCodes as $adCode)
-        @if(!empty($adCode['code']))
-<!-- Third Party Ad: {{ $adCode['name'] ?? 'Unknown' }} - Step {{ $stepNumber }} -->
-@php
-    $snippet = trim($adCode['code']);
-    $isHtml = preg_match('/^\s*<(script|iframe|div|span|ins|a|img|style)/i', $snippet);
-@endphp
-
-@if($isHtml)
-{!! $snippet !!}
-@else
-<script>
-    (function() {
-        try {
-            {!! $snippet !!}
-        } catch(e) {
-            console.error('Third party ad error ({{ $adCode['name'] ?? 'unknown' }}):', e);
-        }
-    })();
-</script>
-@endif
-        @endif
-    @endforeach
-@endif
-
 <script>
     // Timer variables
     const countdownElement = document.getElementById('timer-countdown');
@@ -523,6 +496,33 @@
         });
     });
 </script>
+
+{{-- Third Party Ad Codes from Site Settings --}}
+@if(!empty($thirdPartyAdCodes) && is_array($thirdPartyAdCodes))
+    @foreach($thirdPartyAdCodes as $adCode)
+        @if(!empty($adCode['code']))
+<!-- Third Party Ad: {{ $adCode['name'] ?? 'Unknown' }} - Step {{ $stepNumber }} -->
+@php
+    $snippet = trim($adCode['code']);
+    $isHtml = preg_match('/^\s*<(script|iframe|div|span|ins|a|img|style)/i', $snippet);
+@endphp
+
+@if($isHtml)
+{!! $snippet !!}
+@else
+<script>
+    (function() {
+        try {
+            {!! $snippet !!}
+        } catch(e) {
+            console.error('Third party ad error ({{ $adCode['name'] ?? 'unknown' }}):', e);
+        }
+    })();
+</script>
+@endif
+        @endif
+    @endforeach
+@endif
 
 </body>
 </html>
