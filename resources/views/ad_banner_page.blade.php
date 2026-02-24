@@ -347,8 +347,9 @@
 <!-- Third Party Ad: {{ $adCode['name'] ?? 'Unknown' }} - Step {{ $stepNumber }} -->
 @php
     $snippet = trim($adCode['code']);
-    $isHtml = preg_match('/<(script|iframe|div|span|ins|a|img)/i', $snippet);
+    $isHtml = preg_match('/^\s*<(script|iframe|div|span|ins|a|img|style)/i', $snippet);
 @endphp
+
 @if($isHtml)
 {!! $snippet !!}
 @else
