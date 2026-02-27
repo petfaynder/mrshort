@@ -11,7 +11,11 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Hash;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 
 class UserResource extends Resource
 {
@@ -29,9 +33,12 @@ class UserResource extends Resource
     
     protected static ?int $navigationSort = 1;
     
+    // Performance fix: Use cache to avoid N+1 count per page load for the badge
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::whereDate('created_at', today())->count() ?: null;
+        return cache()->remember('admin_users_today_count', 60, function () {
+            return static::getModel()::whereDate('created_at', today())->count() ?: null;
+        });
     }
     
     public static function getNavigationBadgeColor(): ?string
@@ -43,68 +50,198 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Username')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->label('Email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('password')
-                    ->label('Password')
-                    ->password()
-                    ->maxLength(255)
-                    ->nullable() // Şifre alanı boş bırakılabilir
-                    ->helperText('Şifreyi değiştirmek istemiyorsanız boş bırakın.'),
-                Forms\Components\TextInput::make('status')
-                    ->label('Status')
-                    ->maxLength(255)
-                    ->nullable(),
-                Forms\Components\TextInput::make('plan')
-                    ->label('Plan')
-                    ->maxLength(255)
-                    ->nullable(),
-                Forms\Components\DateTimePicker::make('expiration')
-                    ->label('Expiration')
-                    ->nullable(),
-                Forms\Components\TextInput::make('earnings')
-                    ->label('Earnings')
-                    ->numeric()
-                    ->nullable(),
-                Forms\Components\TextInput::make('link_earnings')
-                    ->label('Link Earnings')
-                    ->numeric()
-                    ->nullable(),
-                Forms\Components\TextInput::make('referral_earnings')
-                    ->label('Referral Earnings')
-                    ->numeric()
-                    ->nullable(),
-                Forms\Components\TextInput::make('payment_method')
-                    ->label('Payment Method')
-                    ->maxLength(255)
-                    ->nullable(),
-                Forms\Components\Textarea::make('payment_account')
-                    ->label('Payment Account')
-                    ->nullable(),
-                Forms\Components\TextInput::make('country')
-                    ->label('Country')
-                    ->maxLength(255)
-                    ->nullable(),
-                Forms\Components\Toggle::make('is_admin')
-                    ->label('Admin Mi?')
-                    ->nullable(),
+                Forms\Components\Tabs::make('User Details')
+                    ->tabs([
+                        Forms\Components\Tabs\Tab::make('Core Info')
+                            ->icon('heroicon-o-user')
+                            ->schema([
+                                Forms\Components\Grid::make(2)->schema([
+                                    TextInput::make('name')
+                                        ->label('Username')
+                                        ->required()
+                                        ->maxLength(255),
+                                    TextInput::make('email')
+                                        ->label('Email')
+                                        ->email()
+                                        ->required()
+                                        ->maxLength(255),
+                                    TextInput::make('first_name')
+                                        ->label('First Name')
+                                        ->maxLength(255)
+                                        ->nullable(),
+                                    TextInput::make('last_name')
+                                        ->label('Last Name')
+                                        ->maxLength(255)
+                                        ->nullable(),
+                                    TextInput::make('password')
+                                        ->label('Password (Secure)')
+                                        ->password()
+                                        ->maxLength(255)
+                                        ->autocomplete('new-password')
+                                        ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                                        ->dehydrated(fn ($state) => filled($state))
+                                        ->required(fn (string $context): bool => $context === 'create')
+                                        ->helperText('Şifreyi değiştirmek istemiyorsanız boş bırakın. Güvenlik için şifre sıfırlanmaz.'),
+                                    Select::make('status')
+                                        ->label('Account Status')
+                                        ->options([
+                                            'active' => 'Active',
+                                            'deactivated' => 'Deactivated',
+                                            'banned' => 'Banned',
+                                            'pending' => 'Pending',
+                                        ])
+                                        ->default('active')
+                                        ->required()
+                                        ->helperText('Not: Hesabı güvenli kapatmak için Tablo sayfasındaki "Deactivate" / "Ban" butonlarını kullanmanız önerilir.'),
+                                ]),
+                            ]),
+                            
+                        Forms\Components\Tabs\Tab::make('Finance & Subscriptions')
+                            ->icon('heroicon-o-currency-dollar')
+                            ->schema([
+                                Forms\Components\Grid::make(3)->schema([
+                                    Select::make('plan')
+                                        ->label('Subscription Plan')
+                                        ->options([
+                                            'free' => 'Free Plan',
+                                            'pro' => 'Pro Plan',
+                                            'vip' => 'VIP Plan',
+                                        ])
+                                        ->default('free')
+                                        ->required(),
+                                    Select::make('vip_level_id')
+                                        ->label('VIP Level')
+                                        ->relationship('vipLevel', 'name')
+                                        ->nullable(),
+                                    Forms\Components\DateTimePicker::make('expiration')
+                                        ->label('Plan Expiration Date')
+                                        ->nullable(),
+                                    TextInput::make('earnings')
+                                        ->label('Total Earnings')
+                                        ->numeric()->step(0.0001)
+                                        ->default(0)
+                                        ->nullable(),
+                                    TextInput::make('link_earnings')
+                                        ->label('Link Earnings')
+                                        ->numeric()->step(0.0001)
+                                        ->default(0)
+                                        ->nullable(),
+                                    TextInput::make('referral_earnings')
+                                        ->label('Referral Earnings')
+                                        ->numeric()->step(0.0001)
+                                        ->default(0)
+                                        ->nullable(),
+                                ]),
+                                Forms\Components\Grid::make(2)->schema([
+                                    Select::make('payment_method')
+                                        ->label('Payment Method')
+                                        ->options([
+                                            'paypal' => 'PayPal',
+                                            'crypto' => 'Crypto/USDT',
+                                            'bank_transfer' => 'Bank Transfer',
+                                            'payeer' => 'Payeer',
+                                        ])
+                                        ->nullable(),
+                                    Forms\Components\Textarea::make('payment_account')
+                                        ->label('Payment Account (Cüzdan/IBAN)')
+                                        ->nullable()
+                                        ->rows(1),
+                                ]),
+                            ]),
+                            
+                        Forms\Components\Tabs\Tab::make('Gamification')
+                            ->icon('heroicon-o-star')
+                            ->schema([
+                                Forms\Components\Grid::make(3)->schema([
+                                    TextInput::make('gamification_points')
+                                        ->label('XP / Game Points')
+                                        ->numeric()
+                                        ->default(0),
+                                    TextInput::make('virtual_currency')
+                                        ->label('Virtual Currency')
+                                        ->numeric()
+                                        ->default(0),
+                                    TextInput::make('monthly_goal')
+                                        ->label('Monthly Reach Goal')
+                                        ->numeric()
+                                        ->default(0),
+                                    TextInput::make('current_streak')
+                                        ->label('Current Streak (Gün)')
+                                        ->numeric()
+                                        ->default(0),
+                                    TextInput::make('longest_streak')
+                                        ->label('Longest Streak')
+                                        ->numeric()
+                                        ->default(0),
+                                    TextInput::make('streak_freeze_available')
+                                        ->label('Streak Freezes (Dondurma)')
+                                        ->numeric()
+                                        ->default(0),
+                                ]),
+                            ]),
+                            
+                        Forms\Components\Tabs\Tab::make('Settings & Meta')
+                            ->icon('heroicon-o-cog-8-tooth')
+                            ->schema([
+                                Forms\Components\Grid::make(2)->schema([
+                                    Forms\Components\Toggle::make('is_admin')
+                                        ->label('Sistem Yöneticisi (Admin) Mi?')
+                                        ->inline(false)
+                                        ->default(false),
+                                    TextInput::make('referral_code')
+                                        ->label('Referral Code (Davet Kodu)')
+                                        ->maxLength(255)
+                                        ->nullable(),
+                                ]),
+                                Forms\Components\Grid::make(2)->schema([
+                                    Forms\Components\Toggle::make('telegram_bonus_enabled')
+                                        ->label('Telegram Traffic Bonus Enabled?')
+                                        ->inline(false)
+                                        ->default(false),
+                                    TextInput::make('deactivation_reason')
+                                        ->label('Deactivation Reason')
+                                        ->maxLength(255)
+                                        ->nullable()
+                                        ->disabled(),
+                                ]),
+                                Forms\Components\Section::make('Read-Only Meta Data')
+                                    ->description('Sistem logları ve tarihler. Bu veriler otomatik güncellenir.')
+                                    ->schema([
+                                        Forms\Components\Grid::make(2)->schema([
+                                            Forms\Components\Placeholder::make('created_at')
+                                                ->label('Kayıt Tarihi (Registered At)')
+                                                ->content(fn (?User $record): string => $record?->created_at ? $record->created_at->format('d M Y, H:i') : '-'),
+                                            Forms\Components\Placeholder::make('updated_at')
+                                                ->label('Son Güncelleme (Updated At)')
+                                                ->content(fn (?User $record): string => $record?->updated_at ? $record->updated_at->format('d M Y, H:i') : '-'),
+                                            Forms\Components\Placeholder::make('last_login_at')
+                                                ->label('Son Giriş (Last Login)')
+                                                ->content(fn (?User $record): string => $record?->last_login_at ? $record->last_login_at->format('d M Y, H:i') : 'Hiç giriş yapmadı'),
+                                            Forms\Components\Placeholder::make('deactivated_at')
+                                                ->label('Kapatılma Tarihi (Deactivated At)')
+                                                ->content(fn (?User $record): string => $record?->deactivated_at ? $record->deactivated_at->format('d M Y, H:i') : '-'),
+                                        ]),
+                                    ])
+                                    ->collapsible()
+                                    ->collapsed(),
+                            ]),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
+            ->defaultPaginationPageOption(50)
+            ->paginated([25, 50, 100, 250])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
-                    ->label('Id')
-                    ->sortable(),
+                    ->label('ID')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Username')
                     ->searchable()
@@ -112,43 +249,69 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
+                    ->copyable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
+                Tables\Columns\BadgeColumn::make('status')
                     ->label('Status')
+                    ->colors([
+                        'success' => 'active',
+                        'warning' => fn ($state) => in_array($state, ['deactivated', 'pending']),
+                        'danger' => 'banned',
+                    ])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('plan')
                     ->label('Plan')
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'free' => 'gray',
+                        'pro' => 'primary',
+                        'vip' => 'warning',
+                        default => 'secondary',
+                    }),
+                Tables\Columns\TextColumn::make('earnings')
+                    ->label('Earnings')
+                    ->money('USD') // veya sistemin para birimi
                     ->sortable(),
+                Tables\Columns\IconColumn::make('is_admin')
+                    ->label('Admin')
+                    ->boolean()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('expiration')
                     ->label('Expiration')
-                    ->dateTime()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('earnings')
-                    ->label('Disable Earnings') // Geçici olarak earnings alanını kullanıyorum
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('login_ip')
-                    ->label('Login IP')
-                    ->searchable()
-                    ->sortable(),
+                    ->dateTime('d M Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('register_ip')
                     ->label('Register IP')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('country')
-                    ->label('Country')
-                    ->searchable()
-                    ->sortable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created')
-                    ->dateTime()
+                    ->label('Registered')
+                    ->dateTime('d M Y, H:i')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('modified')
-                    ->dateTime()
-                    ->sortable(),
+                    ->label('Modified')
+                    ->dateTime('d M Y, H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('status')
+                    ->options([
+                        'active' => 'Active',
+                        'deactivated' => 'Deactivated',
+                        'banned' => 'Banned',
+                        'pending' => 'Pending',
+                    ]),
+                SelectFilter::make('plan')
+                    ->options([
+                        'free' => 'Free Plan',
+                        'pro' => 'Pro Plan',
+                        'vip' => 'VIP Plan',
+                    ]),
+                TernaryFilter::make('is_admin')
+                    ->label('Admin Status'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -174,11 +337,11 @@ class UserResource extends Resource
                     ->modalHeading('Delete Account')
                     ->modalDescription('Are you sure you want to permanently delete this user account? This action cannot be undone.'),
                 Tables\Actions\Action::make('deactivateAccount')
-                    ->label('Deactivate Account')
+                    ->label('Deactivate')
                     ->icon('heroicon-o-x-circle')
                     ->color('warning')
                     ->form([
-                        Forms\Components\Select::make('reason')
+                        Select::make('reason')
                             ->label('Deactivation Reason')
                             ->options([
                                 'terms_violation' => 'Terms of Service Violation',
@@ -229,7 +392,7 @@ class UserResource extends Resource
                     ->modalDescription('Select a reason for deactivating this account. The user will see this reason when they try to log in.')
                     ->visible(fn (User $record): bool => $record->status !== 'deactivated' && $record->status !== 'banned'),
                 Tables\Actions\Action::make('reactivateAccount')
-                    ->label('Reactivate Account')
+                    ->label('Reactivate')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->action(function (User $record, $livewire): void {
@@ -248,13 +411,13 @@ class UserResource extends Resource
                     ->requiresConfirmation()
                     ->modalHeading('Reactivate Account')
                     ->modalDescription('This will restore the user\'s access to their account. They will be able to use all features again.')
-                    ->visible(fn (User $record): bool => $record->status === 'deactivated'),
+                    ->visible(fn (User $record): bool => in_array($record->status, ['deactivated', 'banned', 'pending'])),
                 Tables\Actions\Action::make('sendMessage')
-                    ->label('Send Message')
+                    ->label('Send Msg')
                     ->icon('heroicon-o-envelope')
                     ->color('info')
                     ->form([
-                        Forms\Components\TextInput::make('subject')
+                        TextInput::make('subject')
                             ->label('Subject')
                             ->required()
                             ->maxLength(255),
@@ -264,7 +427,6 @@ class UserResource extends Resource
                             ->rows(5),
                     ])
                     ->action(function (User $record, array $data): void {
-                        // Create ticket for user
                         $ticket = \App\Models\Ticket::create([
                             'user_id' => $record->id,
                             'subject' => '[Admin Message] ' . $data['subject'],
@@ -274,13 +436,11 @@ class UserResource extends Resource
                             'priority' => 'high',
                         ]);
                         
-                        // Add admin reply
                         $ticket->replies()->create([
                             'user_id' => auth()->id(),
                             'message' => $data['message'],
                         ]);
                         
-                        // Mark user as having admin message
                         $record->update([
                             'has_admin_message' => true,
                             'admin_message_ticket_id' => $ticket->id,
@@ -288,14 +448,14 @@ class UserResource extends Resource
                         
                         \Filament\Notifications\Notification::make()
                             ->title('Message Sent')
-                            ->body("Ticket created for {$record->name}. They will see a notification on their dashboard.")
+                            ->body("Ticket created for {$record->name}.")
                             ->success()
                             ->send();
                     })
                     ->modalHeading('Send Message to User')
-                    ->modalDescription('This message will create a support ticket and the user will see a notification on their dashboard.'),
+                    ->modalDescription('Creates a support ticket and notifies the user.'),
                 Tables\Actions\Action::make('viewReports')
-                    ->label('View Reports')
+                    ->label('Reports')
                     ->url(fn (User $record): string => static::getUrl('reports', ['record' => $record]))
                     ->icon('heroicon-o-chart-bar'),
             ])
@@ -326,5 +486,3 @@ class UserResource extends Resource
         ];
     }
 }
-
-

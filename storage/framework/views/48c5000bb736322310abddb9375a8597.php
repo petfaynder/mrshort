@@ -1,3 +1,0 @@
-<svg class="h-4 w-4 text-gray-500 ml-auto group-hover:text-rose-400 transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
-  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
-</svg><?php /**PATH C:\Users\Tolga\Desktop\Proje Siteleri\linkkısaltmaservisi2\storage\framework\views/a459b55faad3fb1ccb1033f6ac728afa.blade.php ENDPATH**/ ?>

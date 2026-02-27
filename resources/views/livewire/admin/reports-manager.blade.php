@@ -7,10 +7,10 @@
     {{-- İstatistik Kartları --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         @php
-            $totalClicks = collect($clicksByDeviceType)->sum('total');
-            $humanClicks = collect($clicksByBotStatus)->where('is_bot', false)->first()->total ?? 0;
-            $botClicks = collect($clicksByBotStatus)->where('is_bot', true)->first()->total ?? 0;
-            $topCountry = collect($clicksByCountryChartData['labels'])->zip($clicksByCountryChartData['data'])->sortByDesc(1)->first();
+            $totalClicks = $this->clicksByDeviceType->sum('total');
+            $humanClicks = $this->clicksByBotStatus->where('is_bot', false)->first()->total ?? 0;
+            $botClicks = $this->clicksByBotStatus->where('is_bot', true)->first()->total ?? 0;
+            $topCountry = collect($this->clicksByCountryChartData['labels'])->zip($this->clicksByCountryChartData['data'])->sortByDesc(1)->first();
         @endphp
         <x-filament::card>
             <div class="text-center">
@@ -40,24 +40,30 @@
 
     {{-- Grafikler --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {{-- Ülkelere Göre Tıklamalar --}}
-        <x-filament::card>
+        {{-- Coğrafi Yoğunluk Haritası (Geographic Density Map) --}}
+        <x-filament::card class="lg:col-span-2">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Ülkelere Göre Tıklamalar</h3>
-                <x-filament::button wire:click="exportCsv('countries')" size="sm" color="gray">
-                    CSV Export
-                </x-filament::button>
-            </div>
-            @if(count($clicksByCountryChartData['data']) > 0)
-                <div style="height: 300px;">
-                    <canvas id="countriesChart"></canvas>
+                <h3 class="text-lg font-bold">Coğrafi Yoğunluk Haritası</h3>
+                
+                <div class="flex items-center gap-2 text-sm text-gray-400">
+                    <span>Düşük</span>
+                    <div class="h-3 w-32 rounded-full" style="background: linear-gradient(to right, #2c3e50, #00f2ff);"></div>
+                    <span>Yüksek</span>
+                    
+                    <x-filament::button wire:click="exportCsv('countries')" size="sm" color="gray" class="ml-4">
+                        CSV İndir
+                    </x-filament::button>
                 </div>
-            @else
-                <p class="text-gray-500 text-center py-8">Veri bulunamadı</p>
-            @endif
+            </div>
+            <div 
+                wire:ignore 
+                x-data="worldMapChart({ clicksData: @js($this->clicksByCountryChartData) })" 
+                class="p-4 relative min-h-[400px] rounded-lg" 
+                style="background-color: #101922;"
+            >
+                <div x-ref="mapdiv" style="width: 100%; height: 500px;"></div>
+            </div>
         </x-filament::card>
-
-        {{-- Zaman Trendleri --}}
         <x-filament::card>
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold">Günlük Tıklama Trendleri</h3>
@@ -65,10 +71,14 @@
                     CSV Export
                 </x-filament::button>
             </div>
-            @if($clicksOverTime->count() > 0)
-                <div style="height: 300px;">
-                    <canvas id="timeChart"></canvas>
-                </div>
+            @if($this->clicksOverTime->count() > 0)
+                <div 
+                wire:ignore 
+                x-data="timeTrendsChart({ trendData: @js($this->clicksOverTime) })" 
+                class="p-4 relative min-h-[350px]"
+            >
+                <div x-ref="chartdiv" style="width: 100%; height: 350px;"></div>
+            </div>
             @else
                 <p class="text-gray-500 text-center py-8">Veri bulunamadı</p>
             @endif
@@ -79,62 +89,89 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         {{-- Cihaz Türleri --}}
         <x-filament::card>
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Cihaz Türleri</h3>
-                <x-filament::button wire:click="exportCsv('device_types')" size="sm" color="gray">
-                    Export
-                </x-filament::button>
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">devices</span>
+                    <h3 class="text-lg font-bold text-white">Cihazlar</h3>
+                </div>
+                <button wire:click="exportCsv('device_types')" class="text-gray-400 hover:text-white transition">
+                    <span class="material-symbols-outlined !text-xl">download</span>
+                </button>
             </div>
-            <ul class="divide-y divide-gray-700">
-                @forelse($clicksByDeviceType as $device)
-                <li class="py-3 flex justify-between items-center">
-                    <span class="text-sm">{{ $device->device_type ?? 'Diğer' }}</span>
-                    <span class="text-sm font-semibold">{{ number_format($device->total) }}</span>
-                </li>
+            <div class="space-y-4">
+                @php $maxDevice = $this->clicksByDeviceType->max('total') ?? 1; @endphp
+                @forelse($this->clicksByDeviceType as $device)
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="font-medium text-gray-200">{{ $device->device_type ?? 'Diğer' }}</span>
+                        <span class="text-gray-400">{{ number_format($device->total) }}</span>
+                    </div>
+                    <div class="w-full bg-gray-800 rounded-full h-1.5">
+                        <div class="bg-primary h-1.5 rounded-full" style="width: {{ ($device->total / $maxDevice) * 100 }}%"></div>
+                    </div>
+                </div>
                 @empty
-                <li class="py-3 text-center text-gray-500">Veri yok</li>
+                <p class="text-center text-gray-500 py-4">Veri yok</p>
                 @endforelse
-            </ul>
+            </div>
         </x-filament::card>
 
         {{-- İşletim Sistemleri --}}
         <x-filament::card>
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">İşletim Sistemleri</h3>
-                <x-filament::button wire:click="exportCsv('operating_systems')" size="sm" color="gray">
-                    Export
-                </x-filament::button>
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-green-500">computer</span>
+                    <h3 class="text-lg font-bold text-white">İşletim Sistemleri</h3>
+                </div>
+                <button wire:click="exportCsv('operating_systems')" class="text-gray-400 hover:text-white transition">
+                    <span class="material-symbols-outlined !text-xl">download</span>
+                </button>
             </div>
-            <ul class="divide-y divide-gray-700 max-h-64 overflow-y-auto">
-                @forelse($clicksByOs as $os)
-                <li class="py-3 flex justify-between items-center">
-                    <span class="text-sm">{{ $os->os ?? 'Bilinmiyor' }}</span>
-                    <span class="text-sm font-semibold">{{ number_format($os->total) }}</span>
-                </li>
+            <div class="space-y-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                @php $maxOs = $this->clicksByOs->max('total') ?? 1; @endphp
+                @forelse($this->clicksByOs as $os)
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="font-medium text-gray-200">{{ $os->os ?? 'Bilinmiyor' }}</span>
+                        <span class="text-gray-400">{{ number_format($os->total) }}</span>
+                    </div>
+                    <div class="w-full bg-gray-800 rounded-full h-1.5">
+                        <div class="bg-green-500 h-1.5 rounded-full" style="width: {{ ($os->total / $maxOs) * 100 }}%"></div>
+                    </div>
+                </div>
                 @empty
-                <li class="py-3 text-center text-gray-500">Veri yok</li>
+                <p class="text-center text-gray-500 py-4">Veri yok</p>
                 @endforelse
-            </ul>
+            </div>
         </x-filament::card>
 
         {{-- Tarayıcılar --}}
         <x-filament::card>
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Tarayıcılar</h3>
-                <x-filament::button wire:click="exportCsv('browsers')" size="sm" color="gray">
-                    Export
-                </x-filament::button>
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-purple-500">public</span>
+                    <h3 class="text-lg font-bold text-white">Tarayıcılar</h3>
+                </div>
+                <button wire:click="exportCsv('browsers')" class="text-gray-400 hover:text-white transition">
+                    <span class="material-symbols-outlined !text-xl">download</span>
+                </button>
             </div>
-            <ul class="divide-y divide-gray-700 max-h-64 overflow-y-auto">
-                @forelse($clicksByBrowser as $browser)
-                <li class="py-3 flex justify-between items-center">
-                    <span class="text-sm">{{ $browser->browser ?? 'Bilinmiyor' }}</span>
-                    <span class="text-sm font-semibold">{{ number_format($browser->total) }}</span>
-                </li>
+            <div class="space-y-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                @php $maxBrowser = $this->clicksByBrowser->max('total') ?? 1; @endphp
+                @forelse($this->clicksByBrowser as $browser)
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="font-medium text-gray-200">{{ $browser->browser ?? 'Bilinmiyor' }}</span>
+                        <span class="text-gray-400">{{ number_format($browser->total) }}</span>
+                    </div>
+                    <div class="w-full bg-gray-800 rounded-full h-1.5">
+                        <div class="bg-purple-500 h-1.5 rounded-full" style="width: {{ ($browser->total / $maxBrowser) * 100 }}%"></div>
+                    </div>
+                </div>
                 @empty
-                <li class="py-3 text-center text-gray-500">Veri yok</li>
+                <p class="text-center text-gray-500 py-4">Veri yok</p>
                 @endforelse
-            </ul>
+            </div>
         </x-filament::card>
     </div>
 
@@ -142,42 +179,68 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {{-- Yönlendiren Domainler --}}
         <x-filament::card>
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Yönlendiren Domainler</h3>
-                <x-filament::button wire:click="exportCsv('referrers')" size="sm" color="gray">
-                    Export
-                </x-filament::button>
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-yellow-500">link</span>
+                    <h3 class="text-lg font-bold text-white">Yönlendiren Domainler (Referrers)</h3>
+                </div>
+                <button wire:click="exportCsv('referrers')" class="text-gray-400 hover:text-white transition">
+                    <span class="material-symbols-outlined !text-xl">download</span>
+                </button>
             </div>
-            <ul class="divide-y divide-gray-700 max-h-64 overflow-y-auto">
-                @forelse($clicksByReferrer as $referrer)
-                <li class="py-3 flex justify-between items-center">
-                    <span class="text-sm truncate max-w-xs">{{ $referrer->referrer ?? 'Direkt' }}</span>
-                    <span class="text-sm font-semibold">{{ number_format($referrer->total) }}</span>
-                </li>
+            <div class="space-y-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                @php $maxRef = $this->clicksByReferrer->max('total') ?? 1; @endphp
+                @forelse($this->clicksByReferrer as $referrer)
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="font-medium text-gray-200 truncate max-w-[200px]">{{ $referrer->referrer ?? 'Direkt (Katalog Dışı)' }}</span>
+                        <span class="text-gray-400">{{ number_format($referrer->total) }}</span>
+                    </div>
+                    <div class="w-full bg-gray-800 rounded-full h-1.5">
+                        <div class="bg-yellow-500 h-1.5 rounded-full" style="width: {{ ($referrer->total / $maxRef) * 100 }}%"></div>
+                    </div>
+                </div>
                 @empty
-                <li class="py-3 text-center text-gray-500">Veri yok</li>
+                <p class="text-center text-gray-500 py-4">Veri yok</p>
                 @endforelse
-            </ul>
+            </div>
         </x-filament::card>
 
-        {{-- En Çok Tıklanan Ülkeler --}}
+        {{-- En Çok Tıklanan Ülkeler (Side Panel) --}}
         <x-filament::card>
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">En Çok Tıklanan Ülkeler</h3>
-                <x-filament::button wire:click="exportCsv('countries_table')" size="sm" color="gray">
-                    Export
-                </x-filament::button>
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-400">flag</span>
+                    <h3 class="text-lg font-bold text-white">Top 10 Ülke</h3>
+                </div>
+                <button wire:click="exportCsv('countries_table')" class="text-gray-400 hover:text-white transition">
+                    <span class="material-symbols-outlined !text-xl">download</span>
+                </button>
             </div>
-            <ul class="divide-y divide-gray-700 max-h-64 overflow-y-auto">
-                @forelse(collect($clicksByCountryChartData['labels'])->zip($clicksByCountryChartData['data'])->sortByDesc(1)->take(10) as $country)
-                <li class="py-3 flex justify-between items-center">
-                    <span class="text-sm">{{ $country[0] ?? 'Bilinmiyor' }}</span>
-                    <span class="text-sm font-semibold">{{ number_format($country[1]) }}</span>
-                </li>
+            <div class="space-y-4 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                @php
+                    $countriesList = collect($this->clicksByCountryChartData['labels'])->zip($this->clicksByCountryChartData['data'])->sortByDesc(1)->take(10);
+                    $maxCountry = $countriesList->max(1) ?? 1;
+                @endphp
+                @forelse($countriesList as $country)
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <div class="flex items-center gap-2">
+                            @if($country[0] && $country[0] !== 'Bilinmiyor')
+                                <span class="fi fi-{{ strtolower(substr($country[0], 0, 2)) }}"></span>
+                            @endif
+                            <span class="font-medium text-gray-200">{{ $country[0] ?? 'Bilinmiyor' }}</span>
+                        </div>
+                        <span class="text-gray-400">{{ number_format($country[1]) }}</span>
+                    </div>
+                    <div class="w-full bg-gray-800 rounded-full h-1.5">
+                        <div class="bg-blue-400 h-1.5 rounded-full" style="width: {{ ($country[1] / $maxCountry) * 100 }}%"></div>
+                    </div>
+                </div>
                 @empty
-                <li class="py-3 text-center text-gray-500">Veri yok</li>
+                <p class="text-center text-gray-500 py-4">Veri yok</p>
                 @endforelse
-            </ul>
+            </div>
         </x-filament::card>
     </div>
 
@@ -199,7 +262,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-700">
-                    @forelse($clicksByLink as $link)
+                    @forelse($this->clicksByLink as $link)
                     <tr>
                         <td class="px-4 py-3 text-sm text-primary">{{ $link['short_link'] }}</td>
                         <td class="px-4 py-3 text-sm text-gray-300 truncate max-w-xs">{{ Str::limit($link['original_url'], 50) }}</td>
@@ -215,136 +278,257 @@
         </div>
         
         {{-- Pagination --}}
-        @if($totalLinkPages > 1)
-        <div class="mt-4 flex items-center justify-between border-t border-gray-700 pt-4">
-            <div class="text-sm text-gray-400">
-                Toplam {{ number_format($totalLinks) }} link, Sayfa {{ $linksPage }} / {{ $totalLinkPages }}
-            </div>
-            <div class="flex items-center gap-1">
-                {{-- Previous Button --}}
-                <button 
-                    wire:click="previousLinksPage" 
-                    @if($linksPage <= 1) disabled @endif
-                    class="px-3 py-1 text-sm rounded border border-gray-600 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    ← Önceki
-                </button>
-                
-                {{-- Page Numbers --}}
-                @php
-                    $startPage = max(1, $linksPage - 2);
-                    $endPage = min($totalLinkPages, $linksPage + 2);
-                @endphp
-                
-                @if($startPage > 1)
-                    <button wire:click="goToLinksPage(1)" class="px-3 py-1 text-sm rounded border border-gray-600 hover:bg-gray-700">1</button>
-                    @if($startPage > 2)
-                        <span class="px-2 text-gray-500">...</span>
-                    @endif
-                @endif
-                
-                @for($i = $startPage; $i <= $endPage; $i++)
-                    <button 
-                        wire:click="goToLinksPage({{ $i }})" 
-                        class="px-3 py-1 text-sm rounded border {{ $i === $linksPage ? 'bg-primary text-white border-primary' : 'border-gray-600 hover:bg-gray-700' }}"
-                    >
-                        {{ $i }}
-                    </button>
-                @endfor
-                
-                @if($endPage < $totalLinkPages)
-                    @if($endPage < $totalLinkPages - 1)
-                        <span class="px-2 text-gray-500">...</span>
-                    @endif
-                    <button wire:click="goToLinksPage({{ $totalLinkPages }})" class="px-3 py-1 text-sm rounded border border-gray-600 hover:bg-gray-700">{{ $totalLinkPages }}</button>
-                @endif
-                
-                {{-- Next Button --}}
-                <button 
-                    wire:click="nextLinksPage" 
-                    @if($linksPage >= $totalLinkPages) disabled @endif
-                    class="px-3 py-1 text-sm rounded border border-gray-600 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    Sonraki →
-                </button>
-            </div>
+        @if($this->clicksByLink->total() > $this->clicksByLink->perPage())
+        <div class="mt-4">
+            {{ $this->clicksByLink->links() }}
         </div>
         @endif
     </x-filament::card>
 </div>
 
-@script
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Ülkelere göre pasta grafik
-    const countriesData = @json($clicksByCountryChartData);
-    if (countriesData.data && countriesData.data.length > 0) {
-        const ctx1 = document.getElementById('countriesChart');
-        if (ctx1) {
-            new Chart(ctx1, {
-                type: 'doughnut',
-                data: {
-                    labels: countriesData.labels.slice(0, 10),
-                    datasets: [{
-                        data: countriesData.data.slice(0, 10),
-                        backgroundColor: [
-                            '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
-                            '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: { color: '#9ca3af' }
-                        }
-                    }
-                }
-            });
-        }
-    }
+@assets
+<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/map.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+@endassets
 
-    // Zaman trendleri çizgi grafik
-    const timeData = @json($clicksOverTime);
-    if (timeData && timeData.length > 0) {
-        const ctx2 = document.getElementById('timeChart');
-        if (ctx2) {
-            new Chart(ctx2, {
-                type: 'line',
-                data: {
-                    labels: timeData.map(item => item.click_date),
-                    datasets: [{
-                        label: 'Tıklama',
-                        data: timeData.map(item => item.total),
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: {
-                            ticks: { color: '#9ca3af' },
-                            grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            ticks: { color: '#9ca3af' },
-                            grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                        }
+@script
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('worldMapChart', ({ clicksData }) => ({
+            root: null,
+            polygonSeries: null,
+            init() {
+                this.loadMap();
+                
+                Livewire.on('heatmap-data-updated', (event) => {
+                    this.updateData(event[0].data);
+                });
+            },
+            destroy() {
+                if (this.root) {
+                    this.root.dispose();
+                }
+            },
+            loadMap() {
+                if (typeof am5 === 'undefined') {
+                    // Script belum dimuat sepenuhnya, tunggu 100ms
+                    setTimeout(() => this.loadMap(), 100);
+                    return;
+                }
+                
+                this.root = am5.Root.new(this.$refs.mapdiv);
+                this.root.setThemes([am5themes_Animated.new(this.root)]);
+
+                let chart = this.root.container.children.push(
+                    am5map.MapChart.new(this.root, {
+                        panX: "rotateX",
+                        panY: "translateY",
+                        projection: am5map.geoMercator(),
+                        homeGeoPoint: { latitude: 2, longitude: 2 }
+                    })
+                );
+
+                this.polygonSeries = chart.series.push(
+                    am5map.MapPolygonSeries.new(this.root, {
+                        geoJSON: am5geodata_worldLow,
+                        exclude: ["AQ"]
+                    })
+                );
+
+                this.polygonSeries.mapPolygons.template.setAll({
+                    tooltipText: "{name}: {value} Tıklama",
+                    toggleKey: "active",
+                    interactive: true,
+                    fill: am5.color(0xaaaaaa)
+                });
+
+                this.polygonSeries.mapPolygons.template.states.create("hover", {
+                    fill: am5.color(0x00f2ff)
+                });
+
+                this.polygonSeries.heatRules.push({
+                    target: this.polygonSeries.mapPolygons.template,
+                    dataField: "value",
+                    min: am5.color(0x2c3e50),
+                    max: am5.color(0x00f2ff),
+                    key: "fill"
+                });
+
+                this.updateData(clicksData);
+            },
+            updateData(data) {
+                if (!this.polygonSeries) return;
+                var heatData = [];
+                if (data && data.labels && data.data) {
+                    for (var i = 0; i < data.labels.length; i++) {
+                        heatData.push({
+                            id: data.labels[i],
+                            value: Number(data.data[i])
+                        });
                     }
                 }
-            });
-        }
-    }
+                this.polygonSeries.data.setAll(heatData);
+            }
+        }));
+
+        Alpine.data('timeTrendsChart', ({ trendData }) => ({
+            root: null,
+            series: null,
+            xAxis: null,
+            init() {
+                this.loadChart();
+                
+                Livewire.on('timechart-data-updated', (event) => {
+                    this.updateData(event[0].data);
+                });
+            },
+            destroy() {
+                if (this.root) {
+                    this.root.dispose();
+                }
+            },
+            loadChart() {
+                if (typeof am5 === 'undefined' || typeof am5xy === 'undefined') {
+                    setTimeout(() => this.loadChart(), 100);
+                    return;
+                }
+                
+                this.root = am5.Root.new(this.$refs.chartdiv);
+                this.root.setThemes([am5themes_Animated.new(this.root)]);
+
+                let chart = this.root.container.children.push(
+                    am5xy.XYChart.new(this.root, {
+                        panX: true,
+                        panY: true,
+                        wheelX: "panX",
+                        wheelY: "zoomX",
+                        pinchZoomX: true
+                    })
+                );
+
+                let cursor = chart.set("cursor", am5xy.XYCursor.new(this.root, {
+                    behavior: "none"
+                }));
+                cursor.lineY.set("visible", false);
+
+                // Create axes
+                let xAxis = chart.xAxes.push(
+                    am5xy.DateAxis.new(this.root, {
+                        maxDeviation: 0.2,
+                        baseInterval: { timeUnit: "day", count: 1 },
+                        renderer: am5xy.AxisRendererX.new(this.root, {
+                            minGridDistance: 80,
+                            minorGridEnabled: true
+                        }),
+                        tooltip: am5.Tooltip.new(this.root, {})
+                    })
+                );
+
+                // Styling X Axis labels for dark theme
+                xAxis.get("renderer").labels.template.setAll({
+                    fill: am5.color(0x9ca3af),
+                    fontSize: 12
+                });
+
+                let yAxis = chart.yAxes.push(
+                    am5xy.ValueAxis.new(this.root, {
+                        renderer: am5xy.AxisRendererY.new(this.root, {})
+                    })
+                );
+
+                // Styling Y Axis labels for dark theme
+                yAxis.get("renderer").labels.template.setAll({
+                    fill: am5.color(0x9ca3af),
+                    fontSize: 12
+                });
+
+                // Style Grid Lines
+                xAxis.get("renderer").grid.template.setAll({
+                    stroke: am5.color(0x374151),
+                    strokeOpacity: 0.5
+                });
+                
+                yAxis.get("renderer").grid.template.setAll({
+                    stroke: am5.color(0x374151),
+                    strokeOpacity: 0.5
+                });
+
+                // Add series
+                let series = chart.series.push(
+                    am5xy.SmoothedXLineSeries.new(this.root, {
+                        name: "Clicks",
+                        xAxis: xAxis,
+                        yAxis: yAxis,
+                        valueYField: "value",
+                        valueXField: "date",
+                        tooltip: am5.Tooltip.new(this.root, {
+                            labelText: "{valueY} clicks"
+                        }),
+                        tension: 0.4
+                    })
+                );
+
+                // Neon primary color glow
+                series.strokes.template.setAll({
+                    strokeWidth: 3,
+                    stroke: am5.color(0x00f2ff),
+                    shadowColor: am5.color(0x00f2ff),
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowOffsetY: 0,
+                    shadowOpacity: 0.8
+                });
+                
+                // Gradient Fill Under Line
+                series.fills.template.setAll({
+                    fillOpacity: 0.5,
+                    visible: true,
+                    fillGradient: am5.LinearGradient.new(this.root, {
+                        stops: [
+                            { color: am5.color(0x00f2ff), opacity: 0.5 },
+                            { color: am5.color(0x00f2ff), opacity: 0 }
+                        ],
+                        rotation: 90
+                    })
+                });
+
+                series.bullets.push(() => {
+                    return am5.Bullet.new(this.root, {
+                        sprite: am5.Circle.new(this.root, {
+                            radius: 4,
+                            fill: am5.color(0x101922),
+                            stroke: am5.color(0x00f2ff),
+                            strokeWidth: 2
+                        })
+                    });
+                });
+
+                this.series = series;
+                this.updateData(trendData);
+                
+                // Appear animation
+                series.appear(1000);
+                chart.appear(1000, 100);
+            },
+            updateData(data) {
+                if (!this.series) return;
+                
+                let chartData = [];
+                if (data && data.length > 0) {
+                    chartData = data.map(item => {
+                        return {
+                            date: new Date(item.click_date).getTime(),
+                            value: Number(item.total)
+                        };
+                    });
+                }
+                
+                this.series.data.setAll(chartData);
+            }
+        }));
+    });
 </script>
 @endscript

@@ -39,8 +39,8 @@
                     </button>
                 </div>
             </div>
-            <div wire:ignore class="p-4 relative min-h-[400px]" style="background-color: #101922;">
-                @include('partials.world-map-svg')
+            <div wire:ignore x-data="worldMapChart({ clicksData: @js($clicksByCountryChartData) })" class="p-4 relative min-h-[400px]" style="background-color: #101922;">
+                <div x-ref="mapdiv" style="width: 100%; height: 500px;"></div>
             </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
@@ -251,78 +251,91 @@
         </div>
     </main>
 </div>
-@push('scripts')
+@assets
 <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
 <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
 <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
 <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+@endassets
+
+@script
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    console.log("amCharts script starting...");
-
-    var root = am5.Root.new("world-map");
-    root.setThemes([am5themes_Animated.new(root)]);
-
-    var chart = root.container.children.push(
-        am5map.MapChart.new(root, {
-            panX: "rotateX",
-            panY: "translateY",
-            projection: am5map.geoMercator(),
-            homeGeoPoint: { latitude: 2, longitude: 2 }
-        })
-    );
-
-    var polygonSeries = chart.series.push(
-        am5map.MapPolygonSeries.new(root, {
-            geoJSON: am5geodata_worldLow,
-            exclude: ["AQ"]
-        })
-    );
-
-    polygonSeries.mapPolygons.template.setAll({
-        tooltipText: "{name}: {value}",
-        toggleKey: "active",
-        interactive: true,
-        fill: am5.color(0xaaaaaa)
-    });
-
-    polygonSeries.mapPolygons.template.states.create("hover", {
-        fill: am5.color(0x00f2ff)
-    });
-
-    polygonSeries.heatRules.push({
-        target: polygonSeries.mapPolygons.template,
-        dataField: "value",
-        min: am5.color(0x2c3e50),
-        max: am5.color(0x00f2ff),
-        key: "fill"
-    });
-
-    function updateData(data) {
-        console.log("Updating map data:", data);
-        var heatData = [];
-        if (data && data.labels && data.data) {
-            for (var i = 0; i < data.labels.length; i++) {
-                heatData.push({
-                    id: data.labels[i],
-                    value: Number(data.data[i])
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('worldMapChart', ({ clicksData }) => ({
+            root: null,
+            polygonSeries: null,
+            init() {
+                this.loadMap();
+                
+                Livewire.on('heatmap-data-updated', (event) => {
+                    this.updateData(event[0].data);
                 });
+            },
+            destroy() {
+                if (this.root) {
+                    this.root.dispose();
+                }
+            },
+            loadMap() {
+                if (typeof am5 === 'undefined') {
+                    setTimeout(() => this.loadMap(), 100);
+                    return;
+                }
+                
+                this.root = am5.Root.new(this.$refs.mapdiv);
+                this.root.setThemes([am5themes_Animated.new(this.root)]);
+
+                let chart = this.root.container.children.push(
+                    am5map.MapChart.new(this.root, {
+                        panX: "rotateX",
+                        panY: "translateY",
+                        projection: am5map.geoMercator(),
+                        homeGeoPoint: { latitude: 2, longitude: 2 }
+                    })
+                );
+
+                this.polygonSeries = chart.series.push(
+                    am5map.MapPolygonSeries.new(this.root, {
+                        geoJSON: am5geodata_worldLow,
+                        exclude: ["AQ"]
+                    })
+                );
+
+                this.polygonSeries.mapPolygons.template.setAll({
+                    tooltipText: "{name}: {value} Tıklama",
+                    toggleKey: "active",
+                    interactive: true,
+                    fill: am5.color(0xaaaaaa)
+                });
+
+                this.polygonSeries.mapPolygons.template.states.create("hover", {
+                    fill: am5.color(0x00f2ff)
+                });
+
+                this.polygonSeries.heatRules.push({
+                    target: this.polygonSeries.mapPolygons.template,
+                    dataField: "value",
+                    min: am5.color(0x2c3e50),
+                    max: am5.color(0x00f2ff),
+                    key: "fill"
+                });
+
+                this.updateData(clicksData);
+            },
+            updateData(data) {
+                if (!this.polygonSeries) return;
+                var heatData = [];
+                if (data && data.labels && data.data) {
+                    for (var i = 0; i < data.labels.length; i++) {
+                        heatData.push({
+                            id: data.labels[i],
+                            value: Number(data.data[i])
+                        });
+                    }
+                }
+                this.polygonSeries.data.setAll(heatData);
             }
-        }
-        
-        polygonSeries.data.setAll(heatData);
-        console.log("Map data updated successfully.");
-    }
-
-    // Initial data load
-    var initialData = @json($clicksByCountryChartData);
-    updateData(initialData);
-
-    // Livewire event listener
-    Livewire.on('heatmap-data-updated', event => {
-        console.log("Received heatmap-data-updated event from Livewire.");
-        updateData(event[0].data);
+        }));
     });
-});
 </script>
-@endpush
+@endscript

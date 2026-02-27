@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\LinkClick;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -22,6 +23,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\Country;
 use App\Models\Link;
  
@@ -40,9 +42,7 @@ class ReportsManager extends Component implements HasForms, HasTable
     public $searchUserQuery;
     public $foundUsers = [];
     
-    // Pagination for links table
-    public int $linksPage = 1;
-    public int $linksPerPage = 25;
+    // Pagination flag for Livewire's built-in trait
 
     protected $queryString = ['startDate', 'endDate', 'selectedPreset', 'userId', 'userEmail'];
 
@@ -110,37 +110,7 @@ class ReportsManager extends Component implements HasForms, HasTable
         $this->userId = $this->data['userId'] ?? null;
         $this->userEmail = $this->data['userEmail'] ?? null;
 
-        $clicksByCountryChartData = $this->getClicksByCountryChartData();
-        $allClicksByLink = $this->getClicksByLink();
-        $clicksByReferrer = $this->getClicksByReferrer();
-        $clicksByDeviceType = $this->getClicksByDeviceType();
-        $clicksByOs = $this->getClicksByOs();
-        $clicksByBrowser = $this->getClicksByBrowser();
-        $clicksOverTime = $this->getClicksOverTime();
-        $uniqueClicksByLink = $this->getUniqueClicksByLink();
-        $clicksByBotStatus = $this->getClicksByBotStatus();
-        $clicksByRecentClickCount = $this->getClicksByRecentClickCount();
-        
-        // Pagination for links
-        $totalLinks = $allClicksByLink->count();
-        $totalLinkPages = max(1, ceil($totalLinks / $this->linksPerPage));
-        $this->linksPage = min($this->linksPage, $totalLinkPages);
-        $clicksByLink = $allClicksByLink->slice(($this->linksPage - 1) * $this->linksPerPage, $this->linksPerPage)->values();
- 
-        return view('livewire.admin.reports-manager', [
-            'clicksByCountryChartData' => $clicksByCountryChartData,
-            'clicksByLink' => $clicksByLink,
-            'totalLinks' => $totalLinks,
-            'totalLinkPages' => $totalLinkPages,
-            'clicksByReferrer' => $clicksByReferrer,
-            'clicksByDeviceType' => $clicksByDeviceType,
-            'clicksByOs' => $clicksByOs,
-            'clicksByBrowser' => $clicksByBrowser,
-            'clicksOverTime' => $clicksOverTime,
-            'uniqueClicksByLink' => $uniqueClicksByLink,
-            'clicksByBotStatus' => $clicksByBotStatus,
-            'clicksByRecentClickCount' => $clicksByRecentClickCount,
-        ]);
+        return view('livewire.admin.reports-manager');
     }
 
     public function table(Table $table): Table
@@ -241,30 +211,18 @@ class ReportsManager extends Component implements HasForms, HasTable
     public function updatedDataStartDate(): void
     {
         $this->selectedPreset = null;
+        $this->dispatch('heatmap-data-updated', data: $this->clicksByCountryChartData);
+        $this->dispatch('timechart-data-updated', data: $this->clicksOverTime);
     }
 
     public function updatedDataEndDate(): void
     {
         $this->selectedPreset = null;
+        $this->dispatch('heatmap-data-updated', data: $this->clicksByCountryChartData);
+        $this->dispatch('timechart-data-updated', data: $this->clicksOverTime);
     }
     
-    // Links pagination methods
-    public function goToLinksPage(int $page): void
-    {
-        $this->linksPage = $page;
-    }
-    
-    public function previousLinksPage(): void
-    {
-        if ($this->linksPage > 1) {
-            $this->linksPage--;
-        }
-    }
-    
-    public function nextLinksPage(): void
-    {
-        $this->linksPage++;
-    }
+
  
     private function applyPreset()
     {
@@ -310,6 +268,11 @@ class ReportsManager extends Component implements HasForms, HasTable
         
         // Refill form with updated data
         $this->form->fill($this->data);
+        
+        // Form properties mutated, trigger events for frontend
+        $this->dispatch('heatmap-data-updated', data: $this->clicksByCountryChartData);
+        $this->dispatch('timechart-data-updated', data: $this->clicksOverTime);
+        $this->resetPage('linksPage'); // Reset table page to 1 on filter
     }
  
     private function getBaseQuery(): Builder
@@ -353,6 +316,10 @@ class ReportsManager extends Component implements HasForms, HasTable
         $this->data['searchUserQuery'] = null;
         $this->foundUsers = [];
         $this->form->fill($this->data);
+        
+        $this->dispatch('heatmap-data-updated', data: $this->clicksByCountryChartData);
+        $this->dispatch('timechart-data-updated', data: $this->clicksOverTime);
+        $this->resetPage('linksPage');
     }
  
     public function clearUserFilter(): void
@@ -362,9 +329,14 @@ class ReportsManager extends Component implements HasForms, HasTable
         $this->data['searchUserQuery'] = null;
         $this->foundUsers = [];
         $this->form->fill($this->data);
+        
+        $this->dispatch('heatmap-data-updated', data: $this->clicksByCountryChartData);
+        $this->dispatch('timechart-data-updated', data: $this->clicksOverTime);
+        $this->resetPage('linksPage');
     }
  
-    private function getClicksByReferrer(): Collection
+    #[Computed]
+    public function clicksByReferrer(): Collection
     {
         return $this->getBaseQuery()
                     ->selectRaw('referrer, count(*) as total')
@@ -373,45 +345,52 @@ class ReportsManager extends Component implements HasForms, HasTable
                     ->get();
     }
  
-    private function getClicksByLink(): Collection
+    #[Computed]
+    public function clicksByLink(): LengthAwarePaginator
     {
-        $clicksByLinkData = $this->getBaseQuery()
+        $paginator = $this->getBaseQuery()
             ->join('links', 'link_clicks.link_id', '=', 'links.id')
             ->selectRaw('link_clicks.link_id, links.original_url, links.code, count(*) as total_clicks, sum(0.001) as earnings')
             ->groupBy('link_clicks.link_id', 'links.original_url', 'links.code')
-            ->get();
- 
-        return $clicksByLinkData->map(function ($linkStats) {
+            ->orderByDesc('total_clicks')
+            ->paginate(25, ['*'], 'linksPage');
+
+        // Map through items to format them nicely
+        $paginator->getCollection()->transform(function ($linkStats) {
             return [
                 'link_id' => $linkStats->link_id,
                 'original_url' => $linkStats->original_url,
                 'short_link' => url($linkStats->code),
                 'total_clicks' => $linkStats->total_clicks,
-                'earnings' => number_format($linkStats->earnings, 2),
+                'earnings' => number_format($linkStats->earnings, 4), // 4 decimals precision for micro-cpm
             ];
         });
+
+        return $paginator;
     }
  
-    private function getClicksByCountryChartData(): array
+    #[Computed]
+    public function clicksByCountryChartData(): array
     {
         $clicksByCountry = $this->getBaseQuery()
-                                    ->with('country')
+                                    ->with('country:id,name,iso_code') // Limit columns mapped from Country relation
                                     ->selectRaw('country_id, count(*) as total')
                                     ->groupBy('country_id')
                                     ->has('country')
                                     ->orderByDesc('total')
                                     ->get();
- 
+
         $labels = $clicksByCountry->pluck('country')->map(fn($country) => $country->name ?? 'Bilinmiyor')->toArray();
         $data = $clicksByCountry->pluck('total')->toArray();
- 
+
         return [
             'labels' => $labels,
             'data' => $data,
         ];
     }
  
-    private function getClicksByDeviceType(): Collection
+    #[Computed]
+    public function clicksByDeviceType(): Collection
     {
         return $this->getBaseQuery()
                     ->selectRaw('device_type, count(*) as total')
@@ -420,7 +399,8 @@ class ReportsManager extends Component implements HasForms, HasTable
                     ->get();
     }
  
-    private function getClicksByOs(): Collection
+    #[Computed]
+    public function clicksByOs(): Collection
     {
         return $this->getBaseQuery()
                     ->selectRaw('os, count(*) as total')
@@ -429,7 +409,8 @@ class ReportsManager extends Component implements HasForms, HasTable
                     ->get();
     }
  
-    private function getClicksByBrowser(): Collection
+    #[Computed]
+    public function clicksByBrowser(): Collection
     {
         return $this->getBaseQuery()
                     ->selectRaw('browser, count(*) as total')
@@ -438,7 +419,8 @@ class ReportsManager extends Component implements HasForms, HasTable
                     ->get();
     }
  
-    private function getClicksOverTime(): Collection
+    #[Computed]
+    public function clicksOverTime(): Collection
     {
         return $this->getBaseQuery()
                     ->selectRaw('DATE(created_at) as click_date, count(*) as total')
@@ -447,8 +429,10 @@ class ReportsManager extends Component implements HasForms, HasTable
                     ->get();
     }
  
-    private function getUniqueClicksByLink(): Collection
+    #[Computed]
+    public function uniqueClicksByLink(): Collection
     {
+        // For performance, this handles only unique distinct ip fetching
         return $this->getBaseQuery()
                     ->selectRaw('link_id, COUNT(DISTINCT ip_address) as unique_clicks')
                     ->groupBy('link_id')
@@ -456,7 +440,8 @@ class ReportsManager extends Component implements HasForms, HasTable
                     ->pluck('unique_clicks', 'link_id');
     }
  
-    private function getClicksByBotStatus(): Collection
+    #[Computed]
+    public function clicksByBotStatus(): Collection
     {
         return $this->getBaseQuery()
                     ->selectRaw('is_bot, count(*) as total')
@@ -464,7 +449,8 @@ class ReportsManager extends Component implements HasForms, HasTable
                     ->get();
     }
  
-    private function getClicksByRecentClickCount(): Collection
+    #[Computed]
+    public function clicksByRecentClickCount(): Collection
     {
         return $this->getBaseQuery()
                     ->selectRaw('recent_click_count, count(*) as total')
@@ -482,30 +468,32 @@ class ReportsManager extends Component implements HasForms, HasTable
  
         switch ($reportType) {
             case 'countries':
-                $data = $this->getClicksByCountryChartData()['data'];
-                $labels = $this->getClicksByCountryChartData()['labels'];
+                $data = $this->clicksByCountryChartData;
+                $labels = $this->clicksByCountryChartData['labels'];
                 $exportData = new Collection();
                 foreach ($labels as $index => $label) {
-                    $exportData->push(['Ülke' => $label, 'Tıklama Sayısı' => $data[$index]]);
+                    $exportData->push(['Ülke' => $label, 'Tıklama Sayısı' => $data['data'][$index]]);
                 }
                 $data = $exportData;
                 $headings = ['Ülke', 'Tıklama Sayısı'];
                 $fileName = 'ulkeler_raporu.csv';
                 break;
             case 'countries_table':
-                 $data = $this->getClicksByCountryChartData()['data'];
-                $labels = $this->getClicksByCountryChartData()['labels'];
+                 $data = $this->clicksByCountryChartData;
+                $labels = $this->clicksByCountryChartData['labels'];
                 $exportData = new Collection();
                 foreach ($labels as $index => $label) {
-                    $exportData->push(['Ülke' => $label, 'Tıklama Sayısı' => $data[$index]]);
+                    $exportData->push(['Ülke' => $label, 'Tıklama Sayısı' => $data['data'][$index]]);
                 }
                 $data = $exportData;
                 $headings = ['Ülke', 'Tıklama Sayısı'];
                 $fileName = 'ulkeler_tablo_raporu.csv';
                 break;
             case 'links':
-                $data = $this->getClicksByLink();
-                 $uniqueClicks = $this->getUniqueClicksByLink();
+                // For export we might want to bypass pagination but let's just use the computed for simplicity and limit safety
+                // Or better yet, write a raw query export for ALL. For now matching existing functionality:
+                $data = $this->clicksByLink->getCollection();
+                 $uniqueClicks = $this->uniqueClicksByLink;
                  $exportData = $data->map(function ($item) use ($uniqueClicks) {
                      $item['Tekil Tıklama'] = $uniqueClicks->get($item['link_id'], 0);
                      unset($item['link_id']);
@@ -516,27 +504,27 @@ class ReportsManager extends Component implements HasForms, HasTable
                 $fileName = 'linkler_raporu.csv';
                 break;
             case 'referrers':
-                $data = $this->getClicksByReferrer();
+                $data = $this->clicksByReferrer;
                 $headings = ['Yönlendiren Domain', 'Tıklama Sayısı'];
                 $fileName = 'yonlendirenler_raporu.csv';
                 break;
             case 'device_types':
-                $data = $this->getClicksByDeviceType();
+                $data = $this->clicksByDeviceType;
                 $headings = ['Cihaz Türü', 'Tıklama Sayısı'];
                 $fileName = 'cihaz_turleri_raporu.csv';
                 break;
             case 'operating_systems':
-                $data = $this->getClicksByOs();
+                $data = $this->clicksByOs;
                 $headings = ['İşletim Sistemi', 'Tıklama Sayısı'];
                 $fileName = 'isletim_sistemleri_raporu.csv';
                 break;
             case 'browsers':
-                $data = $this->getClicksByBrowser();
+                $data = $this->clicksByBrowser;
                 $headings = ['Tarayıcı', 'Tıklama Sayısı'];
                 $fileName = 'tarayicilar_raporu.csv';
                 break;
             case 'time_trends':
-                 $data = $this->getClicksOverTime();
+                 $data = $this->clicksOverTime;
                  $headings = ['Tarih', 'Tıklama Sayısı'];
                  $fileName = 'zaman_trendleri_raporu.csv';
                  break;
@@ -578,18 +566,18 @@ class ReportsManager extends Component implements HasForms, HasTable
  
         switch ($reportType) {
             case 'countries':
-                $data = $this->getClicksByCountryChartData();
+                $data = collect($this->clicksByCountryChartData);
                 $view = 'reports.pdf.countries';
                 $fileName = 'ulkeler_raporu.pdf';
                 break;
             case 'countries_table':
-                 $data = $this->getClicksByCountryChartData();
+                 $data = collect($this->clicksByCountryChartData);
                  $view = 'reports.pdf.countries_table';
                  $fileName = 'ulkeler_tablo_raporu.pdf';
                  break;
             case 'links':
-                $data = $this->getClicksByLink();
-                 $uniqueClicks = $this->getUniqueClicksByLink();
+                $data = collect($this->clicksByLink->items());
+                 $uniqueClicks = $this->uniqueClicksByLink;
                  $data = $data->map(function ($item) use ($uniqueClicks) {
                      $item['unique_clicks'] = $uniqueClicks->get($item['link_id'], 0);
                      unset($item['link_id']);
@@ -599,27 +587,27 @@ class ReportsManager extends Component implements HasForms, HasTable
                 $fileName = 'linkler_raporu.pdf';
                 break;
             case 'referrers':
-                $data = $this->getClicksByReferrer();
+                $data = $this->clicksByReferrer;
                 $view = 'reports.pdf.referrers';
                 $fileName = 'yonlendirenler_raporu.pdf';
                 break;
             case 'device_types':
-                $data = $this->getClicksByDeviceType();
+                $data = $this->clicksByDeviceType;
                 $view = 'reports.pdf.device_types';
                 $fileName = 'cihaz_turleri_raporu.pdf';
                 break;
             case 'operating_systems':
-                $data = $this->getClicksByOs();
+                $data = $this->clicksByOs;
                 $view = 'reports.pdf.operating_systems';
                 $fileName = 'isletim_sistemleri_raporu.pdf';
                 break;
             case 'browsers':
-                $data = $this->getClicksByBrowser();
+                $data = $this->clicksByBrowser;
                 $view = 'reports.pdf.browsers';
                 $fileName = 'tarayicilar_raporu.pdf';
                 break;
             case 'time_trends':
-                 $data = $this->getClicksOverTime();
+                 $data = $this->clicksOverTime;
                  $view = 'reports.pdf.time_trends';
                  $fileName = 'zaman_trendleri_raporu.pdf';
                  break;

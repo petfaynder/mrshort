@@ -76,20 +76,28 @@ class LinkResource extends Resource
             \Log::error('Filament\Tables\Filters\TextInput class does NOT exist.');
         }
         return $table
+            ->defaultSort('created_at', 'desc')
+            ->defaultPaginationPageOption(50)
+            ->paginated([10, 25, 50, 100])
             ->columns([
                 Tables\Columns\TextColumn::make('title')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('short_url')
+                    ->searchable()
+                    ->default(fn (\App\Models\Link $record) => $record->original_url)
+                    ->limit(50),
+                Tables\Columns\TextColumn::make('code')
                     ->label('Short Link')
-                    ->url(fn (\App\Models\Link $record): ?string => $record->short_url ? route('stats', ['code' => $record->short_url]) : null) // Stats linki
-                    ->suffix(fn (\App\Models\Link $record): string => 'Created on: ' . $record->created_at->format('Y-m-d')), // Oluşturulma bilgisi
+                    ->formatStateUsing(fn (string $state, \App\Models\Link $record): string => $record->shortLink())
+                    ->url(fn (\App\Models\Link $record): ?string => $record->code ? route('stats', ['code' => $record->code]) : null)
+                    ->copyable()
+                    ->color('primary'),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Username')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 // ID Filtresi
@@ -132,20 +140,12 @@ class LinkResource extends Resource
                         if (! empty($data['search'])) {
                             $query->where(function (Builder $query) use ($data) {
                                 $query->where('title', 'like', "%{$data['search']}%")
-                                      // ->orWhere('description', 'like', "%{$data['search']}%") // Description alanı modelde mevcut değil
+                                      ->orWhere('code', 'like', "%{$data['search']}%")
                                       ->orWhere('original_url', 'like', "%{$data['search']}%");
                             });
                         }
                         return $query; // Query'yi döndürmeyi unutmayın
                     }),
-
-                // Advertising Type filtresi (yorum satırı olarak kalacak)
-                // Tables\Filters\SelectFilter::make('advertising_type')
-                //     ->options([
-                //         'type1' => 'Type 1', // Örnek seçenekler, gerçek değerlerle değiştirilmeli
-                //         'type2' => 'Type 2',
-                //     ])
-                //     ->label('Advertising Type'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -177,26 +177,28 @@ class LinkResource extends Resource
                         // Linki silme
                         $record->delete();
                     })
-                    ->requiresConfirmation(),
+                    ->requiresConfirmation()
+                    ->color('danger')
+                    ->icon('heroicon-o-trash'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\BulkAction::make('hide')
                         ->label('Hide Selected')
-                        ->action(function (Illuminate\Support\Collection $records) {
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
                             $records->each->update(['is_hidden' => true]);
                         })
                         ->requiresConfirmation(),
                     Tables\Actions\BulkAction::make('unhide')
                         ->label('Unhide Selected')
-                        ->action(function (Illuminate\Support\Collection $records) {
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
                             $records->each->update(['is_hidden' => false]);
                         })
                         ->requiresConfirmation(),
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\BulkAction::make('deleteWithStats')
                         ->label('Delete Selected with Stats')
-                        ->action(function (Illuminate\Support\Collection $records) {
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
                             $records->each(function ($record) {
                                 // İstatistikleri silme (LinkClick modelini kullanarak)
                                 $record->clicks()->delete();
@@ -204,7 +206,9 @@ class LinkResource extends Resource
                                 $record->delete();
                             });
                         })
-                        ->requiresConfirmation(),
+                        ->requiresConfirmation()
+                        ->color('danger')
+                        ->icon('heroicon-o-trash'),
                 ]),
             ]);
     }

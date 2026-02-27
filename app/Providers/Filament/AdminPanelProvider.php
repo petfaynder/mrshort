@@ -125,7 +125,6 @@ class AdminPanelProvider extends PanelProvider
                 // Links & Analytics
                 \App\Filament\Resources\LinkResource::class,
                 \App\Filament\Resources\LinkClickResource::class,
-                \App\Filament\Resources\AdminLinkClickReportResource::class,
                 
                 // Gamification
                 \App\Filament\Resources\GamificationGoalResource::class,
