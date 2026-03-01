@@ -69,8 +69,7 @@ class GamificationGoalResource extends Resource
                         'one_time' => 'Tek Seferlik',
                         'event_based' => 'Etkinlik Bazlı',
                     ])
-                    ->label('Kategori')
-                    ->maxLength(255),
+                    ->label('Kategori'),
                 Forms\Components\Toggle::make('is_active')
                     ->label('Aktif Mi?')
                     ->required(),

@@ -228,13 +228,12 @@
                 {{ $withdrawals->links() }}
             </div>
         </div>
+        {{-- Toast Notifications --}}
+        @if (session()->has('success'))
+            <x-toast-notification type="success">{{ session('success') }}</x-toast-notification>
+        @endif
+        @if (session()->has('error'))
+            <x-toast-notification type="error">{{ session('error') }}</x-toast-notification>
+        @endif
     </div>
 </div>
-
-{{-- Toast Notifications --}}
-@if (session()->has('success'))
-    <x-toast-notification type="success">{{ session('success') }}</x-toast-notification>
-@endif
-@if (session()->has('error'))
-    <x-toast-notification type="error">{{ session('error') }}</x-toast-notification>
-@endif

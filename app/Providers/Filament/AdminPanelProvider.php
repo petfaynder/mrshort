@@ -162,6 +162,7 @@ class AdminPanelProvider extends PanelProvider
                 // Content Management
                 \App\Filament\Resources\PageResource::class,
                 \App\Filament\Resources\AnnouncementResource::class,
+                \App\Filament\Resources\FeedbackPostResource::class,
                 
                 // Blog
                 \App\Filament\Resources\BlogCategoryResource::class,

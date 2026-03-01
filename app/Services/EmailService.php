@@ -6,7 +6,7 @@ use App\Mail\WelcomeMail;
 use App\Mail\WithdrawalStatusMail;
 use App\Mail\AdminNotificationMail;
 use App\Models\User;
-use App\Models\WithdrawRequest;
+use App\Models\WithdrawalRequest;
 use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -40,7 +40,7 @@ class EmailService
     /**
      * Send withdrawal status update email
      */
-    public static function sendWithdrawalStatusEmail(WithdrawRequest $withdrawal, string $status, ?string $reason = null): void
+    public static function sendWithdrawalStatusEmail(WithdrawalRequest $withdrawal, string $status, ?string $reason = null): void
     {
         $settingKey = "notify_user_withdrawal_{$status}";
         

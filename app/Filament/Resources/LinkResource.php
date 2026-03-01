@@ -43,11 +43,11 @@ class LinkResource extends Resource
                         true => 'Hidden',
                     ])
                     ->required(),
-                Forms\Components\FormTextInput::make('original_url')
+                FormTextInput::make('original_url')
                     ->label('Long URL')
                     ->required()
                     ->url(),
-                Forms\Components\FormTextInput::make('title')
+                FormTextInput::make('title')
                     ->label('Title')
                     ->required()
                     ->maxLength(255),

@@ -96,7 +96,8 @@ class User extends Authenticatable implements FilamentUser
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'tutorial_completed_at' => 'datetime',
-            'last_login_at' => 'datetime',
+            'last_login_at'          => 'datetime',
+            'deactivated_at'         => 'datetime',
             // Telegram Bonus
             'telegram_bonus_enabled' => 'boolean',
             'telegram_bonus_enabled_at' => 'datetime',

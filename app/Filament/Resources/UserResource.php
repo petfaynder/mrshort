@@ -108,7 +108,7 @@ class UserResource extends Resource
                                             'vip' => 'VIP Plan',
                                         ])
                                         ->default('free')
-                                        ->required(),
+                                        ->nullable(),
                                     Select::make('vip_level_id')
                                         ->label('VIP Level')
                                         ->relationship('vipLevel', 'name')

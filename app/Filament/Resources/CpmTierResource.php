@@ -37,13 +37,13 @@ class CpmTierResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
-                Forms\Components\TextInput::make('default_publisher_cpm_rate')
+                Forms\Components\TextInput::make('publisher_cpm_rate')
                     ->label('Default Publisher CPM Rate')
                     ->required()
                     ->numeric()
                     ->step(0.0001)
                     ->default(0.0000),
-                Forms\Components\TextInput::make('default_advertiser_cpm_rate')
+                Forms\Components\TextInput::make('advertiser_cpm_rate')
                     ->label('Default Advertiser CPM Rate')
                     ->required()
                     ->numeric()
@@ -59,11 +59,11 @@ class CpmTierResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('default_publisher_cpm_rate')
+                Tables\Columns\TextColumn::make('publisher_cpm_rate')
                     ->label('Default Publisher CPM Rate')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('default_advertiser_cpm_rate')
+                Tables\Columns\TextColumn::make('advertiser_cpm_rate')
                     ->label('Default Advertiser CPM Rate')
                     ->numeric()
                     ->sortable(),

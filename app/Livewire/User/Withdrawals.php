@@ -103,16 +103,10 @@ class Withdrawals extends Component
         ]);
 
         WithdrawalRequest::create([
-            'user_id' => $user->id,
-            'amount' => $this->withdrawal_amount,
-            'method' => $this->payment_method,
-            'status' => 'pending',
-            'details' => $this->payment_method === 'PayPal' ? json_encode(['email' => $this->paypal_email]) : json_encode([
-                'iban' => $this->iban,
-                'account_holder_name' => $this->account_holder_name,
-                'bank_name' => $this->bank_name,
-                'swift_bic' => $this->swift_bic,
-            ]),
+            'user_id'        => $user->id,
+            'amount'         => $this->withdrawal_amount,
+            'payment_method' => $this->payment_method,
+            'status'         => 'pending',
         ]);
 
         $user->earnings -= $this->withdrawal_amount;

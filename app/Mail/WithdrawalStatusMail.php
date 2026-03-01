@@ -8,21 +8,21 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\WithdrawRequest;
+use App\Models\WithdrawalRequest;
 use App\Models\SiteSetting;
 
 class WithdrawalStatusMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public WithdrawRequest $withdrawal;
+    public WithdrawalRequest $withdrawal;
     public string $status;
     public ?string $reason;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(WithdrawRequest $withdrawal, string $status, ?string $reason = null)
+    public function __construct(WithdrawalRequest $withdrawal, string $status, ?string $reason = null)
     {
         $this->withdrawal = $withdrawal;
         $this->status = $status;

@@ -237,9 +237,6 @@
                     </div>
                     @endif
                 </div>
-                </div>
-            </div>
-
             <div class="flex gap-2 p-3 overflow-x-auto">
                 @foreach(['all' => 'All', 'daily' => 'Daily', 'weekly' => 'Weekly', 'one_time' => 'Career', 'social' => 'Social', 'economic' => 'Economy', 'discovery' => 'Discovery'] as $categoryKey => $categoryName)
                     <div wire:click="$set('filterCategory', '{{ $categoryKey }}')"
