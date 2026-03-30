@@ -21,9 +21,11 @@ class EarningsChart extends Component
         $this->dispatch('chartDataUpdated', data: $this->getStatsData());
     }
 
-    public function updateChartForMonth($data)
+    public function updateChartForMonth($month = null)
     {
-        $this->selectedMonth = $data['month'];
+        if ($month) {
+            $this->selectedMonth = $month;
+        }
         $this->dispatch('chartDataUpdated', data: $this->getStatsData());
     }
 
