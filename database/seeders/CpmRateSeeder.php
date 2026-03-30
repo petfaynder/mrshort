@@ -10,246 +10,306 @@ class CpmRateSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
-     * This seeder populates CPM rates for all countries based on:
-     * - Publisher Rates: Link shortener market (Ouo.io/Adf.ly) + 30-50% premium for Tier 1
-     * - Advertiser Rates: PropellerAds optimal CPM data (rounded up)
+     *
+     * Publisher rates based on competitor analysis (cuty.io, exe.io, ouo.io averages)
+     * and real advertising market data (PropellerAds, Adsterra, HilltopAds).
+     *
+     * Strategy: Competitive with cuty.io/exe.io mid-point, sustainable margins.
+     * Publisher rate = ~65% of advertiser rate (platform keeps ~35% margin).
+     *
+     * Tiers:
+     *   Tier 1 (Premium):    $8.00 - $16.00 publisher
+     *   Tier 2 (Mid):        $3.50 - $7.50 publisher
+     *   Tier 3 (Developing): $1.50 - $3.50 publisher
+     *   Tier 4 (Default):    $1.00 - $1.50 publisher
      */
     public function run(): void
     {
-        // Rate data: [ISO Code => ['publisher' => X.XX, 'advertiser' => Y.YY]]
+        // [ISO Code => ['publisher' => X.XX, 'advertiser' => Y.YY]]
+        // publisher_rate: what we pay the link creator per 1000 views
+        // advertiser_rate: what advertisers pay us per 1000 impressions
         $rates = [
-            // Top Tier 1 Countries (Premium publisher rates, PropellerAds advertiser data)
-            'US' => ['publisher' => 6.50, 'advertiser' => 2.50],  // United States
-            'UK' => ['publisher' => 6.00, 'advertiser' => 2.25],  // United Kingdom
-            'DE' => ['publisher' => 4.50, 'advertiser' => 1.50],  // Germany
-            'CA' => ['publisher' => 5.50, 'advertiser' => 1.70],  // Canada
-            'AU' => ['publisher' => 6.20, 'advertiser' => 2.00],  // Australia
-            'CH' => ['publisher' => 6.80, 'advertiser' => 2.55],  // Switzerland
-            'NO' => ['publisher' => 7.00, 'advertiser' => 3.75],  // Norway
-            'SE' => ['publisher' => 4.80, 'advertiser' => 1.40],  // Sweden
-            'DK' => ['publisher' => 4.60, 'advertiser' => 1.80],  // Denmark
-            'FI' => ['publisher' => 5.20, 'advertiser' => 3.65],  // Finland
-            'NL' => ['publisher' => 5.00, 'advertiser' => 1.90],  // Netherlands
-            'BE' => ['publisher' => 4.50, 'advertiser' => 1.70],  // Belgium
-            'AT' => ['publisher' => 4.70, 'advertiser' => 1.25],  // Austria
-            'IE' => ['publisher' => 5.50, 'advertiser' => 0.90],  // Ireland
-            'NZ' => ['publisher' => 5.80, 'advertiser' => 2.20],  // New Zealand
-            'SG' => ['publisher' => 5.00, 'advertiser' => 1.30],  // Singapore
-            'HK' => ['publisher' => 4.80, 'advertiser' => 3.65],  // Hong Kong
-           
-            // High Tier 1 / Tier 2 Countries
-            'FR' => ['publisher' => 3.80, 'advertiser' => 1.80],  // France
-            'IT' => ['publisher' => 3.60, 'advertiser' => 2.00],  // Italy
-            'ES' => ['publisher' => 3.50, 'advertiser' => 1.90],  // Spain
-            'JP' => ['publisher' => 3.50, 'advertiser' => 1.25],  // Japan
-            'KR' => ['publisher' => 3.40, 'advertiser' => 1.45],  // South Korea
-            'TW' => ['publisher' => 3.20, 'advertiser' => 1.25],  // Taiwan
-            'AE' => ['publisher' => 4.20, 'advertiser' => 1.30],  // United Arab Emirates
-            'SA' => ['publisher' => 3.80, 'advertiser' => 3.70],  // Saudi Arabia
-            'IL' => ['publisher' => 3.60, 'advertiser' => 2.25],  // Israel
-            'QA' => ['publisher' => 3.50, 'advertiser' => 0.65],  // Qatar
-            'KW' => ['publisher' => 3.40, 'advertiser' => 1.55],  // Kuwait
-            'BH' => ['publisher' => 3.20, 'advertiser' => 0.60],  // Bahrain
-            'OM' => ['publisher' => 3.00, 'advertiser' => 1.00],  // Oman
-            'PT' => ['publisher' => 3.20, 'advertiser' => 1.30],  // Portugal
-            'GR' => ['publisher' => 3.00, 'advertiser' => 1.80],  // Greece
-            'PL' => ['publisher' => 3.40, 'advertiser' => 2.25],  // Poland
-            'CZ' => ['publisher' => 3.20, 'advertiser' => 1.90],  // Czech Republic
-            'HU' => ['publisher' => 3.00, 'advertiser' => 1.30],  // Hungary
-            'RO' => ['publisher' => 2.80, 'advertiser' => 1.35],  // Romania
-            'BG' => ['publisher' => 2.60, 'advertiser' => 5.25],  // Bulgaria
-            'HR' => ['publisher' => 2.70, 'advertiser' => 4.20],  // Croatia
-            'SI' => ['publisher' => 2.80, 'advertiser' => 0.65],  // Slovenia
-            'SK' => ['publisher' => 2.60, 'advertiser' => 0.90],  // Slovakia
-            'EE' => ['publisher' => 2.70, 'advertiser' => 6.50],  // Estonia
-            'LV' => ['publisher' => 2.60, 'advertiser' => 4.00],  // Latvia
-            'LT' => ['publisher' => 2.60, 'advertiser' => 0.70],  // Lithuania
-            
-            // Tier 2 - Asia
-            'TH' => ['publisher' => 3.20, 'advertiser' => 4.60],  // Thailand
-            'MY' => ['publisher' => 3.00, 'advertiser' => 1.90],  // Malaysia
-            'ID' => ['publisher' => 2.80, 'advertiser' => 1.70],  // Indonesia
-            'PH' => ['publisher' => 2.60, 'advertiser' => 1.75],  // Philippines
-            'VN' => ['publisher' => 2.50, 'advertiser' => 2.05],  // Vietnam
-            'IN' => ['publisher' => 2.20, 'advertiser' => 0.30],  // India
-            'PK' => ['publisher' => 1.80, 'advertiser' => 1.35],  // Pakistan
-            'BD' => ['publisher' => 1.70, 'advertiser' => 1.35],  // Bangladesh
-            'LK' => ['publisher' => 2.00, 'advertiser' => 1.90],  // Sri Lanka
-            'NP' => ['publisher' => 1.80, 'advertiser' => 3.05],  // Nepal
-            'MM' => ['publisher' => 1.60, 'advertiser' => 6.05],  // Myanmar
-            'KH' => ['publisher' => 1.70, 'advertiser' => 1.20],  // Cambodia
-            'LA' => ['publisher' => 1.50, 'advertiser' => 0.35],  // Laos
-            'MN' => ['publisher' => 1.60, 'advertiser' => 1.40],  // Mongolia
-            'CN' => ['publisher' => 2.40, 'advertiser' => 1.45],  // China
-            'MO' => ['publisher' => 2.60, 'advertiser' => 3.85],  // Macau
-            'BN' => ['publisher' => 2.20, 'advertiser' => 1.00],  // Brunei
-            'TL' => ['publisher' => 1.50, 'advertiser' => 0.90],  // Timor-Leste
-            
-            // Tier 2 - Latin America
-            'BR' => ['publisher' => 2.20, 'advertiser' => 1.10],  // Brazil
-            'MX' => ['publisher' => 2.40, 'advertiser' => 3.35],  // Mexico
-            'AR' => ['publisher' => 2.00, 'advertiser' => 1.20],  // Argentina
-            'CL' => ['publisher' => 2.10, 'advertiser' => 1.10],  // Chile
-            'CO' => ['publisher' => 1.90, 'advertiser' => 0.75],  // Colombia
-            'PE' => ['publisher' => 1.80, 'advertiser' => 0.70],  // Peru
-            'VE' => ['publisher' => 1.70, 'advertiser' => 0.65],  // Venezuela
-            'EC' => ['publisher' => 1.80, 'advertiser' => 1.60],  // Ecuador
-            'BO' => ['publisher' => 1.60, 'advertiser' => 2.15],  // Bolivia
-            'PY' => ['publisher' => 1.50, 'advertiser' => 0.55],  // Paraguay
-            'UY' => ['publisher' => 1.90, 'advertiser' => 1.35],  // Uruguay
-            'CR' => ['publisher' => 1.80, 'advertiser' => 1.75],  // Costa Rica
-            'PA' => ['publisher' => 1.70, 'advertiser' => 1.50],  // Panama
-            'GT' => ['publisher' => 1.60, 'advertiser' => 0.80],  // Guatemala
-            'SV' => ['publisher' => 1.60, 'advertiser' => 1.10],  // El Salvador
-            'HN' => ['publisher' => 1.55, 'advertiser' => 0.65],  // Honduras
-            'NI' => ['publisher' => 1.55, 'advertiser' => 1.70],  // Nicaragua
-            'CU' => ['publisher' => 1.70, 'advertiser' => 1.90],  // Cuba
-            'DO' => ['publisher' => 1.65, 'advertiser' => 0.75],  // Dominican Republic
-            'JM' => ['publisher' => 1.60, 'advertiser' => 0.50],  // Jamaica
-            'TT' => ['publisher' => 1.70, 'advertiser' => 0.60],  // Trinidad and Tobago
-            'BS' => ['publisher' => 1.75, 'advertiser' => 1.10],  // Bahamas
-            'BB' => ['publisher' => 1.65, 'advertiser' => 0.45],  // Barbados
-            'GY' => ['publisher' => 1.50, 'advertiser' => 0.25],  // Guyana
-            'SR' => ['publisher' => 1.50, 'advertiser' => 0.70],  // Suriname
-            'HT' => ['publisher' => 1.45, 'advertiser' => 8.00],  // Haiti
-            'PR' => ['publisher' => 2.20, 'advertiser' => 2.75],  // Puerto Rico
-            
-            // Tier 2/3 - Eastern Europe & Central Asia
-            'RU' => ['publisher' => 2.60, 'advertiser' => 0.95],  // Russia (data not in PropellerAds, estimated)
-            'UA' => ['publisher' => 2.40, 'advertiser' => 0.85],  // Ukraine (estimated)
-            'BY' => ['publisher' => 2.20, 'advertiser' => 2.60],  // Belarus
-            'RS' => ['publisher' => 2.10, 'advertiser' => 0.90],  // Serbia
-            'BA' => ['publisher' => 2.00, 'advertiser' => 0.70],  // Bosnia and Herzegovina
-            'ME' => ['publisher' => 1.90, 'advertiser' => 0.55],  // Montenegro
-            'MK' => ['publisher' => 1.85, 'advertiser' => 0.15],  // North Macedonia
-            'AL' => ['publisher' => 1.80, 'advertiser' => 0.65],  // Albania
-            'GE' => ['publisher' => 2.00, 'advertiser' => 1.15],  // Georgia
-            'AM' => ['publisher' => 1.85, 'advertiser' => 0.65],  // Armenia
-            'AZ' => ['publisher' => 2.05, 'advertiser' => 1.90],  // Azerbaijan
-            'KZ' => ['publisher' => 2.00, 'advertiser' => 1.05],  // Kazakhstan
-            'UZ' => ['publisher' => 1.90, 'advertiser' => 3.55],  // Uzbekistan
-            'KG' => ['publisher' => 1.80, 'advertiser' => 3.55],  // Kyrgyzstan
-            'TJ' => ['publisher' => 1.75, 'advertiser' => 5.75],  // Tajikistan
-            'TM' => ['publisher' => 1.70, 'advertiser' => 0.80],  // Turkmenistan (estimated)
-            'MD' => ['publisher' => 1.80, 'advertiser' => 0.65],  // Moldova
-            
-            // Tier 3 - Middle East & North Africa
-            'TR' => ['publisher' => 2.30, 'advertiser' => 0.50],  // Turkey
-            'EG' => ['publisher' => 2.00, 'advertiser' => 0.75],  // Egypt
-            'DZ' => ['publisher' => 1.80, 'advertiser' => 0.45],  // Algeria
-            'MA' => ['publisher' => 2.00, 'advertiser' => 1.95],  // Morocco
-            'TN' => ['publisher' => 1.75, 'advertiser' => 0.40],  // Tunisia
-            'LY' => ['publisher' => 1.70, 'advertiser' => 0.25],  // Libya
-            'SD' => ['publisher' => 1.60, 'advertiser' => 1.20],  // Sudan
-            'SS' => ['publisher' => 1.50, 'advertiser' => 1.25],  // South Sudan
-            'IQ' => ['publisher' => 1.90, 'advertiser' => 0.60],  // Iraq
-            'SY' => ['publisher' => 1.70, 'advertiser' => 0.60],  // Syria
-            'JO' => ['publisher' => 1.85, 'advertiser' => 0.85],  // Jordan
-            'LB' => ['publisher' => 1.80, 'advertiser' => 0.45],  // Lebanon
-            'PS' => ['publisher' => 1.75, 'advertiser' => 0.65],  // Palestine
-            'YE' => ['publisher' => 1.60, 'advertiser' => 0.20],  // Yemen
-            'IR' => ['publisher' => 1.80, 'advertiser' => 0.40],  // Iran
-            'AF' => ['publisher' => 1.60, 'advertiser' => 1.25],  // Afghanistan
-            
-            // Tier 3 - Sub-Saharan Africa
-            'ZA' => ['publisher' => 2.40, 'advertiser' => 3.25],  // South Africa
-            'NG' => ['publisher' => 2.00, 'advertiser' => 2.15],  // Nigeria
-            'KE' => ['publisher' => 1.90, 'advertiser' => 1.10],  // Kenya
-            'GH' => ['publisher' => 1.85, 'advertiser' => 5.05],  // Ghana
-            'ET' => ['publisher' => 1.70, 'advertiser' => 0.60],  // Ethiopia
-            'TZ' => ['publisher' => 1.80, 'advertiser' => 1.90],  // Tanzania
-            'UG' => ['publisher' => 1.75, 'advertiser' => 1.45],  // Uganda
-            'AO' => ['publisher' => 1.85, 'advertiser' => 3.80],  // Angola
-            'CM' => ['publisher' => 1.80, 'advertiser' => 6.85],  // Cameroon
-            'CI' => ['publisher' => 1.85, 'advertiser' => 2.85],  // Ivory Coast
-            'SN' => ['publisher' => 1.80, 'advertiser' => 2.15],  // Senegal
-            'ZM' => ['publisher' => 1.80, 'advertiser' => 3.40],  // Zambia
-            'ZW' => ['publisher' => 1.75, 'advertiser' => 5.10],  // Zimbabwe
-            'BW' => ['publisher' => 1.80, 'advertiser' => 1.25],  // Botswana
-            'NA' => ['publisher' => 1.80, 'advertiser' => 5.85],  // Namibia
-            'MW' => ['publisher' => 1.75, 'advertiser' => 9.55],  // Malawi
-            'MZ' => ['publisher' => 1.75, 'advertiser' => 13.20],  // Mozambique
-            'MG' => ['publisher' => 1.70, 'advertiser' => 2.30],  // Madagascar
-            'RW' => ['publisher' => 1.75, 'advertiser' => 5.65],  // Rwanda
-            'BI' => ['publisher' => 1.65, 'advertiser' => 2.90],  // Burundi
-            'SO' => ['publisher' => 1.70, 'advertiser' => 2.20],  // Somalia
-            'ML' => ['publisher' => 1.75, 'advertiser' => 5.35],  // Mali
-            'BF' => ['publisher' => 1.75, 'advertiser' => 2.15],  // Burkina Faso
-            'NE' => ['publisher' => 1.65, 'advertiser' => 2.15],  // Niger
-            'TD' => ['publisher' => 1.70, 'advertiser' => 3.30],  // Chad
-            'MR' => ['publisher' => 1.70, 'advertiser' => 4.75],  // Mauritania
-            'SL' => ['publisher' => 1.70, 'advertiser' => 5.05],  // Sierra Leone
-            'LR' => ['publisher' => 1.70, 'advertiser' => 9.45],  // Liberia
-            'GN' => ['publisher' => 1.75, 'advertiser' => 16.80],  // Guinea
-            'GW' => ['publisher' => 1.65, 'advertiser' => 4.60],  // Guinea-Bissau
-            'GM' => ['publisher' => 1.70, 'advertiser' => 1.05],  // Gambia
-            'TG' => ['publisher' => 1.70, 'advertiser' => 2.10],  // Togo
-            'BJ' => ['publisher' => 1.75, 'advertiser' => 7.30],  // Benin
-            'CD' => ['publisher' => 1.75, 'advertiser' => 3.50],  // Democratic Republic of Congo
-            'CG' => ['publisher' => 1.70, 'advertiser' => 12.20],  // Republic of Congo
-            'GA' => ['publisher' => 1.75, 'advertiser' => 5.05],  // Gabon
-            'GQ' => ['publisher' => 1.65, 'advertiser' => 1.50],  // Equatorial Guinea (estimated)
-            'LS' => ['publisher' => 1.70, 'advertiser' => 11.35],  // Lesotho
-            'SZ' => ['publisher' => 1.65, 'advertiser' => 0.75],  // Eswatini (Swaziland)
-            'MU' => ['publisher' => 1.75, 'advertiser' => 0.40],  // Mauritius
-            'SC' => ['publisher' => 1.70, 'advertiser' => 1.00],  // Seychelles (estimated)
-            'KM' => ['publisher' => 1.65, 'advertiser' => 2.70],  // Comoros
-            'DJ' => ['publisher' => 1.65, 'advertiser' => 0.90],  // Djibouti (estimated)
-            'ER' => ['publisher' => 1.60, 'advertiser' => 0.85],  // Eritrea (estimated)
-            'RE' => ['publisher' => 1.70, 'advertiser' => 0.85],  // Reunion (France overseas)
-            
-            // Tier 3 - Pacific Islands
-            'PG' => ['publisher' => 1.60, 'advertiser' => 0.50],  // Papua New Guinea
-            'FJ' => ['publisher' => 1.65, 'advertiser' => 0.95],  // Fiji
-            'MV' => ['publisher' => 1.65, 'advertiser' => 0.25],  // Maldives
-            'WS' => ['publisher' => 1.50, 'advertiser' => 0.80],  // Samoa (estimated)
-            'TO' => ['publisher' => 1.50, 'advertiser' => 0.75],  // Tonga (estimated)
-            'VU' => ['publisher' => 1.50, 'advertiser' => 0.70],  // Vanuatu (estimated)
-            'SB' => ['publisher' => 1.45, 'advertiser' => 0.65],  // Solomon Islands (estimated)
-            
-            // Tier 3 - Caribbean
-            'AG' => ['publisher' => 1.65, 'advertiser' => 1.05],  // Antigua and Barbuda
-            'LC' => ['publisher' => 1.60, 'advertiser' => 0.90],  // Saint Lucia (estimated)
-            'VC' => ['publisher' => 1.60, 'advertiser' => 0.85],  // Saint Vincent and the Grenadines (estimated)
-            'GD' => ['publisher' => 1.60, 'advertiser' => 0.85],  // Grenada (estimated)
-            'DM' => ['publisher' => 1.55, 'advertiser' => 0.80],  // Dominica (estimated)
-            'KN' => ['publisher' => 1.60, 'advertiser' => 0.90],  // Saint Kitts and Nevis (estimated)
-            
-            // Europe - Microstates
-            'LU' => ['publisher' => 5.20, 'advertiser' => 1.25],  // Luxembourg
-            'MT' => ['publisher' => 3.40, 'advertiser' => 1.20],  // Malta
-            'CY' => ['publisher' => 3.00, 'advertiser' => 2.05],  // Cyprus
-            'IS' => ['publisher' => 4.80, 'advertiser' => 3.05],  // Iceland
-            'LI' => ['publisher' => 5.50, 'advertiser' => 2.00],  // Liechtenstein (estimated)
-            'MC' => ['publisher' => 5.80, 'advertiser' => 2.20],  // Monaco (estimated)
-            'SM' => ['publisher' => 4.40, 'advertiser' => 1.60],  // San Marino (estimated)
-            'VA' => ['publisher' => 4.50, 'advertiser' => 1.65],  // Vatican City (estimated)
-            'AD' => ['publisher' => 4.20, 'advertiser' => 1.50],  // Andorra (estimated)
-            
-            // Additional countries from PropellerAds data
-            'MQ' => ['publisher' => 1.75, 'advertiser' => 5.70],  // Martinique
-            'GP' => ['publisher' => 1.70, 'advertiser' => 0.75],  // Guadeloupe
+
+            // ════════════════════════════════════════════════
+            // TIER 1 — Premium English-Speaking & Nordic Markets
+            // ════════════════════════════════════════════════
+            'US' => ['publisher' => 10.00, 'advertiser' => 15.00],  // United States
+            'CA' => ['publisher' => 8.50,  'advertiser' => 12.50],  // Canada
+            'GB' => ['publisher' => 9.00,  'advertiser' => 13.00],  // United Kingdom
+            'AU' => ['publisher' => 8.00,  'advertiser' => 11.50],  // Australia
+            'NZ' => ['publisher' => 6.50,  'advertiser' => 9.50],   // New Zealand
+            'IE' => ['publisher' => 6.00,  'advertiser' => 8.50],   // Ireland
+
+            // Nordics
+            'NO' => ['publisher' => 7.50,  'advertiser' => 11.00],  // Norway
+            'SE' => ['publisher' => 6.50,  'advertiser' => 9.50],   // Sweden
+            'DK' => ['publisher' => 6.50,  'advertiser' => 9.50],   // Denmark
+            'FI' => ['publisher' => 6.00,  'advertiser' => 8.50],   // Finland
+            'IS' => ['publisher' => 5.50,  'advertiser' => 8.00],   // Iceland
+
+            // Western Europe (Core)
+            'CH' => ['publisher' => 7.00,  'advertiser' => 10.50],  // Switzerland
+            'DE' => ['publisher' => 7.50,  'advertiser' => 11.00],  // Germany
+            'NL' => ['publisher' => 6.50,  'advertiser' => 9.50],   // Netherlands
+            'BE' => ['publisher' => 5.50,  'advertiser' => 8.00],   // Belgium
+            'AT' => ['publisher' => 5.50,  'advertiser' => 8.00],   // Austria
+            'LU' => ['publisher' => 6.00,  'advertiser' => 8.50],   // Luxembourg
+            'LI' => ['publisher' => 6.00,  'advertiser' => 8.50],   // Liechtenstein
+
+            // ════════════════════════════════════════════════
+            // TIER 2 — Western Europe, Gulf, Developed Asia
+            // ════════════════════════════════════════════════
+            'FR' => ['publisher' => 5.50,  'advertiser' => 8.00],   // France
+            'ES' => ['publisher' => 4.50,  'advertiser' => 6.50],   // Spain
+            'IT' => ['publisher' => 4.50,  'advertiser' => 6.50],   // Italy
+            'PT' => ['publisher' => 3.80,  'advertiser' => 5.50],   // Portugal
+            'GR' => ['publisher' => 3.50,  'advertiser' => 5.00],   // Greece
+            'MT' => ['publisher' => 3.50,  'advertiser' => 5.00],   // Malta
+            'CY' => ['publisher' => 3.50,  'advertiser' => 5.00],   // Cyprus
+            'MC' => ['publisher' => 5.00,  'advertiser' => 7.50],   // Monaco
+            'SM' => ['publisher' => 4.00,  'advertiser' => 6.00],   // San Marino
+            'VA' => ['publisher' => 4.00,  'advertiser' => 6.00],   // Vatican City
+            'AD' => ['publisher' => 3.80,  'advertiser' => 5.50],   // Andorra
+
+            // Gulf / Middle East (Wealthy)
+            'AE' => ['publisher' => 5.50,  'advertiser' => 8.00],   // UAE
+            'SA' => ['publisher' => 5.00,  'advertiser' => 7.50],   // Saudi Arabia
+            'QA' => ['publisher' => 4.50,  'advertiser' => 6.50],   // Qatar
+            'KW' => ['publisher' => 4.50,  'advertiser' => 6.50],   // Kuwait
+            'BH' => ['publisher' => 3.80,  'advertiser' => 5.50],   // Bahrain
+            'OM' => ['publisher' => 3.50,  'advertiser' => 5.00],   // Oman
+            'IL' => ['publisher' => 4.50,  'advertiser' => 6.50],   // Israel
+
+            // Developed Asia
+            'JP' => ['publisher' => 4.50,  'advertiser' => 6.50],   // Japan
+            'KR' => ['publisher' => 4.00,  'advertiser' => 6.00],   // South Korea
+            'SG' => ['publisher' => 5.50,  'advertiser' => 8.00],   // Singapore
+            'HK' => ['publisher' => 4.50,  'advertiser' => 6.50],   // Hong Kong
+            'TW' => ['publisher' => 3.50,  'advertiser' => 5.00],   // Taiwan
+
+            // Eastern Europe (EU Members)
+            'PL' => ['publisher' => 3.80,  'advertiser' => 5.50],   // Poland
+            'CZ' => ['publisher' => 3.50,  'advertiser' => 5.00],   // Czech Republic
+            'HU' => ['publisher' => 3.20,  'advertiser' => 4.50],   // Hungary
+            'RO' => ['publisher' => 3.00,  'advertiser' => 4.50],   // Romania
+            'BG' => ['publisher' => 3.00,  'advertiser' => 4.50],   // Bulgaria
+            'HR' => ['publisher' => 3.20,  'advertiser' => 4.50],   // Croatia
+            'SI' => ['publisher' => 3.50,  'advertiser' => 5.00],   // Slovenia
+            'SK' => ['publisher' => 3.20,  'advertiser' => 4.50],   // Slovakia
+            'EE' => ['publisher' => 3.50,  'advertiser' => 5.00],   // Estonia
+            'LV' => ['publisher' => 3.20,  'advertiser' => 4.50],   // Latvia
+            'LT' => ['publisher' => 3.20,  'advertiser' => 4.50],   // Lithuania
+
+            // ════════════════════════════════════════════════
+            // TIER 2/3 — Latin America, Southeast Asia, Other
+            // ════════════════════════════════════════════════
+
+            // Latin America
+            'MX' => ['publisher' => 3.50,  'advertiser' => 5.00],   // Mexico
+            'BR' => ['publisher' => 3.50,  'advertiser' => 5.00],   // Brazil
+            'AR' => ['publisher' => 2.50,  'advertiser' => 3.50],   // Argentina
+            'CL' => ['publisher' => 2.80,  'advertiser' => 4.00],   // Chile
+            'CO' => ['publisher' => 2.50,  'advertiser' => 3.50],   // Colombia
+            'PE' => ['publisher' => 2.20,  'advertiser' => 3.20],   // Peru
+            'VE' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Venezuela
+            'EC' => ['publisher' => 2.20,  'advertiser' => 3.20],   // Ecuador
+            'BO' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Bolivia
+            'PY' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Paraguay
+            'UY' => ['publisher' => 2.50,  'advertiser' => 3.50],   // Uruguay
+            'CR' => ['publisher' => 2.50,  'advertiser' => 3.50],   // Costa Rica
+            'PA' => ['publisher' => 2.20,  'advertiser' => 3.20],   // Panama
+            'GT' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Guatemala
+            'SV' => ['publisher' => 1.80,  'advertiser' => 2.80],   // El Salvador
+            'HN' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Honduras
+            'NI' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Nicaragua
+            'CU' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Cuba
+            'DO' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Dominican Republic
+            'JM' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Jamaica
+            'TT' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Trinidad and Tobago
+            'BS' => ['publisher' => 2.20,  'advertiser' => 3.20],   // Bahamas
+            'BB' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Barbados
+            'GY' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Guyana
+            'SR' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Suriname
+            'HT' => ['publisher' => 1.50,  'advertiser' => 2.50],   // Haiti
+            'PR' => ['publisher' => 3.50,  'advertiser' => 5.00],   // Puerto Rico (US territory)
+
+            // Southeast Asia
+            'TH' => ['publisher' => 3.20,  'advertiser' => 4.80],   // Thailand
+            'MY' => ['publisher' => 3.00,  'advertiser' => 4.50],   // Malaysia
+            'ID' => ['publisher' => 2.80,  'advertiser' => 4.00],   // Indonesia
+            'PH' => ['publisher' => 2.80,  'advertiser' => 4.00],   // Philippines
+            'VN' => ['publisher' => 2.50,  'advertiser' => 3.80],   // Vietnam
+            'BN' => ['publisher' => 2.50,  'advertiser' => 3.80],   // Brunei
+            'MM' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Myanmar
+            'KH' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Cambodia
+            'LA' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Laos
+            'TL' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Timor-Leste
+
+            // South Asia
+            'IN' => ['publisher' => 2.20,  'advertiser' => 3.20],   // India
+            'PK' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Pakistan
+            'BD' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Bangladesh
+            'LK' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Sri Lanka
+            'NP' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Nepal
+            'MV' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Maldives
+            'BT' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Bhutan
+
+            // East Asia
+            'CN' => ['publisher' => 2.80,  'advertiser' => 4.00],   // China
+            'MN' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Mongolia
+            'MO' => ['publisher' => 3.00,  'advertiser' => 4.50],   // Macau
+
+            // ════════════════════════════════════════════════
+            // TIER 2/3 — Eastern Europe & Central Asia
+            // ════════════════════════════════════════════════
+            'RU' => ['publisher' => 2.50,  'advertiser' => 3.80],   // Russia
+            'UA' => ['publisher' => 2.50,  'advertiser' => 3.80],   // Ukraine
+            'BY' => ['publisher' => 2.20,  'advertiser' => 3.20],   // Belarus
+            'RS' => ['publisher' => 2.50,  'advertiser' => 3.80],   // Serbia
+            'BA' => ['publisher' => 2.20,  'advertiser' => 3.20],   // Bosnia
+            'ME' => ['publisher' => 2.20,  'advertiser' => 3.20],   // Montenegro
+            'MK' => ['publisher' => 2.00,  'advertiser' => 3.00],   // North Macedonia
+            'AL' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Albania
+            'GE' => ['publisher' => 2.20,  'advertiser' => 3.20],   // Georgia
+            'AM' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Armenia
+            'AZ' => ['publisher' => 2.20,  'advertiser' => 3.20],   // Azerbaijan
+            'MD' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Moldova
+            'KZ' => ['publisher' => 2.20,  'advertiser' => 3.20],   // Kazakhstan
+            'UZ' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Uzbekistan
+            'KG' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Kyrgyzstan
+            'TJ' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Tajikistan
+            'TM' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Turkmenistan
+
+            // ════════════════════════════════════════════════
+            // TIER 3 — Middle East & North Africa
+            // ════════════════════════════════════════════════
+            'TR' => ['publisher' => 3.00,  'advertiser' => 4.50],   // Turkey
+            'EG' => ['publisher' => 2.20,  'advertiser' => 3.20],   // Egypt
+            'DZ' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Algeria
+            'MA' => ['publisher' => 2.20,  'advertiser' => 3.20],   // Morocco
+            'TN' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Tunisia
+            'LY' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Libya
+            'SD' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Sudan
+            'SS' => ['publisher' => 1.50,  'advertiser' => 2.20],   // South Sudan
+            'IQ' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Iraq
+            'SY' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Syria
+            'JO' => ['publisher' => 2.20,  'advertiser' => 3.20],   // Jordan
+            'LB' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Lebanon
+            'PS' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Palestine
+            'YE' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Yemen
+            'IR' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Iran
+            'AF' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Afghanistan
+
+            // ════════════════════════════════════════════════
+            // TIER 3 — Sub-Saharan Africa
+            // ════════════════════════════════════════════════
+            'ZA' => ['publisher' => 2.80,  'advertiser' => 4.00],   // South Africa
+            'NG' => ['publisher' => 2.20,  'advertiser' => 3.20],   // Nigeria
+            'KE' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Kenya
+            'GH' => ['publisher' => 2.00,  'advertiser' => 3.00],   // Ghana
+            'ET' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Ethiopia
+            'TZ' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Tanzania
+            'UG' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Uganda
+            'AO' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Angola
+            'CM' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Cameroon
+            'CI' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Ivory Coast
+            'SN' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Senegal
+            'ZM' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Zambia
+            'ZW' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Zimbabwe
+            'BW' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Botswana
+            'NA' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Namibia
+            'MW' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Malawi
+            'MZ' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Mozambique
+            'MG' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Madagascar
+            'RW' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Rwanda
+            'BI' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Burundi
+            'SO' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Somalia
+            'ML' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Mali
+            'BF' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Burkina Faso
+            'NE' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Niger
+            'TD' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Chad
+            'MR' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Mauritania
+            'SL' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Sierra Leone
+            'LR' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Liberia
+            'GN' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Guinea
+            'GW' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Guinea-Bissau
+            'GM' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Gambia
+            'TG' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Togo
+            'BJ' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Benin
+            'CD' => ['publisher' => 1.60,  'advertiser' => 2.50],   // DR Congo
+            'CG' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Republic of Congo
+            'GA' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Gabon
+            'GQ' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Equatorial Guinea
+            'LS' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Lesotho
+            'SZ' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Eswatini
+            'MU' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Mauritius
+            'SC' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Seychelles
+            'KM' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Comoros
+            'DJ' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Djibouti
+            'ER' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Eritrea
+            'RE' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Reunion
+            'CV' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Cape Verde
+            'ST' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Sao Tome
+            'CF' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Central African Republic
+
+            // ════════════════════════════════════════════════
+            // Pacific Islands & Microstates
+            // ════════════════════════════════════════════════
+            'PG' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Papua New Guinea
+            'FJ' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Fiji
+            'WS' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Samoa
+            'TO' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Tonga
+            'VU' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Vanuatu
+            'SB' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Solomon Islands
+            'KI' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Kiribati
+            'TV' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Tuvalu
+            'NR' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Nauru
+            'PW' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Palau
+            'FM' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Micronesia
+            'MH' => ['publisher' => 1.50,  'advertiser' => 2.20],   // Marshall Islands
+
+            // Caribbean microstates
+            'AG' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Antigua and Barbuda
+            'LC' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Saint Lucia
+            'VC' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Saint Vincent
+            'GD' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Grenada
+            'DM' => ['publisher' => 1.60,  'advertiser' => 2.50],   // Dominica
+            'KN' => ['publisher' => 1.70,  'advertiser' => 2.60],   // Saint Kitts and Nevis
+
+            // French Overseas
+            'MQ' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Martinique
+            'GP' => ['publisher' => 1.80,  'advertiser' => 2.80],   // Guadeloupe
         ];
 
+        $updated = 0;
+        $notFound = 0;
+
         foreach ($rates as $isoCode => $rateData) {
+            // Try both the given ISO code and common variants
             $country = Country::where('iso_code', $isoCode)->first();
-            
+
+            // Handle UK: database uses 'GB' but seeder may have 'UK'
+            if (!$country && $isoCode === 'UK') {
+                $country = Country::where('iso_code', 'GB')->first();
+            }
+
             if ($country) {
                 CpmRate::updateOrCreate(
                     ['country_id' => $country->id],
                     [
-                        'publisher_rate' => $rateData['publisher'],
+                        'publisher_rate'  => $rateData['publisher'],
                         'advertiser_rate' => $rateData['advertiser'],
                     ]
                 );
-                
+                $updated++;
                 $this->command->info("✓ {$country->name} ({$isoCode}): Publisher \${$rateData['publisher']}, Advertiser \${$rateData['advertiser']}");
             } else {
+                $notFound++;
                 $this->command->warn("✗ Country with ISO code '{$isoCode}' not found in database");
             }
         }
 
-        $this->command->info("\n" . count($rates) . " countries updated with CPM rates.");
+        $this->command->info("\n✅ Done! {$updated} countries updated, {$notFound} not found.");
+        $this->command->info("📊 Rate structure: US \$10.00 | UK/DE \$7.50-9.00 | TR \$3.00 | IN \$2.20 | Default \$1.50");
     }
 }

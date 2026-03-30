@@ -22,10 +22,13 @@ class CpmCampaignService
      */
     public function startCampaign(string $name, float $multiplier, Carbon $startDate, Carbon $endDate): CpmCampaign
     {
+        // Check for expired campaigns first and clear them
+        $this->checkExpiredCampaigns();
+
         // Check if there's already an active campaign
         $activeCampaign = CpmCampaign::active()->first();
         if ($activeCampaign) {
-            throw new \Exception('There is already an active campaign. Please stop it before starting a new one.');
+            throw new \Exception('There is already an active or scheduled campaign. Please stop it before starting a new one.');
         }
 
         // Validate dates
@@ -150,10 +153,9 @@ class CpmCampaignService
      */
     public function getActiveCampaign(): ?CpmCampaign
     {
-        return CpmCampaign::active()
-            ->where('start_date', '<=', now())
-            ->where('end_date', '>', now())
-            ->first();
+        $this->checkExpiredCampaigns();
+
+        return CpmCampaign::active()->first();
     }
 
     /**
