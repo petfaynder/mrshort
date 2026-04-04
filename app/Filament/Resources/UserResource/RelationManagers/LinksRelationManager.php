@@ -21,13 +21,13 @@ class LinksRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('url')
+                Forms\Components\TextInput::make('original_url')
                     ->label('Destination URL')
                     ->required()
                     ->url()
                     ->maxLength(2000),
-                Forms\Components\TextInput::make('alias')
-                    ->label('Alias')
+                Forms\Components\TextInput::make('code')
+                    ->label('Short Code')
                     ->unique(ignoreRecord: true),
                 Forms\Components\TextInput::make('title')
                     ->maxLength(255),
@@ -37,23 +37,35 @@ class LinksRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('alias')
+            ->recordTitleAttribute('code')
             ->columns([
-                Tables\Columns\TextColumn::make('alias')
+                Tables\Columns\TextColumn::make('code')
                     ->searchable()
                     ->sortable()
                     ->label('Short Link')
-                    ->formatStateUsing(fn ($state) => $state),
-                Tables\Columns\TextColumn::make('url')
+                    ->formatStateUsing(fn (Link $record) => $record->shortLink())
+                    ->copyable()
+                    ->copyableState(fn (Link $record) => $record->shortLink()),
+                Tables\Columns\TextColumn::make('original_url')
                     ->label('Destination')
-                    ->limit(30)
-                    ->searchable(),
+                    ->limit(40)
+                    ->searchable()
+                    ->tooltip(fn (Link $record) => $record->original_url),
                 Tables\Columns\TextColumn::make('clicks')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('is_active')
+                Tables\Columns\IconColumn::make('is_hidden')
                     ->boolean()
-                    ->label('Active'),
+                    ->trueIcon('heroicon-o-eye-slash')
+                    ->falseIcon('heroicon-o-eye')
+                    ->trueColor('warning')
+                    ->falseColor('success')
+                    ->label('Hidden'),
+                Tables\Columns\IconColumn::make('is_blocked')
+                    ->boolean()
+                    ->trueColor('danger')
+                    ->falseColor('success')
+                    ->label('Blocked'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
@@ -78,3 +90,4 @@ class LinksRelationManager extends RelationManager
             ]);
     }
 }
+

@@ -11,6 +11,8 @@ class ReportsManager extends Component
 {
     protected $layout = 'components.user-dashboard-layout'; // Layout'u belirt
 
+    public $targetUserId;
+
     public $startDate;
     public $endDate;
     public $selectedPreset = 'last_30_days'; // Varsayılan olarak son 30 gün
@@ -35,8 +37,16 @@ class ReportsManager extends Component
 
     protected $listeners = ['generateReport' => 'generateReport']; // Livewire event listener
 
-    public function mount()
+    public function mount($user = null)
     {
+        // If a user is passed (e.g. from admin panel), use that user's ID
+        // Otherwise fall back to the currently authenticated user
+        if ($user) {
+            $this->targetUserId = $user instanceof \App\Models\User ? $user->id : (int) $user;
+        } else {
+            $this->targetUserId = Auth::id();
+        }
+
         $this->setDatesFromPreset();
         $this->generateReport();
     }
@@ -81,10 +91,10 @@ class ReportsManager extends Component
 
     public function generateReport()
     {
-        $user = Auth::user();
+        $userId = $this->targetUserId;
 
-        $query = LinkClick::whereHas('link', function ($query) use ($user) {
-                                $query->where('user_id', $user->id);
+        $query = LinkClick::whereHas('link', function ($query) use ($userId) {
+                                $query->where('user_id', $userId);
                             })
                             ->where('is_skipped', false);
 
