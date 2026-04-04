@@ -90,9 +90,20 @@ class LinkResource extends Resource
                     ->url(fn (\App\Models\Link $record): ?string => $record->code ? route('stats', ['code' => $record->code]) : null)
                     ->copyable()
                     ->color('primary'),
+                Tables\Columns\TextColumn::make('code')
+                    ->label('Alias')
+                    ->badge()
+                    ->color('gray')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Username')
-                    ->searchable(),
+                    ->searchable()
+                    ->url(fn (\App\Models\Link $record): ?string =>
+                        $record->user_id
+                            ? \App\Filament\Resources\UserResource::getUrl('edit', ['record' => $record->user_id])
+                            : null
+                    )
+                    ->color('primary'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()

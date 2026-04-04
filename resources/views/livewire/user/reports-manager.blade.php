@@ -26,23 +26,46 @@
                 </div>
             </div>
         </div>
-        <div class="mt-6 bg-gray-900 rounded-xl border border-gray-800">
+        {{-- ═══════════════════════════════════════════════════════════════ --}}
+        {{-- GEOGRAPHIC DENSITY MAP                                        --}}
+        {{-- ═══════════════════════════════════════════════════════════════ --}}
+        <div class="mt-6 bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
             <div class="p-4 flex flex-wrap justify-between items-center gap-4 border-b border-gray-800">
-                <h3 class="text-lg font-bold text-white">Geographic Density Map</h3>
-                <div class="flex items-center gap-2 text-sm text-gray-400">
-                    <span>Low</span>
-                    <div class="h-3 w-32 rounded-full" style="background: linear-gradient(to right, #2c3e50, #00f2ff);"></div>
-                    <span>High</span>
-                    <button wire:click="exportCsv('countries')" wire:loading.attr="disabled" class="flex items-center gap-2 font-medium hover:text-white ml-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-600/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary !text-lg">public</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">Geographic Density Map</h3>
+                </div>
+                <div class="flex items-center gap-3 text-sm text-gray-400">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-medium uppercase tracking-wider text-gray-500">Low</span>
+                        <div class="h-2.5 w-36 rounded-full overflow-hidden" style="background: linear-gradient(to right, #0d253f, #0f3d5c, #0e5f7a, #008b9e, #00b8c4, #00f2ff);"></div>
+                        <span class="text-xs font-medium uppercase tracking-wider text-gray-500">High</span>
+                    </div>
+                    <div class="w-px h-5 bg-gray-700"></div>
+                    <button wire:click="exportCsv('countries')" wire:loading.attr="disabled" class="flex items-center gap-1.5 font-medium hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         <span wire:loading.remove wire:target="exportCsv('countries')" class="material-symbols-outlined !text-base">download</span>
                         <span wire:loading wire:target="exportCsv('countries')" class="material-symbols-outlined !text-base animate-spin">progress_activity</span>
                     </button>
                 </div>
             </div>
-            <div wire:ignore class="p-4 relative min-h-[400px]" style="background-color: #101922;">
-                <div id="user-reports-worldmap" style="width: 100%; height: 500px;"></div>
+            <div wire:ignore class="relative" style="background: radial-gradient(ellipse at 50% 50%, #0d1f2d 0%, #080f16 100%);">
+                <div id="user-reports-worldmap" style="width: 100%; height: 520px;"></div>
+                {{-- No data overlay --}}
+                @if(empty($clicksByCountryChartData['labels']) || count($clicksByCountryChartData['labels']) === 0)
+                <div id="map-no-data-overlay" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10" style="background: rgba(8,15,22,0.6); backdrop-filter: blur(2px);">
+                    <span class="material-symbols-outlined !text-5xl text-gray-600 mb-3">explore_off</span>
+                    <p class="text-gray-500 text-sm font-medium">No geographic data available yet</p>
+                    <p class="text-gray-600 text-xs mt-1">Clicks from different countries will appear here</p>
+                </div>
+                @endif
             </div>
         </div>
+
+        {{-- ═══════════════════════════════════════════════════════════════ --}}
+        {{-- DEVICE / OS / BROWSER BREAKDOWN                               --}}
+        {{-- ═══════════════════════════════════════════════════════════════ --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
             <div class="bg-gray-900 rounded-xl border border-gray-800">
                 <div class="p-4 flex justify-between items-center border-b border-gray-800">
@@ -104,6 +127,10 @@
                 </ul>
             </div>
         </div>
+
+        {{-- ═══════════════════════════════════════════════════════════════ --}}
+        {{-- REFERRERS / TOP COUNTRIES                                      --}}
+        {{-- ═══════════════════════════════════════════════════════════════ --}}
         <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-gray-900 rounded-xl border border-gray-800">
                 <div class="p-4 flex justify-between items-center border-b border-gray-800">
@@ -145,6 +172,10 @@
                 </ul>
             </div>
         </div>
+
+        {{-- ═══════════════════════════════════════════════════════════════ --}}
+        {{-- HUMAN / BOT CLICKS                                            --}}
+        {{-- ═══════════════════════════════════════════════════════════════ --}}
         <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-gray-900 rounded-xl border border-gray-800 md:col-span-2 p-6 flex flex-col justify-between">
                 <div class="flex justify-between items-start">
@@ -194,6 +225,10 @@
                 </div>
             </div>
         </div>
+
+        {{-- ═══════════════════════════════════════════════════════════════ --}}
+        {{-- CLICKS BY LINKS TABLE                                          --}}
+        {{-- ═══════════════════════════════════════════════════════════════ --}}
         <div class="mt-6 bg-gray-900 rounded-xl border border-gray-800">
             <div class="p-4 flex justify-between items-center border-b border-gray-800">
                 <h3 class="text-lg font-bold text-white">Clicks by Links</h3>
@@ -261,6 +296,7 @@
 (function() {
     var clicksData = @json($clicksByCountryChartData);
     var mapRoot = null;
+    var mapChart = null;
     var mapPolygonSeries = null;
 
     function initWorldMap() {
@@ -276,49 +312,134 @@
         el._amcharts = true;
 
         try {
+            // Create root
+            mapRoot = am5.Root.new(el);
 
-        mapRoot = am5.Root.new(el);
-        mapRoot.setThemes([am5themes_Animated.new(mapRoot)]);
+            // Disable amCharts branding
+            mapRoot._logo.dispose();
 
-        var chart = mapRoot.container.children.push(
-            am5map.MapChart.new(mapRoot, {
-                panX: "rotateX",
-                panY: "translateY",
-                projection: am5map.geoMercator(),
-                homeGeoPoint: { latitude: 2, longitude: 2 }
-            })
-        );
+            // Set animated theme
+            mapRoot.setThemes([am5themes_Animated.new(mapRoot)]);
 
-        mapPolygonSeries = chart.series.push(
-            am5map.MapPolygonSeries.new(mapRoot, {
-                geoJSON: am5geodata_worldLow,
-                exclude: ["AQ"]
-            })
-        );
+            // Create chart
+            mapChart = mapRoot.container.children.push(
+                am5map.MapChart.new(mapRoot, {
+                    panX: "rotateX",
+                    panY: "translateY",
+                    projection: am5map.geoNaturalEarth1(),
+                    homeGeoPoint: { latitude: 20, longitude: 10 },
+                    homeZoomLevel: 1,
+                    wheelY: "zoom",
+                    pinchZoom: true
+                })
+            );
 
-        mapPolygonSeries.mapPolygons.template.setAll({
-            tooltipText: "{name}: {value} Clicks",
-            toggleKey: "active",
-            interactive: true,
-            fill: am5.color(0xaaaaaa)
-        });
+            // Background color for oceans (transparent to show CSS gradient)
+            mapChart.chartContainer.set("background", am5.Rectangle.new(mapRoot, {
+                fill: am5.color(0x000000),
+                fillOpacity: 0
+            }));
 
-        mapPolygonSeries.mapPolygons.template.states.create("hover", {
-            fill: am5.color(0x00f2ff)
-        });
+            // Create polygon series for countries
+            mapPolygonSeries = mapChart.series.push(
+                am5map.MapPolygonSeries.new(mapRoot, {
+                    geoJSON: am5geodata_worldLow,
+                    exclude: ["AQ"],
+                    valueField: "value",
+                    calculateAggregates: true
+                })
+            );
 
-        mapPolygonSeries.heatRules.push({
-            target: mapPolygonSeries.mapPolygons.template,
-            dataField: "value",
-            min: am5.color(0x2c3e50),
-            max: am5.color(0x00f2ff),
-            key: "fill"
-        });
+            // Default style for all countries (deep dark blue-gray)
+            mapPolygonSeries.mapPolygons.template.setAll({
+                tooltipText: "{name}",
+                interactive: true,
+                fill: am5.color(0x1a2a3a),
+                stroke: am5.color(0x0d1f2d),
+                strokeWidth: 0.5,
+                strokeOpacity: 0.6
+            });
 
-        updateMapData(clicksData);
+            // Create a custom tooltip
+            var tooltip = am5.Tooltip.new(mapRoot, {
+                getFillFromSprite: false,
+                labelText: "[bold]{name}[/]\n{value} clicks",
+                autoTextColor: false
+            });
+            tooltip.get("background").setAll({
+                fill: am5.color(0x111827),
+                fillOpacity: 0.95,
+                stroke: am5.color(0x00f2ff),
+                strokeWidth: 1,
+                cornerRadius: 8,
+                shadowColor: am5.color(0x00f2ff),
+                shadowBlur: 12,
+                shadowOffsetX: 0,
+                shadowOffsetY: 0,
+                shadowOpacity: 0.3
+            });
+            tooltip.label.setAll({
+                fill: am5.color(0xffffff),
+                fontSize: 13
+            });
+
+            mapPolygonSeries.mapPolygons.template.set("tooltip", tooltip);
+
+            // Hover state — subtle glow
+            mapPolygonSeries.mapPolygons.template.states.create("hover", {
+                fill: am5.color(0x00f2ff),
+                fillOpacity: 0.85,
+                stroke: am5.color(0x00f2ff),
+                strokeWidth: 1.5
+            });
+
+            // Heat rules — color countries by click density
+            mapPolygonSeries.set("heatRules", [{
+                target: mapPolygonSeries.mapPolygons.template,
+                dataField: "value",
+                min: am5.color(0x0d253f),
+                max: am5.color(0x00f2ff),
+                key: "fill"
+            }]);
+
+            // Zoom controls
+            var zoomControl = mapChart.set("zoomControl", am5map.ZoomControl.new(mapRoot, {}));
+            zoomControl.homeButton.set("visible", true);
+
+            // Style zoom buttons for dark theme
+            zoomControl.plusButton.setAll({
+                fill: am5.color(0x1f2937),
+                stroke: am5.color(0x374151),
+                cornerRadius: 6,
+                width: 32,
+                height: 32
+            });
+            zoomControl.plusButton.get("background").setAll({
+                fill: am5.color(0x1f2937),
+                stroke: am5.color(0x374151),
+                cornerRadius: 6
+            });
+            zoomControl.minusButton.get("background").setAll({
+                fill: am5.color(0x1f2937),
+                stroke: am5.color(0x374151),
+                cornerRadius: 6
+            });
+            zoomControl.homeButton.get("background").setAll({
+                fill: am5.color(0x1f2937),
+                stroke: am5.color(0x374151),
+                cornerRadius: 6
+            });
+
+            // Load initial data
+            updateMapData(clicksData);
+
+            // Appear animation
+            mapChart.appear(1000, 100);
+
         } catch(e) {
+            console.error('Map init error:', e);
             el._amcharts = false;
-            setTimeout(initWorldMap, 200);
+            setTimeout(initWorldMap, 300);
         }
     }
 
@@ -327,17 +448,44 @@
         var heatData = [];
         if (data && data.labels && data.data) {
             for (var i = 0; i < data.labels.length; i++) {
-                heatData.push({ id: data.labels[i], value: Number(data.data[i]) });
+                var val = Number(data.data[i]);
+                if (val > 0) {
+                    heatData.push({ id: data.labels[i], value: val });
+                }
             }
         }
         mapPolygonSeries.data.setAll(heatData);
+
+        // Hide/show no-data overlay
+        var overlay = document.getElementById('map-no-data-overlay');
+        if (overlay) {
+            overlay.style.display = heatData.length > 0 ? 'none' : 'flex';
+        }
     }
 
     initWorldMap();
 
+    // Support Livewire page navigation (re-init after navigate)
+    document.addEventListener('livewire:navigated', function() {
+        mapRoot = null;
+        mapChart = null;
+        mapPolygonSeries = null;
+        var el = document.getElementById('user-reports-worldmap');
+        if (el) el._amcharts = false;
+        initWorldMap();
+    });
+
     if (typeof Livewire !== 'undefined') {
+        // Livewire 3: dispatch('event', data: $val) sends payload as event[0]
+        // where event[0] IS the data object {labels:[...], data:[...]}
         Livewire.on('heatmap-data-updated', function(event) {
-            updateMapData(event[0].data);
+            var payload = event[0];
+            // Normalise: handle both {labels,data} directly and {data:{labels,data}}
+            if (payload && payload.labels !== undefined) {
+                updateMapData(payload);
+            } else if (payload && payload.data !== undefined) {
+                updateMapData(payload.data);
+            }
         });
     }
 })();
