@@ -25,7 +25,7 @@ class DashboardStats extends Component
     public function loadStatsForMonth($data = null)
     {
         $month = $data['month'] ?? Carbon::now()->format('Y-m');
-        $user = Auth::user();
+        $user = Auth::user()->fresh(); // Always get fresh data from DB
         $linkIds = $user->links()->pluck('id');
 
         $startDate = Carbon::parse($month)->startOfMonth();
@@ -39,14 +39,18 @@ class DashboardStats extends Component
 
         $totalViews = $clicks->count();
         $paidViews = $clicks->where('cpm_rate', '>', 0)->count();
-        $publisherEarnings = $clicks->sum('cpm_rate') / 1000;
+
+        // Sum paid cpm_rates for this month. cpm_rate is stored as per-1000-views rate.
+        $paidClicksCpmSum = $clicks->where('cpm_rate', '>', 0)->sum('cpm_rate');
+        $publisherEarnings = $paidClicksCpmSum / 1000;
+
         $referralEarnings = $user->referral_earnings ?? 0;
 
         $this->totalViews = $totalViews;
         $this->paidViews = $paidViews;
         $this->publisherEarnings = $publisherEarnings;
         $this->referralEarnings = $referralEarnings;
-        $this->averageCpm = $paidViews > 0 ? ($publisherEarnings / $paidViews) * 1000 : 0;
+        $this->averageCpm = $paidViews > 0 ? ($paidClicksCpmSum / $paidViews) : 0;
     }
 
     public function render()

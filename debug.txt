@@ -1,0 +1,9 @@
+Array
+(
+    [0] => Array
+        (
+            [name] => Adsterrra Pop
+            [code] => <script src="https://pl28486658.effectivegatecpm.com/79/6f/40/796f408e04fbd41b0f28f32ffc0c9874.js"></script>
+        )
+
+)

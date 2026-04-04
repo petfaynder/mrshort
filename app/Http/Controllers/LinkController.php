@@ -235,9 +235,20 @@ class LinkController extends Controller
             // Check paid views per day limit from settings (SYSTEM-WIDE IP check)
             // This ensures each unique IP can only generate paid views X times per day across ALL links
             $paidViewsPerDay = (int) setting('paid_views_per_day', 1);
+            // Use app timezone for today's date so timezone-aware day boundaries are respected
+            $todayInAppTz = \Carbon\Carbon::now(config('app.timezone'))->toDateString();
             $todayClicksFromIp = LinkClick::where('ip_address', $clientIp)
-                ->whereDate('created_at', today())
+                ->where('cpm_rate', '>', 0)  // Only count PAID views (not all clicks)
+                ->whereDate('created_at', $todayInAppTz)
                 ->count();
+
+            \Log::info('Paid views per day check.', [
+                'ip' => $clientIp,
+                'today_in_app_tz' => $todayInAppTz,
+                'app_timezone' => config('app.timezone'),
+                'paid_clicks_today' => $todayClicksFromIp,
+                'paid_views_per_day_limit' => $paidViewsPerDay,
+            ]);
             
             $shouldPay = $todayClicksFromIp < $paidViewsPerDay;
             

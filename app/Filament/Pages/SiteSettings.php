@@ -113,14 +113,22 @@ class SiteSettings extends Page implements HasForms
                             ->placeholder('MRShort'),
                         Select::make('timezone')
                             ->label('Timezone')
-                            ->options([
-                                'UTC' => 'UTC',
-                                'America/New_York' => 'New York (UTC-5)',
-                                'Europe/London' => 'London (UTC+0)',
-                                'Europe/Istanbul' => 'Istanbul (UTC+3)',
-                                'Asia/Tokyo' => 'Tokyo (UTC+9)',
-                            ])
-                            ->default('UTC'),
+                            ->options(function () {
+                                $timezones = [];
+                                foreach (\DateTimeZone::listIdentifiers() as $tz) {
+                                    $parts = explode('/', $tz, 2);
+                                    $continent = $parts[0];
+                                    $city = str_replace('_', ' ', $parts[1] ?? $tz);
+                                    $offset = (new \DateTimeZone($tz))->getOffset(new \DateTime()) / 3600;
+                                    $sign = $offset >= 0 ? '+' : '-';
+                                    $offsetStr = sprintf('UTC%s%02d:%02d', $sign, abs((int)$offset), abs(($offset - (int)$offset) * 60));
+                                    $timezones[$continent]["$tz"] = "$city ($offsetStr)";
+                                }
+                                return $timezones;
+                            })
+                            ->searchable()
+                            ->default('UTC')
+                            ->helperText('Affects all date/time calculations site-wide. Requires cache clear after change.'),
                     ])->columns(2),
                 Section::make('Maintenance Mode')
                     ->schema([
@@ -774,6 +782,13 @@ class SiteSettings extends Page implements HasForms
         }
         
         SiteSetting::clearCache();
+
+        // Apply timezone immediately to current request
+        $newTimezone = $this->data['timezone'] ?? null;
+        if ($newTimezone && $newTimezone !== '') {
+            config(['app.timezone' => $newTimezone]);
+            date_default_timezone_set($newTimezone);
+        }
         
         Notification::make()
             ->title('Settings saved successfully.')

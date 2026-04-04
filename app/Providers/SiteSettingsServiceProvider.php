@@ -41,7 +41,14 @@ class SiteSettingsServiceProvider extends ServiceProvider
 
             // App settings
             $this->overrideIfSet('site_name', 'app.name');
-            $this->overrideIfSet('timezone', 'app.timezone');
+
+            // Timezone: override config AND apply to PHP runtime
+            $timezone = SiteSetting::get('timezone');
+            if ($timezone && $timezone !== '') {
+                config(['app.timezone' => $timezone]);
+                date_default_timezone_set($timezone);
+            }
+
             $this->overrideIfSet('default_language', 'app.locale');
 
             // Mail settings

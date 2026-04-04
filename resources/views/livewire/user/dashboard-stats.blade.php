@@ -60,7 +60,7 @@
                         </div>
                     </div>
                 </div>
-                <p class="text-xl font-bold text-heading-light dark:text-heading-dark">${{ number_format($publisherEarnings, 2) }}</p>
+                <p class="text-xl font-bold text-heading-light dark:text-heading-dark">${{ $publisherEarnings >= 0.01 ? number_format($publisherEarnings, 2) : number_format($publisherEarnings, 4) }}</p>
             </div>
         </div>
     </div>
