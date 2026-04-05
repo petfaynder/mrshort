@@ -151,11 +151,14 @@
 
     {{-- Optimized Link Suggestions --}}
     @php
-        $allSuggestions = config('link_suggestions', []);
-        // Pick 2 random unique suggestions each page load
-        $suggestions = collect($allSuggestions)->shuffle()->take(2);
+        // DB-backed suggestions (with config fallback)
+        try {
+            $suggestions = \App\Models\LinkSuggestion::active()->inRandomOrder()->take(2)->get();
+        } catch (\Exception $e) {
+            $suggestions = collect(config('link_suggestions', []))->shuffle()->take(2);
+        }
 
-        // Map color prefix → Tailwind classes (needs to be explicit for Tailwind to keep them)
+        // Map color prefix → Tailwind classes (explicit for Tailwind purge)
         $colorMap = [
             'green'  => ['bg' => 'bg-green-100 dark:bg-green-900/50',  'text' => 'text-green-500'],
             'blue'   => ['bg' => 'bg-blue-100 dark:bg-blue-900/50',    'text' => 'text-blue-500'],
@@ -169,25 +172,31 @@
             'pink'   => ['bg' => 'bg-pink-100 dark:bg-pink-900/50',    'text' => 'text-pink-500'],
         ];
     @endphp
+    @if($suggestions->isNotEmpty())
     <div data-tutorial="suggestions" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-md mb-8">
         <h3 class="text-xl font-semibold text-heading-light dark:text-heading-dark mb-4">Optimized Link Suggestions</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             @foreach ($suggestions as $tip)
                 @php
-                    $colors = $colorMap[$tip['color']] ?? $colorMap['blue'];
+                    $tipColor = is_array($tip) ? ($tip['color'] ?? 'blue') : ($tip->color ?? 'blue');
+                    $tipIcon  = is_array($tip) ? ($tip['icon'] ?? 'lightbulb') : ($tip->icon ?? 'lightbulb');
+                    $tipTitle = is_array($tip) ? ($tip['title'] ?? '') : ($tip->title ?? '');
+                    $tipText  = is_array($tip) ? ($tip['text'] ?? '') : ($tip->text ?? '');
+                    $colors = $colorMap[$tipColor] ?? $colorMap['blue'];
                 @endphp
                 <div class="flex items-start gap-4 p-4 bg-background-light dark:bg-background-dark rounded-lg">
                     <div class="mt-1 p-2 {{ $colors['bg'] }} rounded-full shrink-0">
-                        <span class="material-symbols-outlined {{ $colors['text'] }} text-base">{{ $tip['icon'] }}</span>
+                        <span class="material-symbols-outlined {{ $colors['text'] }} text-base">{{ $tipIcon }}</span>
                     </div>
                     <div>
-                        <h4 class="font-semibold text-heading-light dark:text-heading-dark">{{ $tip['title'] }}</h4>
-                        <p class="text-sm text-text-light dark:text-text-dark">{{ $tip['text'] }}</p>
+                        <h4 class="font-semibold text-heading-light dark:text-heading-dark">{{ $tipTitle }}</h4>
+                        <p class="text-sm text-text-light dark:text-text-dark">{{ $tipText }}</p>
                     </div>
                 </div>
             @endforeach
         </div>
     </div>
+    @endif
 
     {{-- Payment Info & Recent Activity --}}
     <div data-tutorial="payment-activity" class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
