@@ -61,7 +61,7 @@ class CampaignTemplateResource extends Resource
 
                         TextInput::make('slug')
                             ->label('Şablon Kısa Adı')
-                            ->unique()
+                            ->unique(ignoreRecord: true)
                             ->required()
                             ->helperText('URL ve kodlarda kullanılacak benzersiz tanımlayıcı'),
 
@@ -253,8 +253,8 @@ class CampaignTemplateResource extends Resource
                                     ->defaultItems(7) // Haftanın 7 günü için varsayılan
                                     ->minItems(7)
                                     ->maxItems(7)
-                                    ->disableItemCreation()
-                                    ->disableItemDeletion()
+                                    ->addable(false)
+                                    ->deletable(false)
                                     ->mutateRelationshipDataBeforeCreateUsing(function (array $data): array {
                                         // İlk oluşturmada gün adlarını otomatik doldur
                                         $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
