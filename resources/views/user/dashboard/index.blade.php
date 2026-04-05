@@ -150,23 +150,42 @@
     </div>
 
     {{-- Optimized Link Suggestions --}}
+    @php
+        $allSuggestions = config('link_suggestions', []);
+        // Pick 2 random unique suggestions each page load
+        $suggestions = collect($allSuggestions)->shuffle()->take(2);
+
+        // Map color prefix → Tailwind classes (needs to be explicit for Tailwind to keep them)
+        $colorMap = [
+            'green'  => ['bg' => 'bg-green-100 dark:bg-green-900/50',  'text' => 'text-green-500'],
+            'blue'   => ['bg' => 'bg-blue-100 dark:bg-blue-900/50',    'text' => 'text-blue-500'],
+            'amber'  => ['bg' => 'bg-amber-100 dark:bg-amber-900/50',  'text' => 'text-amber-500'],
+            'purple' => ['bg' => 'bg-purple-100 dark:bg-purple-900/50','text' => 'text-purple-500'],
+            'rose'   => ['bg' => 'bg-rose-100 dark:bg-rose-900/50',    'text' => 'text-rose-500'],
+            'cyan'   => ['bg' => 'bg-cyan-100 dark:bg-cyan-900/50',    'text' => 'text-cyan-500'],
+            'orange' => ['bg' => 'bg-orange-100 dark:bg-orange-900/50','text' => 'text-orange-500'],
+            'teal'   => ['bg' => 'bg-teal-100 dark:bg-teal-900/50',    'text' => 'text-teal-500'],
+            'indigo' => ['bg' => 'bg-indigo-100 dark:bg-indigo-900/50','text' => 'text-indigo-500'],
+            'pink'   => ['bg' => 'bg-pink-100 dark:bg-pink-900/50',    'text' => 'text-pink-500'],
+        ];
+    @endphp
     <div data-tutorial="suggestions" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-md mb-8">
         <h3 class="text-xl font-semibold text-heading-light dark:text-heading-dark mb-4">Optimized Link Suggestions</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="flex items-start gap-4 p-4 bg-background-light dark:bg-background-dark rounded-lg">
-                <div class="mt-1 p-2 bg-green-100 dark:bg-green-900/50 rounded-full"><span class="material-symbols-outlined text-green-500 text-base">trending_up</span></div>
-                <div>
-                    <h4 class="font-semibold text-heading-light dark:text-heading-dark">High Traffic Potential</h4>
-                    <p class="text-sm text-text-light dark:text-text-dark">Your link for "Tech Gadgets 2024" is performing well. Consider creating more content around this topic.</p>
+            @foreach ($suggestions as $tip)
+                @php
+                    $colors = $colorMap[$tip['color']] ?? $colorMap['blue'];
+                @endphp
+                <div class="flex items-start gap-4 p-4 bg-background-light dark:bg-background-dark rounded-lg">
+                    <div class="mt-1 p-2 {{ $colors['bg'] }} rounded-full shrink-0">
+                        <span class="material-symbols-outlined {{ $colors['text'] }} text-base">{{ $tip['icon'] }}</span>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-heading-light dark:text-heading-dark">{{ $tip['title'] }}</h4>
+                        <p class="text-sm text-text-light dark:text-text-dark">{{ $tip['text'] }}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="flex items-start gap-4 p-4 bg-background-light dark:bg-background-dark rounded-lg">
-                <div class="mt-1 p-2 bg-blue-100 dark:bg-blue-900/50 rounded-full"><span class="material-symbols-outlined text-primary text-base">public</span></div>
-                <div>
-                    <h4 class="font-semibold text-heading-light dark:text-heading-dark">Geo-Targeting Tip</h4>
-                    <p class="text-sm text-text-light dark:text-text-dark">High CPM in Germany. Try sharing your links in German-speaking forums for higher earnings.</p>
-                </div>
-            </div>
+            @endforeach
         </div>
     </div>
 
