@@ -1,7 +1,7 @@
 @if ($ad->ad_type === \App\Enums\AdType::Banner)
     @if (!empty($ad->ad_data['custom_js']))
         {{-- Banner with custom JavaScript code (e.g. ad network scripts) --}}
-        <div class="banner-js-content w-full h-full flex items-center justify-center">
+        <div class="banner-js-content w-full h-full overflow-hidden relative" style="max-width: 100%; max-height: 100%;">
             {!! $ad->ad_data['custom_js'] !!}
         </div>
     @elseif (!empty($ad->ad_data['image']))

@@ -173,7 +173,7 @@
                     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-2">
                         <p class="text-xs text-gray-500 text-center mb-2">Advertisement</p>
                         @php $leftSkyscraper = $adsData->shift(); @endphp
-                        <div class="w-[160px] h-[600px] mx-auto flex items-center justify-center ad-block" data-ad-id="{{ $leftSkyscraper->id ?? '' }}" data-ad-type="{{ $leftSkyscraper ? ($leftSkyscraper->ad_type->value ?? '') : '' }}">
+                        <div class="w-[160px] h-[600px] mx-auto flex items-center justify-center overflow-hidden ad-block" data-ad-id="{{ $leftSkyscraper->id ?? '' }}" data-ad-type="{{ $leftSkyscraper ? ($leftSkyscraper->ad_type->value ?? '') : '' }}">
                             @if($leftSkyscraper)
                                 @include('partials.ad_display', ['ad' => $leftSkyscraper])
                             @else
@@ -270,7 +270,7 @@
                     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-2">
                         <p class="text-xs text-gray-500 text-center mb-2">Advertisement</p>
                         @php $rightSkyscraper = $adsData->shift(); @endphp
-                        <div class="w-[160px] h-[600px] mx-auto flex items-center justify-center ad-block" data-ad-id="{{ $rightSkyscraper->id ?? '' }}" data-ad-type="{{ $rightSkyscraper ? ($rightSkyscraper->ad_type->value ?? '') : '' }}">
+                        <div class="w-[160px] h-[600px] mx-auto flex items-center justify-center overflow-hidden ad-block" data-ad-id="{{ $rightSkyscraper->id ?? '' }}" data-ad-type="{{ $rightSkyscraper ? ($rightSkyscraper->ad_type->value ?? '') : '' }}">
                             @if($rightSkyscraper)
                                 @include('partials.ad_display', ['ad' => $rightSkyscraper])
                             @else
