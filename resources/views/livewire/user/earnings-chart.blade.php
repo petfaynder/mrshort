@@ -13,9 +13,9 @@
                     @foreach ($dailyStats as $dayStats)
                         <div class="p-4 bg-background-light dark:bg-background-dark rounded-lg">
                             <p class="font-semibold text-heading-light dark:text-heading-dark">{{ \Carbon\Carbon::parse($dayStats['date'])->format('l, d M') }}</p>
-                            <p class="text-sm text-text-light dark:text-text-dark">{{ $dayStats['views'] }} Clicks</p>
+                            <p class="text-sm text-text-light dark:text-text-dark">{{ $dayStats['views'] }} Clicks &bull; {{ $dayStats['paid_views'] ?? 0 }} Paid</p>
                             <div class="mt-2 text-right">
-                                <p class="font-bold text-green-500">${{ number_format($dayStats['publisher_earnings'], 2) }}</p>
+                                <p class="font-bold text-green-500">${{ $dayStats['publisher_earnings'] >= 0.01 ? number_format($dayStats['publisher_earnings'], 2) : number_format($dayStats['publisher_earnings'], 4) }}</p>
                                 <p class="text-sm text-text-light dark:text-text-dark">${{ number_format($dayStats['cpm'], 2) }} CPM</p>
                             </div>
                         </div>
@@ -47,8 +47,8 @@
                 this.chart.updateOptions({
                     series: [
                         { name: 'Views', data: data.map(item => item.views) },
-                        { name: 'Earnings', data: data.map(item => parseFloat(item.publisher_earnings).toFixed(2)) },
-                        { name: 'CPM', data: data.map(item => parseFloat(item.cpm).toFixed(2)) }
+                        { name: 'Earnings ($)', data: data.map(item => parseFloat(item.publisher_earnings).toFixed(4)) },
+                        { name: 'CPM ($)', data: data.map(item => parseFloat(item.cpm).toFixed(2)) }
                     ],
                     xaxis: {
                         categories: data.map(item => new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
@@ -69,8 +69,8 @@
                     },
                     series: [
                         { name: 'Views', data: chartData.map(item => item.views) },
-                        { name: 'Earnings', data: chartData.map(item => parseFloat(item.publisher_earnings).toFixed(2)) },
-                        { name: 'CPM', data: chartData.map(item => parseFloat(item.cpm).toFixed(2)) }
+                        { name: 'Earnings ($)', data: chartData.map(item => parseFloat(item.publisher_earnings).toFixed(4)) },
+                        { name: 'CPM ($)', data: chartData.map(item => parseFloat(item.cpm).toFixed(2)) }
                     ],
                     xaxis: {
                         categories: chartData.map(item => new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),

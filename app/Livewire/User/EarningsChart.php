@@ -56,11 +56,16 @@ class EarningsChart extends Component
         $startDate = Carbon::parse($this->selectedMonth)->startOfMonth();
         $endDate = Carbon::parse($this->selectedMonth)->endOfMonth();
 
-        $query = LinkClick::whereIn('link_id', $linkIds)
+        // Single query: get per-day totals including real cpm_rate sums
+        $dailyData = LinkClick::whereIn('link_id', $linkIds)
             ->where('is_skipped', false)
-            ->whereBetween('created_at', [$startDate, $endDate]);
-
-        $dailyClicks = $query->selectRaw('DATE(created_at) as date, count(*) as total_clicks')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw('
+                DATE(created_at) as date,
+                COUNT(*) as total_clicks,
+                SUM(CASE WHEN cpm_rate > 0 THEN 1 ELSE 0 END) as paid_clicks,
+                SUM(cpm_rate) as total_cpm_rate
+            ')
             ->groupBy('date')
             ->orderBy('date', 'asc')
             ->get()
@@ -71,21 +76,27 @@ class EarningsChart extends Component
 
         while ($currentDate->lte($endDate)) {
             $dateString = $currentDate->format('Y-m-d');
-            $clicksToday = $dailyClicks->get($dateString);
-            
-            $views = $clicksToday ? $clicksToday->total_clicks : 0;
-            $earnings = $views * 0.001; // Örnek kazanç hesaplaması
-            $cpm = $views > 0 ? ($earnings / $views) * 1000 : 0;
-            $referralEarnings = 0; // Referans kazancı için placeholder
+            $row = $dailyData->get($dateString);
+
+            $views      = $row ? (int) $row->total_clicks : 0;
+            $paidClicks = $row ? (int) $row->paid_clicks  : 0;
+            $totalCpmRateSum = $row ? (float) $row->total_cpm_rate : 0.0;
+
+            // Earnings = sum of cpm_rates / 1000  (cpm_rate is stored as $/1000-views unit)
+            $earnings = $totalCpmRateSum / 1000;
+
+            // Average CPM = average cpm_rate among PAID clicks only
+            $cpm = $paidClicks > 0 ? ($totalCpmRateSum / $paidClicks) : 0;
 
             $statsData[] = [
-                'date' => $dateString,
-                'views' => $views,
-                'publisher_earnings' => $earnings,
-                'cpm' => $cpm,
-                'referral_earnings' => $referralEarnings,
+                'date'               => $dateString,
+                'views'              => $views,
+                'paid_views'         => $paidClicks,
+                'publisher_earnings' => round($earnings, 6),
+                'cpm'                => round($cpm, 4),
+                'referral_earnings'  => 0,
             ];
-            
+
             $currentDate->addDay();
         }
 
