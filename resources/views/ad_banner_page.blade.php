@@ -163,6 +163,28 @@
         </div>
     </header>
 
+    {{-- Size-based Ad Slot Assignment --}}
+    @php
+        // Helper: get the declared size of an ad regardless of type
+        $getAdSize = fn($ad) => $ad->ad_data['size'] ?? null;
+
+        // Separate ads into size buckets
+        $ads_728x90   = $adsData->filter(fn($a) => $getAdSize($a) === '728x90')->values();
+        $ads_300x250  = $adsData->filter(fn($a) => $getAdSize($a) === '300x250')->values();
+        $ads_160x600  = $adsData->filter(fn($a) => $getAdSize($a) === '160x600')->values();
+        $ads_320x50   = $adsData->filter(fn($a) => $getAdSize($a) === '320x50')->values();
+        // Any ad without a recognised size falls back to 300x250 pool
+        $ads_unknown  = $adsData->filter(fn($a) => !in_array($getAdSize($a), ['728x90','300x250','160x600','320x50']))->values();
+        $ads_300x250  = $ads_300x250->merge($ads_unknown)->values();
+
+        // Assign slots
+        $leftSkyscraper  = $ads_160x600->shift();
+        $topAd           = $ads_728x90->shift()  ?? $ads_320x50->shift();  // fallback to mobile banner
+        $middleAd        = $ads_300x250->shift();
+        $bottomAd        = $ads_300x250->shift();
+        $rightSkyscraper = $ads_160x600->shift();
+    @endphp
+
     {{-- Main 3-Column Layout --}}
     <main class="max-w-7xl mx-auto px-4 py-6">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -172,7 +194,6 @@
                 <div class="skyscraper-container">
                     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-2">
                         <p class="text-xs text-gray-500 text-center mb-2">Advertisement</p>
-                        @php $leftSkyscraper = $adsData->shift(); @endphp
                         <div class="w-[160px] h-[600px] mx-auto flex items-center justify-center overflow-hidden ad-block" data-ad-id="{{ $leftSkyscraper->id ?? '' }}" data-ad-type="{{ $leftSkyscraper ? ($leftSkyscraper->ad_type->value ?? '') : '' }}">
                             @if($leftSkyscraper)
                                 @include('partials.ad_display', ['ad' => $leftSkyscraper])
@@ -193,7 +214,6 @@
                     {{-- Top Banner Ad --}}
                     <div class="mb-6">
                         <p class="text-xs text-gray-500 text-center mb-2">Advertisement</p>
-                        @php $topAd = $adsData->shift(); @endphp
                         <div class="w-full max-w-[728px] h-[90px] mx-auto flex items-center justify-center rounded-lg overflow-hidden ad-block" data-ad-id="{{ $topAd->id ?? '' }}" data-ad-type="{{ $topAd ? ($topAd->ad_type->value ?? '') : '' }}">
                             @if($topAd)
                                 @include('partials.ad_display', ['ad' => $topAd])
@@ -220,7 +240,6 @@
                     
                     {{-- Middle Banner Ad --}}
                     <div class="mb-6">
-                        @php $middleAd = $adsData->shift(); @endphp
                         <div class="w-[300px] h-[250px] mx-auto flex items-center justify-center rounded-lg overflow-hidden ad-block" data-ad-id="{{ $middleAd->id ?? '' }}" data-ad-type="{{ $middleAd ? ($middleAd->ad_type->value ?? '') : '' }}">
                             @if($middleAd)
                                 @include('partials.ad_display', ['ad' => $middleAd])
@@ -247,7 +266,6 @@
                     
                     {{-- Bottom Banner Ad --}}
                     <div class="mt-6">
-                        @php $bottomAd = $adsData->shift(); @endphp
                         <div class="w-[300px] h-[250px] mx-auto flex items-center justify-center rounded-lg overflow-hidden ad-block" data-ad-id="{{ $bottomAd->id ?? '' }}" data-ad-type="{{ $bottomAd ? ($bottomAd->ad_type->value ?? '') : '' }}">
                             @if($bottomAd)
                                 @include('partials.ad_display', ['ad' => $bottomAd])
@@ -269,7 +287,6 @@
                 <div class="skyscraper-container">
                     <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-2">
                         <p class="text-xs text-gray-500 text-center mb-2">Advertisement</p>
-                        @php $rightSkyscraper = $adsData->shift(); @endphp
                         <div class="w-[160px] h-[600px] mx-auto flex items-center justify-center overflow-hidden ad-block" data-ad-id="{{ $rightSkyscraper->id ?? '' }}" data-ad-type="{{ $rightSkyscraper ? ($rightSkyscraper->ad_type->value ?? '') : '' }}">
                             @if($rightSkyscraper)
                                 @include('partials.ad_display', ['ad' => $rightSkyscraper])
