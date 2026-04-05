@@ -53,7 +53,7 @@ class ListLinkClicks extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            LinkClickResource\Widgets\ClickStatsOverview::class,
+            \App\Filament\Resources\LinkClickResource\Widgets\ClickStatsOverview::class,
         ];
     }
 }

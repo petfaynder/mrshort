@@ -75,8 +75,7 @@ class LinkClickResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime('d M Y, H:i')
-                    ->sortable()
-                    ->size('sm'),
+                    ->sortable(),
                 
                 // Reason badge (Paid / Sampled Out / Unpaid / Bot)
                 Tables\Columns\TextColumn::make('reason')
@@ -118,30 +117,26 @@ class LinkClickResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->copyable()
-                    ->color('primary')
-                    ->size('sm'),
+                    ->color('primary'),
 
                 // IP Address
                 Tables\Columns\TextColumn::make('ip_address')
                     ->label('IP')
                     ->searchable()
                     ->copyable()
-                    ->size('sm')
                     ->toggleable(),
 
                 // Country
                 Tables\Columns\TextColumn::make('country')
                     ->label('Country')
                     ->searchable()
-                    ->sortable()
-                    ->size('sm'),
+                    ->sortable(),
                 
                 // City
                 Tables\Columns\TextColumn::make('city')
                     ->label('City')
                     ->searchable()
                     ->sortable()
-                    ->size('sm')
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 // CPM Rate
@@ -149,8 +144,7 @@ class LinkClickResource extends Resource
                     ->label('CPM Rate')
                     ->numeric(decimalPlaces: 4)
                     ->sortable()
-                    ->color(fn (LinkClick $record): string => $record->cpm_rate > 0 ? 'success' : 'gray')
-                    ->size('sm'),
+                    ->color(fn (LinkClick $record): string => $record->cpm_rate > 0 ? 'success' : 'gray'),
 
                 // Publisher Earn (per click)
                 Tables\Columns\TextColumn::make('publisher_earn')
@@ -159,8 +153,7 @@ class LinkClickResource extends Resource
                         if ($record->is_skipped || $record->cpm_rate <= 0) return '$0.0000';
                         return '$' . number_format($record->cpm_rate / 1000, 4);
                     })
-                    ->color(fn (LinkClick $record): string => ($record->cpm_rate > 0 && !$record->is_skipped) ? 'success' : 'gray')
-                    ->size('sm'),
+                    ->color(fn (LinkClick $record): string => ($record->cpm_rate > 0 && !$record->is_skipped) ? 'success' : 'gray'),
 
                 // Owner Earn (site's cut — if we have advertiser rate)
                 Tables\Columns\TextColumn::make('owner_earn')
@@ -179,28 +172,24 @@ class LinkClickResource extends Resource
                         return '$' . number_format($ownerEarn, 4);
                     })
                     ->color('info')
-                    ->size('sm')
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 // Device
                 Tables\Columns\TextColumn::make('device_type')
                     ->label('Device')
                     ->sortable()
-                    ->size('sm')
                     ->toggleable(),
 
                 // OS
                 Tables\Columns\TextColumn::make('os')
                     ->label('OS')
                     ->sortable()
-                    ->size('sm')
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 // Browser
                 Tables\Columns\TextColumn::make('browser')
                     ->label('Browser')
                     ->sortable()
-                    ->size('sm')
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 // Referer Domain (parsed from full URL)
@@ -213,7 +202,6 @@ class LinkClickResource extends Resource
                         return parse_url($record->referrer, PHP_URL_HOST) ?? $record->referrer;
                     })
                     ->searchable()
-                    ->size('sm')
                     ->limit(30)
                     ->toggleable(),
 
