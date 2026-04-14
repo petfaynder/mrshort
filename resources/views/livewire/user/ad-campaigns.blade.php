@@ -41,107 +41,121 @@
         </div>
     </div>
 
-    <div class="overflow-x-auto">
+    {{-- Desktop Table --}}
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-left">
-                <thead class="border-b border-border-light dark:border-border-dark">
-                <tr>
-                    <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Campaign Name') }}</th>
-                    <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Type') }}</th>
-                    <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Approval') }}</th>
-                    <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Active') }}</th>
-                    <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Impressions') }}</th>
-                    <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Clicks') }}</th>
-                    <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider text-right">{{ __('Actions') }}</th>
-                </tr>
+            <thead class="border-b border-border-light dark:border-border-dark">
+            <tr>
+                <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Campaign Name') }}</th>
+                <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Type') }}</th>
+                <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Approval') }}</th>
+                <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Active') }}</th>
+                <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Impressions') }}</th>
+                <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider">{{ __('Clicks') }}</th>
+                <th class="p-4 text-xs font-semibold uppercase text-text-light dark:text-text-dark tracking-wider text-right">{{ __('Actions') }}</th>
+            </tr>
             </thead>
             <tbody class="text-heading-light dark:text-heading-dark">
                 @forelse ($adCampaigns as $campaign)
-                    <tr class="border-b border-border-light dark:border-border-dark">
-                        <td class="p-4 whitespace-nowrap text-sm font-medium">
-                            {{ $campaign->name }}
-                        </td>
-                        <td class="p-4 whitespace-nowrap text-sm text-text-light dark:text-text-dark">
-                            {{ $campaign->campaign_type->value }}
-                        </td>
-                        <td class="p-4 text-sm min-w-[120px]">
-                            @php
-                                $status = $campaign->approval_status ?? 'pending';
-                            @endphp
+                    <tr class="border-b border-border-light dark:border-border-dark hover:bg-gray-50 dark:hover:bg-white/5">
+                        <td class="p-4 whitespace-nowrap text-sm font-medium">{{ $campaign->name }}</td>
+                        <td class="p-4 whitespace-nowrap text-sm text-text-light dark:text-text-dark">{{ $campaign->campaign_type->value }}</td>
+                        <td class="p-4 text-sm">
+                            @php $status = $campaign->approval_status ?? 'pending'; @endphp
                             @if ($status === 'approved')
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    {{ __('Approved') }}
-                                </span>
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">{{ __('Approved') }}</span>
                             @elseif ($status === 'rejected')
                                 <div class="flex items-center gap-1">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                        {{ __('Rejected') }}
-                                    </span>
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">{{ __('Rejected') }}</span>
                                     @if ($campaign->rejection_reason)
                                         <span class="material-icons-outlined text-red-500 cursor-help" style="font-size: 16px;" title="{{ $campaign->rejection_reason }}">info</span>
                                     @endif
                                 </div>
                             @else
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    {{ __('Pending') }}
-                                </span>
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">{{ __('Pending') }}</span>
                             @endif
                         </td>
-                        <td class="p-4 whitespace-nowrap text-sm text-text-light dark:text-text-dark">
+                        <td class="p-4 whitespace-nowrap text-sm">
                             @if ($campaign->is_active)
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    {{ __('Yes') }}
-                                </span>
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">{{ __('Yes') }}</span>
                             @else
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                    {{ __('No') }}
-                                </span>
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">{{ __('No') }}</span>
                             @endif
                         </td>
-                        <td class="p-4 whitespace-nowrap text-sm text-text-light dark:text-text-dark">
-                            {{ $campaign->total_impressions }}
-                        </td>
-                        <td class="p-4 whitespace-nowrap text-sm text-text-light dark:text-text-dark">
-                            {{ $campaign->total_clicks }}
-                        </td>
+                        <td class="p-4 whitespace-nowrap text-sm text-text-light dark:text-text-dark">{{ $campaign->total_impressions }}</td>
+                        <td class="p-4 whitespace-nowrap text-sm text-text-light dark:text-text-dark">{{ $campaign->total_clicks }}</td>
                         <td class="p-4 whitespace-nowrap text-right text-sm font-medium">
                             <a href="{{ route('user.ads.edit', $campaign) }}" class="text-primary hover:underline mr-3">{{ __('Edit') }}</a>
-                            <button 
-                                type="button"
-                                x-data
-                                @click="$dispatch('open-confirm-modal', { 
-                                    id: 'delete-campaign-{{ $campaign->id }}', 
-                                    onConfirm: () => $wire.deleteCampaign({{ $campaign->id }}) 
-                                })"
-                                wire:loading.attr="disabled" 
-                                class="text-red-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 float-right"
-                            >
+                            <button type="button" x-data
+                                @click="$dispatch('open-confirm-modal', { id: 'delete-campaign-{{ $campaign->id }}', onConfirm: () => $wire.deleteCampaign({{ $campaign->id }}) })"
+                                wire:loading.attr="disabled" class="text-red-600 hover:underline disabled:opacity-50">
                                 <span wire:loading.remove wire:target="deleteCampaign({{ $campaign->id }})">{{ __('Delete') }}</span>
                                 <span wire:loading wire:target="deleteCampaign({{ $campaign->id }})" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
                             </button>
-                            <x-confirm-modal 
-                                id="delete-campaign-{{ $campaign->id }}"
-                                title="Delete Campaign"
-                                message="Are you sure you want to delete this campaign?"
-                                confirmText="Delete"
-                                cancelText="Cancel"
-                                confirmColor="red"
-                                icon="delete"
-                            />
+                            <x-confirm-modal id="delete-campaign-{{ $campaign->id }}" title="Delete Campaign" message="Are you sure you want to delete this campaign?" confirmText="Delete" cancelText="Cancel" confirmColor="red" icon="delete" />
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td class="text-center py-20 px-4" colspan="7">
+                        <td class="text-center py-12 px-4" colspan="7">
                             <p class="text-text-light dark:text-text-dark">{{ __("You don't have any active campaigns yet.") }}</p>
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
-        
-        <div class="mt-4">
-            {{ $adCampaigns->links() }}
-        </div>
+    </div>
+
+    {{-- Mobile Card Layout --}}
+    <div class="md:hidden space-y-3">
+        @forelse ($adCampaigns as $campaign)
+            @php $status = $campaign->approval_status ?? 'pending'; @endphp
+            <div class="border border-border-light dark:border-border-dark rounded-lg p-4">
+                <div class="flex items-start justify-between gap-2 mb-3">
+                    <div>
+                        <p class="font-semibold text-sm text-heading-light dark:text-heading-dark">{{ $campaign->name }}</p>
+                        <p class="text-xs text-text-light dark:text-text-dark mt-0.5">{{ $campaign->campaign_type->value }}</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                        @if ($status === 'approved')
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Approved</span>
+                        @elseif ($status === 'rejected')
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>
+                        @else
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                        @endif
+                        @if ($campaign->is_active)
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                        @else
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>
+                        @endif
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs text-text-light dark:text-text-dark mb-3">
+                    <div><span class="font-medium">Impressions:</span> {{ $campaign->total_impressions }}</div>
+                    <div><span class="font-medium">Clicks:</span> {{ $campaign->total_clicks }}</div>
+                </div>
+                <div class="flex items-center gap-3 pt-3 border-t border-border-light dark:border-border-dark">
+                    <a href="{{ route('user.ads.edit', $campaign) }}" class="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">edit</span> Edit
+                    </a>
+                    <button type="button" x-data
+                        @click="$dispatch('open-confirm-modal', { id: 'delete-campaign-mob-{{ $campaign->id }}', onConfirm: () => $wire.deleteCampaign({{ $campaign->id }}) })"
+                        class="text-xs font-semibold text-red-600 dark:text-red-500 hover:underline flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">delete</span> Delete
+                    </button>
+                    <x-confirm-modal id="delete-campaign-mob-{{ $campaign->id }}" title="Delete Campaign" message="Are you sure you want to delete this campaign?" confirmText="Delete" cancelText="Cancel" confirmColor="red" icon="delete" />
+                </div>
+            </div>
+        @empty
+            <div class="border border-border-light dark:border-border-dark rounded-lg p-8 text-center">
+                <p class="text-sm text-text-light dark:text-text-dark">{{ __("You don't have any active campaigns yet.") }}</p>
+            </div>
+        @endforelse
+    </div>
+
+    <div class="mt-4">
+        {{ $adCampaigns->links() }}
     </div>
 </div>
 

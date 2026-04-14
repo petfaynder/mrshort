@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-8">
     {{-- Header --}}
     <div class="flex flex-wrap justify-between gap-3">
-        <h1 class="text-4xl font-black leading-tight tracking-[-0.033em] min-w-72 text-heading-light dark:text-heading-dark">Settings Page</h1>
+        <h1 class="text-2xl sm:text-4xl font-black leading-tight tracking-[-0.033em] text-heading-light dark:text-heading-dark">Settings Page</h1>
     </div>
 
     <div class="grid grid-cols-1 gap-8">

@@ -18,9 +18,9 @@ use App\Enums\CampaignType;
 use App\Enums\FrequencyCapUnit; // Add this import
 use App\Services\VisitorDetectionService;
 use Illuminate\Support\Facades\View;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
-use Carbon\Carbon; // Add this import
 
 class LinkController extends Controller
 {
@@ -148,7 +148,12 @@ class LinkController extends Controller
         return redirect($redirectTo);
     }
 
-    public function redirect(Request $request, Agent $agent, string $code) // Inject Agent
+    /**
+     * Handles short-link redirect: records the click and routes through ad steps.
+     *
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse|\Illuminate\View\View
+     */
+    public function redirect(Request $request, Agent $agent, string $code)
     {
         $link = Link::where('code', $code)->first();
 
@@ -236,7 +241,7 @@ class LinkController extends Controller
             // This ensures each unique IP can only generate paid views X times per day across ALL links
             $paidViewsPerDay = (int) setting('paid_views_per_day', 1);
             // Use app timezone for today's date so timezone-aware day boundaries are respected
-            $todayInAppTz = \Carbon\Carbon::now(config('app.timezone'))->toDateString();
+            $todayInAppTz = Carbon::now(config('app.timezone'))->toDateString();
             $todayClicksFromIp = LinkClick::where('ip_address', $clientIp)
                 ->where('cpm_rate', '>', 0)  // Only count PAID views (not all clicks)
                 ->whereDate('created_at', $todayInAppTz)
@@ -513,6 +518,11 @@ class LinkController extends Controller
     /**
      * Reklam adımlarını gösterir.
      */
+    /**
+     * Renders a specific ad step page for the given link.
+     *
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse|\Illuminate\View\View
+     */
     public function showAdStep(Request $request, Link $link, int $stepNumber)
     {
         $campaignTemplateId = $request->query('campaignTemplateId');
@@ -699,10 +709,15 @@ class LinkController extends Controller
                 }
             }
             
-            if ($userPopupCampaign && isset($userPopupCampaign->targeting_rules['url'])) {
-                $userPopupUrl = $userPopupCampaign->targeting_rules['url'];
-                $userPopupCampaignId = $userPopupCampaign->id;
-                \Log::info('User popup campaign found.', ['campaign_id' => $userPopupCampaign->id]);
+            if ($userPopupCampaign) {
+                $targetingArray = is_array($userPopupCampaign->targeting_rules)
+                    ? $userPopupCampaign->targeting_rules
+                    : (array) $userPopupCampaign->targeting_rules;
+                if (isset($targetingArray['url'])) {
+                    $userPopupUrl = $targetingArray['url'];
+                    $userPopupCampaignId = $userPopupCampaign->id;
+                    \Log::info('User popup campaign found.', ['campaign_id' => $userPopupCampaign->id]);
+                }
             }
         }
         
@@ -746,9 +761,39 @@ class LinkController extends Controller
             }
         }
 
-        // Adım türüne göre ilgili view'i yükle
-        // Tüm adım tipleri artık BannerPage olarak render edilecek (Interstitial kaldırıldı)
+
+        // Detect content category and select theme-specific view
+        // (Only if Content Theme System is enabled in admin settings)
         $viewName = 'ad_banner_page';
+
+        if (setting('content_themes_enabled', true)) {
+            $detectionService = app(\App\Services\ContentDetectionService::class);
+            $detectedCategory = $detectionService->detectAndPersist($link);
+
+            // Per-category enable/disable checks
+            $themeViewMap = [
+                'adult'    => setting('content_theme_adult_enabled', true)    ? 'link_themes.adult'    : null,
+                'gaming'   => setting('content_theme_gaming_enabled', true)   ? 'link_themes.gaming'   : null,
+                'download' => setting('content_theme_download_enabled', true) ? 'link_themes.download' : null,
+                'video'    => setting('content_theme_video_enabled', true)    ? 'link_themes.video'    : null,
+            ];
+
+            // If category is disabled (null) → fallback to standard page
+            $resolvedView = $themeViewMap[$detectedCategory] ?? null;
+            $viewName = $resolvedView ?? 'ad_banner_page';
+
+
+            \Log::info('ContentDetection: view selected.', [
+                'link_code' => $link->code,
+                'category'  => $detectedCategory,
+                'view'      => $viewName,
+            ]);
+        } else {
+            \Log::info('ContentDetection: themes disabled, using default view.', [
+                'link_code' => $link->code,
+            ]);
+        }
+
 
         // Get third-party ad codes for this step from Site Settings
         $thirdPartyAdCodes = setting("thirdparty_ads_step_{$stepNumber}", []);

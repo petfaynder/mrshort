@@ -2,9 +2,9 @@
     <div class="mx-auto max-w-7xl">
 
         <div class="flex flex-wrap justify-between gap-3 mb-8">
-            <div class="flex min-w-72 flex-col gap-2">
-                <h1 class="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Withdrawals</h1>
-                <p class="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal">Manage your earnings and request withdrawals.</p>
+            <div class="flex flex-col gap-1">
+                <h1 class="text-gray-900 dark:text-white text-2xl sm:text-4xl font-black leading-tight tracking-[-0.033em]">Withdrawals</h1>
+                <p class="text-gray-500 dark:text-gray-400 text-sm sm:text-base font-normal leading-normal">Manage your earnings and request withdrawals.</p>
             </div>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
@@ -171,58 +171,87 @@
                     </button>
                 </div>
             </div>
-            <div class="overflow-x-auto bg-white dark:bg-gray-800/50 rounded-xl shadow-sm border border-gray-200 dark:border-white/10">
+            {{-- Desktop Table --}}
+            <div class="hidden md:block overflow-x-auto bg-white dark:bg-gray-800/50 rounded-xl shadow-sm border border-gray-200 dark:border-white/10">
                 <table class="min-w-full text-sm text-left">
                     <thead class="border-b border-gray-200 dark:border-white/10 text-xs text-gray-500 dark:text-gray-400 uppercase">
                         <tr>
-                            <th class="px-6 py-4 font-medium" scope="col">Request ID</th>
-                            <th class="px-6 py-4 font-medium" scope="col">Amount ($)</th>
-                            <th class="px-6 py-4 font-medium" scope="col">Payment Method</th>
-                            <th class="px-6 py-4 font-medium" scope="col">Request Date</th>
-                            <th class="px-6 py-4 font-medium" scope="col">Status</th>
-                            <th class="px-6 py-4 font-medium text-right" scope="col">Actions</th>
+                            <th class="px-4 py-3 font-medium" scope="col">Request ID</th>
+                            <th class="px-4 py-3 font-medium" scope="col">Amount</th>
+                            <th class="px-4 py-3 font-medium" scope="col">Method</th>
+                            <th class="px-4 py-3 font-medium" scope="col">Date</th>
+                            <th class="px-4 py-3 font-medium" scope="col">Status</th>
+                            <th class="px-4 py-3 font-medium text-right" scope="col">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-white/10">
                         @forelse ($withdrawals as $withdrawal)
                             <tr class="hover:bg-gray-50 dark:hover:bg-white/5">
-                                <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">#{{ $withdrawal->id }}</td>
-                                <td class="px-6 py-4 text-gray-700 dark:text-gray-300">${{ number_format($withdrawal->amount, 2) }}</td>
-                                <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ $withdrawal->method }}</td>
-                                <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ $withdrawal->created_at->format('M d, Y') }}</td>
-                                <td class="px-6 py-4">
+                                <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">#{{ $withdrawal->id }}</td>
+                                <td class="px-4 py-3 text-gray-700 dark:text-gray-300">${{ number_format($withdrawal->amount, 2) }}</td>
+                                <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ $withdrawal->method }}</td>
+                                <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ $withdrawal->created_at->format('M d, Y') }}</td>
+                                <td class="px-4 py-3">
                                     <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
                                         @switch($withdrawal->status)
-                                            @case('pending')
-                                                bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300
-                                                @break
-                                            @case('completed')
-                                                bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300
-                                                @break
-                                            @case('cancelled')
-                                                bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300
-                                                @break
+                                            @case('pending') bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 @break
+                                            @case('completed') bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 @break
+                                            @case('cancelled') bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 @break
                                         @endswitch
                                     ">{{ ucfirst($withdrawal->status) }}</span>
                                 </td>
-                                <td class="px-6 py-4 text-right">
+                                <td class="px-4 py-3 text-right">
                                     @if ($withdrawal->status === 'pending')
-                                        <button wire:click="cancelWithdrawal({{ $withdrawal->id }})" wire:loading.attr="disabled" class="text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400 text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 float-right">
+                                        <button wire:click="cancelWithdrawal({{ $withdrawal->id }})" wire:loading.attr="disabled" class="text-red-600 hover:text-red-800 dark:text-red-500 text-xs font-medium disabled:opacity-50 flex items-center gap-1 float-right">
                                             <span wire:loading.remove wire:target="cancelWithdrawal({{ $withdrawal->id }})">Cancel</span>
                                             <span wire:loading wire:target="cancelWithdrawal({{ $withdrawal->id }})" class="material-symbols-outlined text-xs animate-spin">progress_activity</span>
                                         </button>
                                     @else
-                                        <span class="text-gray-400 dark:text-gray-500 text-xs">-</span>
+                                        <span class="text-gray-400 text-xs">-</span>
                                     @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">No withdrawals found.</td>
+                                <td colspan="6" class="px-6 py-6 text-center text-gray-500 dark:text-gray-400">No withdrawals found.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            {{-- Mobile Card Layout --}}
+            <div class="md:hidden space-y-3">
+                @forelse ($withdrawals as $withdrawal)
+                    <div class="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-white/10 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-sm font-bold text-gray-900 dark:text-white">#{{ $withdrawal->id }}</span>
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                                @switch($withdrawal->status)
+                                    @case('pending') bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 @break
+                                    @case('completed') bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 @break
+                                    @case('cancelled') bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 @break
+                                @endswitch
+                            ">{{ ucfirst($withdrawal->status) }}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            <div><span class="font-medium text-gray-700 dark:text-gray-300">Amount:</span> ${{ number_format($withdrawal->amount, 2) }}</div>
+                            <div><span class="font-medium text-gray-700 dark:text-gray-300">Method:</span> {{ $withdrawal->method }}</div>
+                            <div class="col-span-2"><span class="font-medium text-gray-700 dark:text-gray-300">Date:</span> {{ $withdrawal->created_at->format('M d, Y H:i') }}</div>
+                        </div>
+                        @if ($withdrawal->status === 'pending')
+                            <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                <button wire:click="cancelWithdrawal({{ $withdrawal->id }})" class="inline-flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-800 dark:text-red-500">
+                                    <span class="material-symbols-outlined text-sm">cancel</span> Cancel Request
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-white/10 p-8 text-center text-gray-500 dark:text-gray-400 text-sm">
+                        No withdrawals found.
+                    </div>
+                @endforelse
             </div>
             <div class="mt-4">
                 {{ $withdrawals->links() }}

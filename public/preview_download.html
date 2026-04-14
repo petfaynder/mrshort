@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Download Theme Preview — MrShort</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --primary:#B45309;--primary-hover:#92400E;--accent:#F59E0B;
+  --bg:#0E0E0E;--header-bg:rgba(14,14,14,0.92);--card-bg:rgba(18,18,18,0.9);
+  --border:rgba(245,158,11,0.18);--text:#EDE9DF;--muted:rgba(237,233,223,0.5);
+  --card-bg-info:rgba(18,18,18,0.75);--border-color:rgba(245,158,11,0.15);
+  --subtle-text:rgba(237,233,223,0.55);--primary-color:#B45309;--primary-hover:#92400E;
+  --timer-color:#F59E0B;--timer-track:rgba(245,158,11,0.1);
+  --btn-disabled-bg:rgba(18,18,18,0.9);--btn-disabled-text:rgba(237,233,223,0.25);
+  --ad-bg:rgba(12,12,12,0.8);
+}
+html,body{min-height:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;position:relative;}
+/* Ruled lines */
+body::before{content:'';position:fixed;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(255,255,255,0.025) 27px,rgba(255,255,255,0.025) 28px);pointer-events:none;z-index:0;}
+/* Amber left accent */
+body::after{content:'';position:fixed;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,transparent,var(--accent) 25%,var(--accent) 75%,transparent);opacity:0.55;z-index:1;}
+.page-wrap{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;padding-left:4px;}
+.preview-badge{position:fixed;top:1rem;right:1rem;background:#92400E;color:#fff;font-size:.65rem;padding:.3rem .7rem;border-radius:4px;z-index:999;letter-spacing:.1em;font-family:monospace;font-weight:700;}
+
+/* AdBlock Modal */
+#adblock-modal{position:fixed;inset:0;z-index:200;align-items:center;justify-content:center;background:rgba(0,0,0,0.88);backdrop-filter:blur(6px);display:none;}
+#adblock-modal.show{display:flex;}
+.adblock-inner{background:#141414;border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:2.5rem 2rem;max-width:420px;width:calc(100% - 2rem);text-align:center;animation:shake .5s ease-in-out;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+.adblock-icon{width:60px;height:60px;background:rgba(245,158,11,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;}
+.adblock-icon svg{width:28px;height:28px;stroke:#F59E0B;}
+.adblock-inner h2{font-family:'DM Sans',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:.5rem;}
+.adblock-inner p{font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:1.5rem;font-family:'JetBrains Mono',monospace;}
+.adblock-btn{background:var(--accent);color:#0E0E0E;border:none;padding:.75rem 1.75rem;border-radius:4px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .2s;}
+.adblock-btn:hover{background:#FBB23F;}
+
+/* Header */
+header{background:var(--header-bg);border-bottom:1px solid var(--border);backdrop-filter:blur(10px);position:sticky;top:0;z-index:50;}
+.header-inner{max-width:1280px;margin:0 auto;padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--text);letter-spacing:.04em;}
+.logo span{color:var(--accent);}
+.header-timer{display:flex;align-items:center;gap:.6rem;background:rgba(245,158,11,0.06);border:1px solid var(--border);padding:.4rem .9rem;border-radius:3px;font-family:'JetBrains Mono',monospace;}
+.header-timer-ring{position:relative;width:28px;height:28px;flex-shrink:0;}
+.header-timer-ring svg{width:100%;height:100%;transform:rotate(-90deg);}
+.ht-track{fill:none;stroke:rgba(245,158,11,0.1);stroke-width:3;}
+.ht-fill{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-dasharray:75.4;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear;}
+.header-timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:var(--accent);}
+.status-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
+.header-timer-label{font-size:.7rem;color:var(--muted);letter-spacing:.06em;}
+.progress-strip{height:3px;background:rgba(245,158,11,0.06);}
+.progress-strip-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));transition:width 1s linear;}
+
+/* Layout */
+main{max-width:1280px;margin:0 auto;width:100%;padding:1.5rem 1rem;}
+.three-col{display:grid;grid-template-columns:1fr;gap:1.25rem;}
+@media(min-width:1024px){.three-col{grid-template-columns:160px 1fr 160px;}}
+.col-skyscraper{display:none;}
+@media(min-width:1024px){.col-skyscraper{display:block;}}
+.sky-card{background:var(--card-bg);border:1px solid var(--border);border-radius:4px;padding:.5rem;position:sticky;top:1rem;}
+.ad-label-small{font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(237,233,223,0.15);text-align:center;margin-bottom:.5rem;font-family:'JetBrains Mono',monospace;}
+.sky-slot{width:160px;height:600px;display:flex;align-items:center;justify-content:center;background:var(--ad-bg);border:1px dashed rgba(245,158,11,0.12);border-radius:2px;}
+.ad-placeholder-text{font-size:.6rem;color:rgba(237,233,223,0.15);text-align:center;letter-spacing:.06em;font-family:'JetBrains Mono',monospace;}
+.center-card{background:var(--card-bg);border:1px solid var(--border);border-radius:6px;padding:1.75rem;backdrop-filter:blur(6px);}
+.ad-leaderboard{margin-bottom:1.5rem;}
+.leaderboard-slot{width:100%;max-width:728px;height:90px;margin:0 auto;display:flex;align-items:center;justify-content:center;background:var(--ad-bg);border:1px dashed rgba(245,158,11,0.12);border-radius:3px;}
+
+/* Timer — horizontal inline style for download */
+.timer-area{margin-bottom:1.5rem;}
+.timer-inline{display:flex;align-items:center;gap:.9rem;background:rgba(18,18,18,0.95);border:1px solid var(--border);border-radius:4px;padding:.9rem 1.2rem;}
+.timer-circle{position:relative;width:42px;height:42px;flex-shrink:0;}
+.tc-svg{width:100%;height:100%;transform:rotate(-90deg);}
+.tc-track{fill:none;stroke:rgba(245,158,11,0.1);stroke-width:3;}
+.tc-fill{fill:none;stroke:var(--timer-color);stroke-width:3;stroke-linecap:round;stroke-dasharray:113.1;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear;}
+.tc-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--accent);}
+.timer-text{flex:1;}
+.timer-heading{font-size:.95rem;font-weight:600;color:var(--text);margin-bottom:.2rem;}
+.timer-sub{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);}
+/* Download progress */
+.dl-progress{margin:1rem 0 1.5rem;}
+.dl-progress-header{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);margin-bottom:.4rem;}
+.dl-track{height:8px;background:rgba(245,158,11,0.08);border-radius:2px;overflow:hidden;}
+.dl-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:2px;transition:width 1s linear;position:relative;}
+.dl-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:20px;background:rgba(255,255,255,0.2);filter:blur(3px);}
+
+/* Medium ad */
+.ad-medium{display:flex;justify-content:center;margin-bottom:1.5rem;}
+.medium-slot{width:300px;height:250px;display:flex;align-items:center;justify-content:center;background:var(--ad-bg);border:1px dashed rgba(245,158,11,0.12);border-radius:3px;}
+
+/* Captcha */
+.captcha-area{margin-bottom:1.5rem;display:flex;justify-content:center;}
+.captcha-box{background:rgba(18,18,18,0.95);border:1px solid var(--border);border-radius:4px;padding:1rem 1.5rem;display:flex;align-items:center;gap:.75rem;min-width:300px;}
+.captcha-check{width:24px;height:24px;border:1px solid rgba(245,158,11,0.3);border-radius:3px;flex-shrink:0;}
+.captcha-text{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+.captcha-logo{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.58rem;color:rgba(237,233,223,0.2);text-align:right;}
+
+/* Button */
+.get-link-btn{width:100%;padding:1rem 1.5rem;background:var(--btn-disabled-bg);border:1px solid rgba(245,158,11,0.15);border-radius:5px;color:var(--btn-disabled-text);font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;cursor:not-allowed;display:flex;align-items:center;justify-content:center;gap:.6rem;transition:all .3s;position:relative;overflow:hidden;}
+.get-link-btn.active{background:var(--accent);color:#0E0E0E;cursor:pointer;border-color:transparent;}
+.get-link-btn.active::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent,rgba(255,255,255,0.2),transparent);transform:rotate(45deg);animation:btnshine 2.5s infinite;}
+@keyframes btnshine{from{left:-50%;}to{left:150%;}}
+.spinner{width:16px;height:16px;border:2px solid rgba(237,233,223,0.1);border-top-color:rgba(245,158,11,0.6);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.ad-bottom{display:flex;justify-content:center;margin-top:1.5rem;}
+
+/* Info */
+.info-section{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;margin-top:1.5rem;}
+.info-card{background:var(--card-bg-info);border:1px solid var(--border-color);border-radius:5px;padding:1.4rem;}
+.info-card .icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;}
+.info-card .icon.red{background:rgba(239,68,68,0.1);color:#F87171;}
+.info-card .icon.blue{background:rgba(59,130,246,0.1);color:#60A5FA;}
+.info-card .icon.green{background:rgba(34,197,94,0.1);color:#4ADE80;}
+.info-card h3{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:.5rem;}
+.info-card p{font-size:.8rem;color:var(--subtle-text);line-height:1.65;}
+.cta-section{background:var(--card-bg-info);border:1px solid var(--border-color);border-radius:5px;padding:1.75rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-top:1.25rem;}
+.cta-section h2{font-size:1.15rem;font-weight:700;color:var(--text);}
+.cta-section p{font-size:.82rem;color:var(--subtle-text);margin-top:.25rem;}
+.cta-button{background:var(--accent);color:#0E0E0E;text-decoration:none;padding:.7rem 1.5rem;border-radius:4px;font-weight:700;font-size:.88rem;transition:all .2s;white-space:nowrap;}
+.cta-button:hover{background:#FBB23F;}
+footer{background:var(--header-bg);border-top:1px solid var(--border);margin-top:2rem;}
+.footer-inner{max-width:1280px;margin:0 auto;padding:1rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:.75rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);}
+@media(min-width:640px){.footer-inner{flex-direction:row;justify-content:space-between;}}
+.footer-links{display:flex;gap:1.25rem;}
+.footer-links a{color:var(--muted);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="preview-badge">PREVIEW — download theme</div>
+<div id="adblock-modal">
+  <div class="adblock-inner">
+    <div class="adblock-icon"><svg fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M4.93 4.93l14.14 14.14" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <h2>AdBlock Detected!</h2>
+    <p>Please disable your ad blocker to continue. Our service relies on advertisements to remain free.</p>
+    <button class="adblock-btn" onclick="document.getElementById('adblock-modal').classList.remove('show')">I've Disabled AdBlock – Reload</button>
+  </div>
+</div>
+
+<div class="page-wrap">
+  <header>
+    <div class="header-inner">
+      <div class="logo">mr<span>short</span></div>
+      <div class="header-timer">
+        <div class="status-dot"></div>
+        <div class="header-timer-ring">
+          <svg viewBox="0 0 30 30"><circle class="ht-track" cx="15" cy="15" r="12"/><circle class="ht-fill" id="ht-fill" cx="15" cy="15" r="12"/></svg>
+          <div class="header-timer-num" id="ht-num">10</div>
+        </div>
+        <span class="header-timer-label">seconds</span>
+      </div>
+    </div>
+    <div class="progress-strip"><div class="progress-strip-fill" id="progress-strip-fill" style="width:100%"></div></div>
+  </header>
+
+  <main>
+    <div class="three-col">
+      <div class="col-skyscraper">
+        <div class="sky-card">
+          <p class="ad-label-small">advertisement</p>
+          <div class="sky-slot"><span class="ad-placeholder-text">160×600<br>Skyscraper</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="center-card">
+          <div class="ad-leaderboard">
+            <p class="ad-label-small">advertisement</p>
+            <div class="leaderboard-slot"><span class="ad-placeholder-text">728×90 Leaderboard</span></div>
+          </div>
+          <!-- Download-specific timer style -->
+          <div class="timer-area">
+            <div class="timer-inline">
+              <div class="timer-circle">
+                <svg class="tc-svg" viewBox="0 0 42 42"><circle class="tc-track" cx="21" cy="21" r="18"/><circle class="tc-fill" id="tc-fill" cx="21" cy="21" r="18"/></svg>
+                <div class="tc-num" id="tc-num">10</div>
+              </div>
+              <div class="timer-text">
+                <div class="timer-heading">Verifying download source...</div>
+                <div class="timer-sub">Please wait — auto‑continue in <span id="ts">10</span>s</div>
+              </div>
+            </div>
+            <div class="dl-progress">
+              <div class="dl-progress-header">
+                <span>Transfer Progress</span>
+                <span id="pct">0%</span>
+              </div>
+              <div class="dl-track"><div class="dl-fill" id="dl-fill" style="width:0%"></div></div>
+            </div>
+          </div>
+          <div class="ad-medium"><div class="medium-slot"><span class="ad-placeholder-text">300×250 Banner</span></div></div>
+          <div class="captcha-area">
+            <div class="captcha-box">
+              <div class="captcha-check"></div>
+              <span class="captcha-text">I'm not a robot</span>
+              <span class="captcha-logo">reCAPTCHA<br>Privacy · Terms</span>
+            </div>
+          </div>
+          <button class="get-link-btn" id="get-link-btn">
+            <div class="spinner" id="btn-spinner"></div>
+            <span id="btn-text">Please wait...</span>
+          </button>
+          <div class="ad-bottom"><div class="medium-slot"><span class="ad-placeholder-text">300×250 Banner</span></div></div>
+        </div>
+        <div class="info-section">
+          <div class="info-card">
+            <div class="icon red"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+            <h3>Create an account</h3><p>Creating an account would not take you more than 3 minutes. Email, username and password only.</p>
+          </div>
+          <div class="info-card">
+            <div class="icon blue"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
+            <h3>Shorten and share links</h3><p>After you create an account, use our powerful tools to shorten links that you want to share.</p>
+          </div>
+          <div class="info-card">
+            <div class="icon green"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+            <h3>Earn money</h3><p>Share links and get paid for each visit based on our competitive payout rates.</p>
+          </div>
+        </div>
+        <div class="cta-section">
+          <div><h2>Ready to start earning with MrShort?</h2><p>Register your account and start the journey. It is 100% free!</p></div>
+          <a href="#" class="cta-button">Sign up</a>
+        </div>
+      </div>
+      <div class="col-skyscraper">
+        <div class="sky-card">
+          <p class="ad-label-small">advertisement</p>
+          <div class="sky-slot"><span class="ad-placeholder-text">160×600<br>Skyscraper</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <span>© 2026 mrshort. All rights reserved.</span>
+      <div class="footer-links"><a href="#">privacy</a><a href="#">terms</a><a href="#" style="color:rgba(237,233,223,0.25);">dmca</a></div>
+    </div>
+  </footer>
+</div>
+
+<script>
+const TOTAL=10;let t=TOTAL;
+const tcFill=document.getElementById('tc-fill'),tcNum=document.getElementById('tc-num'),ts=document.getElementById('ts'),htFill=document.getElementById('ht-fill'),htNum=document.getElementById('ht-num'),pFill=document.getElementById('progress-strip-fill'),dlFill=document.getElementById('dl-fill'),pct=document.getElementById('pct'),btn=document.getElementById('get-link-btn'),spinner=document.getElementById('btn-spinner'),btnText=document.getElementById('btn-text');
+const CIRC=113.1,HTC=75.4;
+tcFill.style.strokeDashoffset=0;htFill.style.strokeDashoffset=0;
+const iv=setInterval(()=>{
+  t--;
+  tcNum.textContent=t;htNum.textContent=t;if(ts)ts.textContent=t;
+  const p=t/TOTAL;
+  tcFill.style.strokeDashoffset=CIRC*(1-p);htFill.style.strokeDashoffset=HTC*(1-p);
+  pFill.style.width=(p*100)+'%';
+  const dlP=Math.round((1-(t/TOTAL))*100);
+  dlFill.style.width=dlP+'%';pct.textContent=dlP+'%';
+  if(t<=0){clearInterval(iv);spinner.style.display='none';btnText.textContent='↓ Download File';btn.classList.add('active');}
+},1000);
+</script>
+</body>
+</html>

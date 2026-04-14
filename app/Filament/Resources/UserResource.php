@@ -251,13 +251,15 @@ class UserResource extends Resource
                     ->searchable()
                     ->copyable()
                     ->sortable(),
-                Tables\Columns\BadgeColumn::make('status')
+                Tables\Columns\TextColumn::make('status')
                     ->label('Status')
-                    ->colors([
-                        'success' => 'active',
-                        'warning' => fn ($state) => in_array($state, ['deactivated', 'pending']),
-                        'danger' => 'banned',
-                    ])
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'active' => 'success',
+                        'deactivated', 'pending' => 'warning',
+                        'banned' => 'danger',
+                        default => 'gray',
+                    })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('plan')
                     ->label('Plan')

@@ -1,18 +1,30 @@
 <x-user-dashboard-layout>
     <x-slot name="header">
-        <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-            <div>
-                <h1 class="text-2xl font-bold text-heading-light dark:text-heading-dark">Developer Tools & Integrations</h1>
-            </div>
-            <div class="flex items-center gap-4 mt-4 sm:mt-0">
-                <button class="text-text-light dark:text-subtext-dark hover:text-heading-light dark:hover:text-heading-dark">
-                    <span class="material-symbols-outlined">notifications</span>
+        <header class="sticky top-0 z-20 bg-card-light dark:bg-card-dark border-b border-border-light dark:border-border-dark px-4 lg:px-6 py-3 flex items-center justify-between gap-3 shrink-0 shadow-sm">
+            {{-- Left: Hamburger + Page Title --}}
+            <div class="flex items-center gap-3 min-w-0">
+                {{-- Hamburger - mobile only --}}
+                <button
+                    @click="sidebarOpen = !sidebarOpen"
+                    class="lg:hidden flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-text-light dark:text-text-dark transition-colors"
+                    aria-label="Toggle navigation menu"
+                >
+                    <span class="material-symbols-outlined">menu</span>
                 </button>
+                <div class="min-w-0">
+                    <h2 class="text-base lg:text-2xl font-bold text-heading-light dark:text-heading-dark leading-tight truncate">Developer Tools & Integrations</h2>
+                </div>
+            </div>
+            {{-- Right: User info --}}
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <livewire:user.notifications />
                 <div class="flex items-center gap-2">
-                    <img alt="User avatar" class="w-8 h-8 rounded-full" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&size=40&background=0D8ABC&color=fff"/>
-                    <div>
-                        <p class="text-sm font-semibold text-heading-light dark:text-heading-dark">{{ Auth::user()->name }}</p>
-                        <p class="text-xs text-text-light dark:text-subtext-dark">Balance: ${{ number_format((Auth::user()->link_earnings ?? 0) + (Auth::user()->referral_earnings ?? 0), 2) }}</p>
+                    <img alt="User avatar"
+                         class="w-8 h-8 lg:w-10 lg:h-10 rounded-full flex-shrink-0 ring-2 ring-primary/20"
+                         src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&size=40&background=0D8ABC&color=fff"/>
+                    <div class="hidden sm:block leading-tight">
+                        <p class="font-semibold text-heading-light dark:text-heading-dark text-sm">{{ Auth::user()->name }}</p>
+                        <p class="text-xs text-text-light dark:text-text-dark">Balance: ${{ number_format(Auth::user()->balance, 5) }}</p>
                     </div>
                 </div>
             </div>

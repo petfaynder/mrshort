@@ -120,7 +120,7 @@ class AdminPanelProvider extends PanelProvider
             ->resources([
                 // User Management
                 \App\Filament\Resources\UserResource::class,
-                \App\Filament\Resources\ReportsResource::class,
+                ReportsResource::class,
                 
                 // Links & Analytics
                 \App\Filament\Resources\LinkResource::class,

@@ -1,22 +1,22 @@
 <div>
     <main class="flex-1 mt-6">
-        <div class="flex flex-wrap items-start justify-between gap-4 p-4">
-            <div class="flex min-w-72 flex-col gap-3">
-                <p class="text-white text-4xl font-black leading-tight tracking-[-0.033em]">Detailed Reports</p>
-                <p class="text-gray-400 text-base font-normal leading-normal">Analyze the combined statistics of all your links.</p>
+        <div class="flex flex-col gap-4 p-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+            <div class="flex flex-col gap-1">
+                <p class="text-white text-2xl sm:text-4xl font-black leading-tight tracking-[-0.033em]">Detailed Reports</p>
+                <p class="text-gray-400 text-sm sm:text-base font-normal leading-normal">Analyze the combined statistics of all your links.</p>
             </div>
-            <div class="flex flex-wrap items-center gap-4">
-                <div class="flex flex-col gap-2">
+            <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
+                <div class="flex flex-col gap-1.5">
                     <label class="text-xs font-medium text-gray-400" for="start-date">Start Date</label>
-                    <input wire:model.live="startDate" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-700 bg-gray-800 h-10 placeholder:text-gray-400 px-4 text-sm font-normal" id="start-date" type="date"/>
+                    <input wire:model.live="startDate" class="form-input w-full rounded-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-700 bg-gray-800 h-10 placeholder:text-gray-400 px-4 text-sm font-normal" id="start-date" type="date"/>
                 </div>
-                <div class="flex flex-col gap-2">
+                <div class="flex flex-col gap-1.5">
                     <label class="text-xs font-medium text-gray-400" for="end-date">End Date</label>
-                    <input wire:model.live="endDate" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-700 bg-gray-800 h-10 placeholder:text-gray-400 px-4 text-sm font-normal" id="end-date" type="date"/>
+                    <input wire:model.live="endDate" class="form-input w-full rounded-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-700 bg-gray-800 h-10 placeholder:text-gray-400 px-4 text-sm font-normal" id="end-date" type="date"/>
                 </div>
-                <div class="flex flex-col gap-2">
+                <div class="flex flex-col gap-1.5">
                     <label class="text-xs font-medium text-gray-400" for="quick-select">Quick Select</label>
-                    <select wire:model.live="selectedPreset" class="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-700 bg-gray-800 h-10 placeholder:text-gray-400 px-3 text-sm font-normal" id="quick-select">
+                    <select wire:model.live="selectedPreset" class="form-select w-full rounded-lg text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-700 bg-gray-800 h-10 placeholder:text-gray-400 px-3 text-sm font-normal" id="quick-select">
                         <option value="last_7_days">Last 7 Days</option>
                         <option value="last_30_days">Last 30 Days</option>
                         <option value="last_90_days">Last 3 Months</option>
@@ -51,7 +51,7 @@
                 </div>
             </div>
             <div wire:ignore class="relative" style="background: radial-gradient(ellipse at 50% 50%, #0d1f2d 0%, #080f16 100%);">
-                <div id="user-reports-worldmap" style="width: 100%; height: 520px;"></div>
+                <div id="user-reports-worldmap" style="width: 100%; height: 300px;" class="sm:!h-[400px] lg:!h-[520px]"></div>
                 {{-- No data overlay --}}
                 @if(empty($clicksByCountryChartData['labels']) || count($clicksByCountryChartData['labels']) === 0)
                 <div id="map-no-data-overlay" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10" style="background: rgba(8,15,22,0.6); backdrop-filter: blur(2px);">

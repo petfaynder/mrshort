@@ -1,13 +1,13 @@
 <div x-data="chartComponentData()">
-    <div class="grid grid-cols-1 gap-8 mb-8">
-        <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-md">
-            <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
-                <h3 class="text-xl font-semibold text-heading-light dark:text-heading-dark">Statistics Visualization</h3>
+    <div class="grid grid-cols-1 gap-6 mb-6">
+        <div class="bg-card-light dark:bg-card-dark p-4 sm:p-6 rounded-xl shadow-md">
+            <div class="flex flex-wrap justify-between items-center mb-4 gap-3">
+                <h3 class="text-lg sm:text-xl font-semibold text-heading-light dark:text-heading-dark">Statistics Visualization</h3>
             </div>
-            <div class="h-[400px]" id="chart" wire:ignore></div>
+            <div class="h-[250px] sm:h-[350px] lg:h-[400px]" id="chart" wire:ignore></div>
         </div>
-        <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-md">
-            <h3 class="text-xl font-semibold text-heading-light dark:text-heading-dark mb-4">Daily Statistics</h3>
+        <div class="bg-card-light dark:bg-card-dark p-4 sm:p-6 rounded-xl shadow-md">
+            <h3 class="text-lg sm:text-xl font-semibold text-heading-light dark:text-heading-dark mb-4">Daily Statistics</h3>
             @if ($dailyStats->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                     @foreach ($dailyStats as $dayStats)

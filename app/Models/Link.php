@@ -21,6 +21,12 @@ class Link extends Model
         'is_blocked',
         'campaign_template_id',
         'use_wordpress',
+        'detected_category',
+        'category_detected_at',
+    ];
+
+    protected $casts = [
+        'category_detected_at' => 'datetime',
     ];
 
     protected static function boot()

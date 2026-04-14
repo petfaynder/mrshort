@@ -7,6 +7,20 @@
 @tailwind utilities;
 
 @layer base {
+    /* ── Global Mobile Fixes ── */
+    html {
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+    }
+
+    body {
+        overflow-x: hidden;
+    }
+
+    /* Minimum touch target size for interactive elements */
+    button, a, [role="button"] {
+        -webkit-tap-highlight-color: transparent;
+    }
     .error-message {
         display: none;
     }

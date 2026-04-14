@@ -5,7 +5,7 @@
     <main class="w-full">
         <div class="layout-content-container flex flex-col w-full max-w-[1200px] flex-1 mx-auto">
             <div class="flex flex-wrap justify-between gap-3 p-4">
-                <p class="text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Achievements Collection</p>
+                <p class="text-white text-2xl sm:text-4xl font-black leading-tight tracking-[-0.033em]">Achievements Collection</p>
             </div>
             
             @if($featuredGoal)

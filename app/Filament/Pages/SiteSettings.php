@@ -46,6 +46,11 @@ class SiteSettings extends Page implements HasForms
             'cache_ttl_default' => 3600,
             'cache_ttl_leaderboard' => 3600,
             'cache_ttl_settings' => 3600,
+            'content_themes_enabled' => true,
+            'content_theme_adult_enabled' => true,
+            'content_theme_gaming_enabled' => true,
+            'content_theme_download_enabled' => true,
+            'content_theme_video_enabled' => true,
         ];
         
         // Toggle fields that need boolean conversion
@@ -53,6 +58,11 @@ class SiteSettings extends Page implements HasForms
             'popup_user_campaigns_enabled',
             'queue_emails',
             'queue_analytics',
+            'content_themes_enabled',
+            'content_theme_adult_enabled',
+            'content_theme_gaming_enabled',
+            'content_theme_download_enabled',
+            'content_theme_video_enabled',
         ];
         
         // Initialize with defaults
@@ -664,6 +674,37 @@ class SiteSettings extends Page implements HasForms
         return Tab::make('Advertising')
             ->icon('heroicon-o-megaphone')
             ->schema([
+                Section::make('Content Theme System')
+                    ->description('When enabled, link transition pages automatically display a theme matching the destination content type (Adult, Gaming, Download, Video). Disabled = all links use the default transition page.')
+                    ->schema([
+                        Toggle::make('content_themes_enabled')
+                            ->label('Enable Category-Based Themes')
+                            ->default(true)
+                            ->helperText('Automatically applies Adult / Gaming / Download / Video themes based on the destination URL. Disable to always show the standard ad page.'),
+                        Section::make('Active Theme Categories')
+                            ->description('Choose which content categories use a custom theme. Disabled categories will fall back to the standard transition page.')
+                            ->schema([
+                                Toggle::make('content_theme_adult_enabled')
+                                    ->label('🔞 Adult Theme')
+                                    ->default(true)
+                                    ->helperText('Show adult-specific transition page for adult/18+ URLs.'),
+                                Toggle::make('content_theme_gaming_enabled')
+                                    ->label('🎮 Gaming Theme')
+                                    ->default(true)
+                                    ->helperText('Show gaming-specific transition page for game/streaming URLs.'),
+                                Toggle::make('content_theme_download_enabled')
+                                    ->label('📥 Download Theme')
+                                    ->default(true)
+                                    ->helperText('Show download-specific transition page for file-hosting URLs.'),
+                                Toggle::make('content_theme_video_enabled')
+                                    ->label('▶️ Video Theme')
+                                    ->default(true)
+                                    ->helperText('Show video-specific transition page for video platform URLs.'),
+                            ])
+                            ->columns(2)
+                            ->visible(fn (\Filament\Forms\Get $get) => (bool) $get('content_themes_enabled')),
+                    ])
+                    ->columns(1),
                 Section::make('Pop-under Priority Settings')
                     ->description('Configure priority between admin and user pop-under URLs when both exist')
                     ->schema([
@@ -817,6 +858,7 @@ class SiteSettings extends Page implements HasForms
             'timezone' => 'general', 'price_' => 'currency',
             'popup_' => 'advertising',
             'thirdparty_ads_' => 'advertising',
+            'content_themes_' => 'advertising',
             'wordpress_' => 'wordpress',
             'cache_' => 'performance', 'queue_' => 'performance',
         ];

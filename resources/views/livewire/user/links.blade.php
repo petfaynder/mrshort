@@ -2,9 +2,9 @@
     <div class="mx-auto w-full px-4 py-8 sm:px-6 md:px-8">
         <div class="flex flex-col gap-8">
             <div class="flex flex-col flex-wrap justify-between gap-4 sm:flex-row sm:items-center">
-                <div class="flex min-w-72 flex-col gap-2">
-                <p class="text-3xl font-black leading-tight tracking-[-0.033em] text-gray-900 dark:text-white">Welcome back, {{ Auth::user()->name }}</p>
-                <p class="text-base font-normal leading-normal text-gray-500 dark:text-gray-400">Here's your link management dashboard.</p>
+                <div class="flex flex-col gap-2">
+                <p class="text-2xl sm:text-3xl font-black leading-tight tracking-[-0.033em] text-gray-900 dark:text-white">Welcome back, {{ Auth::user()->name }}</p>
+                <p class="text-sm sm:text-base font-normal leading-normal text-gray-500 dark:text-gray-400">Here's your link management dashboard.</p>
             </div>
             <div class="flex flex-wrap gap-4">
                 <div class="flex min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900/50">
@@ -81,9 +81,10 @@
             </div>
             @endif
 
-            <div class="w-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
-                <div class="overflow-x-auto">
-                    <table class="w-full min-w-[1200px] text-left text-sm">
+            <div class="w-full rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                {{-- Desktop Table --}}
+                <div class="hidden md:block overflow-x-auto">
+                    <table class="w-full min-w-[900px] text-left text-sm">
                         <thead class="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-900 dark:text-gray-400">
                             <tr>
                                 <th class="p-4" scope="col">
@@ -92,12 +93,12 @@
                                         <label class="sr-only" for="checkbox-all">select all links</label>
                                     </div>
                                 </th>
-                                <th class="px-6 py-3 font-medium" scope="col">Short Link</th>
-                                <th class="px-6 py-3 font-medium" scope="col">Original URL</th>
-                                <th class="px-6 py-3 font-medium text-center" scope="col">Clicks</th>
-                                <th class="px-6 py-3 font-medium text-center" scope="col">Performance (7d)</th>
-                                <th class="px-6 py-3 font-medium" scope="col">Created At</th>
-                                <th class="px-6 py-3 font-medium text-right" scope="col">Actions</th>
+                                <th class="px-4 py-3 font-medium" scope="col">Short Link</th>
+                                <th class="px-4 py-3 font-medium" scope="col">Original URL</th>
+                                <th class="px-4 py-3 font-medium text-center" scope="col">Clicks</th>
+                                <th class="px-4 py-3 font-medium text-center" scope="col">7d</th>
+                                <th class="px-4 py-3 font-medium" scope="col">Created</th>
+                                <th class="px-4 py-3 font-medium text-right" scope="col">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-900/50">
@@ -110,22 +111,18 @@
                                                 <label class="sr-only" for="checkbox-{{ $link->id }}">select link {{ $link->id }}</label>
                                             </div>
                                         </td>
-                                        <td class="whitespace-nowrap px-6 py-4">
+                                        <td class="whitespace-nowrap px-4 py-4">
                                             <div class="group relative flex items-center gap-2">
                                                 <a class="text-primary hover:underline" href="{{ $link->shortLink() }}" target="_blank">{{ $link->shortLink() }}</a>
                                                 <button onclick="copyToClipboard('{{ $link->shortLink() }}')" class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary" data-alt="Copy link button">
                                                     <span class="material-symbols-outlined text-base">content_copy</span>
                                                 </button>
-                                                <div class="pointer-events-none absolute -top-1 left-0 z-10 w-max -translate-y-full rounded-md bg-gray-900 px-3 py-1.5 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-gray-700">
-                                                    Preview: {{ Str::limit($link->original_url, 30) }}
-                                                    <div class="absolute left-4 top-full h-2 w-2 rotate-45 bg-gray-900 dark:bg-gray-700"></div>
-                                                </div>
                                             </div>
                                         </td>
-                                        <td class="max-w-xs truncate px-6 py-4 font-medium text-gray-900 dark:text-white" title="{{ $link->original_url }}"><a class="hover:underline" href="{{ $link->original_url }}" target="_blank">{{ Str::limit($link->original_url, 50) }}</a></td>
-                                        <td class="whitespace-nowrap px-6 py-4 text-center">{{ $link->clicks }}</td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex h-8 w-24 items-end gap-0.5" x-data="{
+                                        <td class="max-w-xs truncate px-4 py-4 font-medium text-gray-900 dark:text-white" title="{{ $link->original_url }}"><a class="hover:underline" href="{{ $link->original_url }}" target="_blank">{{ Str::limit($link->original_url, 40) }}</a></td>
+                                        <td class="whitespace-nowrap px-4 py-4 text-center">{{ $link->clicks }}</td>
+                                        <td class="px-4 py-4">
+                                            <div class="flex h-8 w-20 items-end gap-0.5" x-data="{
                                                 stats: {{ json_encode($performanceData[$link->id] ?? array_fill(0, 7, 0)) }},
                                                 get maxClicks() {
                                                     return Math.max(...this.stats, 1);
@@ -139,16 +136,16 @@
                                                 </template>
                                             </div>
                                         </td>
-                                        <td class="whitespace-nowrap px-6 py-4 text-gray-500 dark:text-gray-400">{{ $link->created_at->format('M d, Y') }}</td>
-                                        <td class="whitespace-nowrap px-6 py-4">
-                                            <div class="flex items-center justify-end gap-2">
-                                                <button wire:click="toggleStats({{ $link->id }})" class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+                                        <td class="whitespace-nowrap px-4 py-4 text-gray-500 dark:text-gray-400">{{ $link->created_at->format('M d, Y') }}</td>
+                                        <td class="whitespace-nowrap px-4 py-4">
+                                            <div class="flex items-center justify-end gap-1">
+                                                <button wire:click="toggleStats({{ $link->id }})" class="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
                                                     <span class="material-symbols-outlined text-sm">bar_chart</span> Stats
                                                 </button>
-                                                <button wire:click="editLink({{ $link->id }})" class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
-                                                    <span class="material-symbols-outlined text-sm">settings</span> Details
+                                                <button wire:click="editLink({{ $link->id }})" class="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+                                                    <span class="material-symbols-outlined text-sm">settings</span> Edit
                                                 </button>
-                                                <button wire:click="hideLink({{ $link->id }})" wire:loading.attr="disabled" class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-orange-600 hover:bg-orange-50 dark:text-orange-500 dark:hover:bg-orange-500/10 disabled:opacity-75 disabled:cursor-not-allowed">
+                                                <button wire:click="hideLink({{ $link->id }})" wire:loading.attr="disabled" class="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-semibold text-orange-600 hover:bg-orange-50 dark:text-orange-500 dark:hover:bg-orange-500/10 disabled:opacity-75">
                                                     <span wire:loading.remove wire:target="hideLink({{ $link->id }})" class="material-symbols-outlined text-sm">visibility_off</span>
                                                     <span wire:loading wire:target="hideLink({{ $link->id }})" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
                                                     Hide
@@ -160,7 +157,7 @@
                                                         onConfirm: () => $wire.deleteLink({{ $link->id }}) 
                                                     })"
                                                     wire:loading.attr="disabled" 
-                                                    class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-500/10 disabled:opacity-75 disabled:cursor-not-allowed"
+                                                    class="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:text-red-500 dark:hover:bg-red-500/10 disabled:opacity-75"
                                                 >
                                                     <span wire:loading.remove wire:target="deleteLink({{ $link->id }})" class="material-symbols-outlined text-sm">delete</span>
                                                     <span wire:loading wire:target="deleteLink({{ $link->id }})" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
@@ -180,35 +177,29 @@
                                     </tr>
                                     @if ($showingStats === $link->id)
                                         <tr>
-                                            <td colspan="8" class="px-6 py-4">
+                                            <td colspan="7" class="px-4 py-4">
                                                 @if (!empty($statsData))
-                                                    <h5 class="text-lg font-semibold text-gray-700 mb-2 dark:text-gray-200">Daily Statistics</h5>
-                                                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-                                                        <thead>
-                                                            <tr>
-                                                                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:bg-gray-900 dark:text-gray-400">
-                                                                    Date
-                                                                </th>
-                                                                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:bg-gray-900 dark:text-gray-400">
-                                                                    Click Count
-                                                                </th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-800 dark:bg-gray-900/50">
-                                                            @foreach ($statsData as $stat)
+                                                    <h5 class="text-base font-semibold text-gray-700 mb-2 dark:text-gray-200">Daily Statistics</h5>
+                                                    <div class="overflow-x-auto">
+                                                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+                                                            <thead>
                                                                 <tr>
-                                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                                        {{ $stat->click_date }}
-                                                                    </td>
-                                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                                                        {{ $stat->total_clicks }}
-                                                                    </td>
+                                                                    <th class="px-4 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:bg-gray-900 dark:text-gray-400">Date</th>
+                                                                    <th class="px-4 py-2 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:bg-gray-900 dark:text-gray-400">Clicks</th>
                                                                 </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
+                                                            </thead>
+                                                            <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-800 dark:bg-gray-900/50">
+                                                                @foreach ($statsData as $stat)
+                                                                    <tr>
+                                                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ $stat->click_date }}</td>
+                                                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ $stat->total_clicks }}</td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 @else
-                                                    <p class="text-gray-600 dark:text-gray-400">Statistics are loading or not available...</p>
+                                                    <p class="text-gray-600 dark:text-gray-400 text-sm">Statistics are loading or not available...</p>
                                                 @endif
                                             </td>
                                         </tr>
@@ -216,13 +207,88 @@
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="8" class="px-6 py-4 text-center text-gray-600 dark:text-gray-400">
+                                    <td colspan="7" class="px-6 py-8 text-center text-gray-600 dark:text-gray-400">
                                         You don't have any shortened links yet.
                                     </td>
                                 </tr>
                             @endif
                         </tbody>
                     </table>
+                </div>
+
+                {{-- Mobile Card Layout --}}
+                <div class="md:hidden divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-gray-900/50">
+                    @if ($links->count())
+                        @foreach ($links as $link)
+                            <div class="p-4">
+                                <div class="flex items-start justify-between gap-2 mb-2">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <input wire:model.live="selectedLinks" value="{{ $link->id }}" class="form-checkbox h-4 w-4 flex-shrink-0 rounded border-gray-300" type="checkbox"/>
+                                        <div class="min-w-0">
+                                            <a class="text-primary font-semibold text-sm hover:underline truncate block" href="{{ $link->shortLink() }}" target="_blank">{{ $link->shortLink() }}</a>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 truncate" title="{{ $link->original_url }}">{{ Str::limit($link->original_url, 45) }}</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="copyToClipboard('{{ $link->shortLink() }}')" class="flex-shrink-0 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500">
+                                        <span class="material-symbols-outlined text-base">content_copy</span>
+                                    </button>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">touch_app</span>{{ $link->clicks }}</span>
+                                        <span>{{ $link->created_at->format('M d') }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button wire:click="toggleStats({{ $link->id }})" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300" title="Stats">
+                                            <span class="material-symbols-outlined text-sm">bar_chart</span>
+                                        </button>
+                                        <button wire:click="editLink({{ $link->id }})" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300" title="Edit">
+                                            <span class="material-symbols-outlined text-sm">settings</span>
+                                        </button>
+                                        <button wire:click="hideLink({{ $link->id }})" class="p-1.5 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/30 text-orange-500" title="Hide">
+                                            <span class="material-symbols-outlined text-sm">visibility_off</span>
+                                        </button>
+                                        <button 
+                                            x-data
+                                            @click="$dispatch('open-confirm-modal', { 
+                                                id: 'delete-link-mob-{{ $link->id }}', 
+                                                onConfirm: () => $wire.deleteLink({{ $link->id }}) 
+                                            })"
+                                            class="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500" title="Delete"
+                                        >
+                                            <span class="material-symbols-outlined text-sm">delete</span>
+                                        </button>
+                                        <x-confirm-modal 
+                                            id="delete-link-mob-{{ $link->id }}"
+                                            title="Delete Link"
+                                            message="Are you sure you want to delete this link?"
+                                            confirmText="Delete"
+                                            cancelText="Cancel"
+                                            confirmColor="red"
+                                            icon="delete"
+                                        />
+                                    </div>
+                                </div>
+                                @if ($showingStats === $link->id && !empty($statsData))
+                                    <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+                                        <p class="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">Daily Stats</p>
+                                        <div class="space-y-1">
+                                            @foreach ($statsData as $stat)
+                                                <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                                                    <span>{{ $stat->click_date }}</span>
+                                                    <span class="font-semibold">{{ $stat->total_clicks }} clicks</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="p-8 text-center text-gray-600 dark:text-gray-400 text-sm">
+                            You don't have any shortened links yet.
+                        </div>
+                    @endif
                 </div>
             </div>
             {{-- Pagination --}}

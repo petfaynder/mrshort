@@ -99,7 +99,7 @@
     @include('partials.header')
 
     <!-- Hero Section (Minimalist & Typography) -->
-    <div class="hero-section relative w-full">
+    <div class="hero-section relative w-full" style="padding-top: calc(5rem + 80px);">
         
         <!-- Grid and Spotlight will be added by JS after LCP -->
 
@@ -165,17 +165,16 @@
                 }
             }" class="w-full max-w-2xl mx-auto lg:mx-0 hero-animate-in-delay-3 relative z-30">
                 
-                <div class="bg-white/5 border border-white/10 p-2 rounded-full backdrop-blur-md shadow-2xl hover:border-white/20 transition-colors duration-300">
-                    <form @submit.prevent="submit" class="flex w-full relative">
-                        <input x-model="url" type="url" placeholder="Paste your long link here..." required 
-                            class="flex-grow bg-transparent border-none text-white placeholder-gray-500 text-lg px-8 py-4 focus:outline-none focus:ring-0" />
-                        <button type="submit" :disabled="loading" 
-                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-black hover:bg-gray-200 font-bold text-lg py-3 px-8 rounded-full transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]">
-                            <span x-show="!loading">Shorten</span>
-                            <span x-show="loading" class="inline-block animate-spin rounded-full h-5 w-5 border-2 border-gray-600 border-t-black"></span>
-                        </button>
-                    </form>
-                </div>
+                {{-- Mobile: stacked form; Desktop: pill form --}}
+                <form @submit.prevent="submit" class="flex flex-col sm:flex-row gap-3 sm:gap-0 sm:bg-white/5 sm:border sm:border-white/10 sm:p-2 sm:rounded-full sm:backdrop-blur-md sm:shadow-2xl sm:hover:border-white/20 sm:transition-colors sm:duration-300">
+                    <input x-model="url" type="url" placeholder="Paste your long link here..." required
+                        class="flex-grow bg-white/5 sm:bg-transparent border border-white/10 sm:border-none text-white placeholder-gray-500 text-base sm:text-lg px-5 sm:px-8 py-3 sm:py-4 rounded-full sm:rounded-none focus:outline-none focus:ring-0 focus:border-white/30 sm:focus:border-none" />
+                    <button type="submit" :disabled="loading"
+                        class="sm:relative sm:right-0 sm:top-auto sm:transform-none bg-white text-black hover:bg-gray-200 font-bold text-base sm:text-lg py-3 px-6 sm:px-8 rounded-full transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:min-w-[120px]">
+                        <span x-show="!loading">Shorten</span>
+                        <span x-show="loading" class="inline-block animate-spin rounded-full h-5 w-5 border-2 border-gray-600 border-t-black"></span>
+                    </button>
+                </form>
 
                 <!-- Result Display -->
                 <div x-cloak x-show="shortened" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform -translate-y-2" x-transition:enter-end="opacity-100 transform translate-y-0"

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Adult Theme Preview — MrShort</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600;1,800&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --primary:#9B1C1C;--primary-hover:#7F1D1D;--accent:#C0392B;
+  --bg:#0A0404;--header-bg:rgba(10,4,4,0.94);--card-bg:rgba(20,8,8,0.88);
+  --border:rgba(155,28,28,0.28);--text:#F0E8E4;--muted:rgba(240,232,228,0.6);
+  --subtle-text:rgba(240,232,228,0.65);--primary-color:#9B1C1C;
+  --timer-color:#C0392B;--timer-track:rgba(155,28,28,0.15);
+  --ad-bg:rgba(25,8,8,0.65);--card-bg-info:rgba(20,8,8,0.75);
+  --border-color:rgba(155,28,28,0.22);
+}
+html,body{min-height:100%;}
+body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
+
+/* Background */
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 75% 50% at 50% 0%,rgba(139,0,0,.32) 0%,transparent 65%),
+  radial-gradient(ellipse 50% 40% at 80% 95%,rgba(100,0,0,.18) 0%,transparent 60%),
+  linear-gradient(180deg,#0E0404 0%,#070202 100%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");opacity:.45;pointer-events:none;z-index:0;}
+.accent-border{position:fixed;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,transparent,var(--accent) 25%,var(--accent) 75%,transparent);opacity:.65;z-index:10;}
+.page-wrap{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
+.preview-badge{position:fixed;top:.75rem;right:.75rem;background:#7F1D1D;color:#fff;font-size:.7rem;padding:.35rem .8rem;border-radius:4px;z-index:999;letter-spacing:.08em;font-family:monospace;font-weight:700;}
+
+/* AdBlock Modal */
+#adblock-modal{position:fixed;inset:0;z-index:200;align-items:center;justify-content:center;background:rgba(0,0,0,.88);backdrop-filter:blur(6px);display:none;}
+#adblock-modal.show{display:flex;}
+.adblock-inner{background:#1A0808;border:1px solid var(--accent);border-radius:14px;padding:2.5rem 2rem;max-width:440px;width:calc(100% - 2rem);text-align:center;animation:shake .5s ease-in-out;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+.adblock-icon{width:64px;height:64px;background:rgba(192,57,43,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;}
+.adblock-icon svg{width:30px;height:30px;stroke:#C0392B;}
+.adblock-inner h2{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--text);margin-bottom:.5rem;}
+.adblock-inner p{font-size:.9rem;color:var(--muted);line-height:1.7;margin-bottom:1.5rem;}
+.adblock-btn{background:var(--primary);color:#fff;border:none;padding:.85rem 2rem;border-radius:8px;font-family:'Raleway',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.04em;cursor:pointer;transition:background .2s;}
+.adblock-btn:hover{background:var(--primary-hover);}
+
+/* Header */
+header{background:var(--header-bg);border-bottom:1px solid var(--border);backdrop-filter:blur(14px);position:sticky;top:0;z-index:50;}
+.header-inner{max-width:1280px;margin:0 auto;padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:800;color:var(--text);}
+.logo span{color:var(--accent);font-style:italic;}
+.header-timer{display:flex;align-items:center;gap:.6rem;background:rgba(155,28,28,.12);border:1px solid var(--border);padding:.45rem 1rem;border-radius:999px;}
+.header-timer-ring{position:relative;width:32px;height:32px;flex-shrink:0;}
+.header-timer-ring svg{width:100%;height:100%;transform:rotate(-90deg);}
+.ht-track{fill:none;stroke:rgba(155,28,28,.18);stroke-width:3;}
+.ht-fill{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-dasharray:75.4;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear;}
+.header-timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700;color:var(--text);}
+.header-timer-label{font-size:.85rem;color:var(--muted);font-weight:500;}
+.progress-strip{height:3px;background:rgba(155,28,28,.1);}
+.progress-strip-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));transition:width 1s linear;box-shadow:0 0 8px rgba(192,57,43,.4);}
+
+/* Main Layout */
+main{max-width:1280px;margin:0 auto;width:100%;padding:1.5rem 1rem;}
+.three-col{display:grid;grid-template-columns:1fr;gap:1.25rem;}
+@media(min-width:1024px){.three-col{grid-template-columns:170px 1fr 170px;}}
+.col-skyscraper{display:none;}
+@media(min-width:1024px){.col-skyscraper{display:block;}}
+.sky-card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:.6rem;position:sticky;top:1rem;}
+.ad-label-small{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(240,232,228,.22);text-align:center;margin-bottom:.5rem;font-weight:600;}
+.sky-slot{width:160px;height:600px;display:flex;align-items:center;justify-content:center;background:var(--ad-bg);border:1px dashed rgba(155,28,28,.18);border-radius:4px;}
+.ad-placeholder-text{font-size:.72rem;color:rgba(240,232,228,.18);text-align:center;letter-spacing:.06em;}
+
+/* Center card */
+.center-card{background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:1.75rem 1.5rem;backdrop-filter:blur(10px);}
+@media(min-width:640px){.center-card{padding:2rem;}}
+
+/* Leaderboard */
+.ad-leaderboard{margin-bottom:1.75rem;}
+.leaderboard-slot{width:100%;max-width:728px;height:90px;margin:0 auto;display:flex;align-items:center;justify-content:center;background:var(--ad-bg);border:1px dashed rgba(155,28,28,.18);border-radius:6px;}
+/* On smallest screens shrink height slightly */
+@media(max-width:480px){.leaderboard-slot{height:70px;}}
+
+/* Timer */
+.timer-area{text-align:center;margin-bottom:1.75rem;}
+.timer-circle{position:relative;width:100px;height:100px;margin:0 auto 1.25rem;}
+@media(min-width:640px){.timer-circle{width:110px;height:110px;}}
+.tc-svg{width:100%;height:100%;transform:rotate(-90deg);}
+.tc-track{fill:none;stroke:var(--timer-track);stroke-width:10;}
+.tc-fill{fill:none;stroke:var(--timer-color);stroke-width:10;stroke-linecap:round;stroke-dasharray:339.3;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear;filter:drop-shadow(0 0 5px rgba(192,57,43,.55));}
+.tc-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:800;color:var(--accent);}
+.timer-heading{font-family:'Playfair Display',serif;font-size:clamp(1.2rem,3vw,1.5rem);font-style:italic;color:var(--text);margin-bottom:.5rem;line-height:1.3;}
+.timer-sub{font-size:.92rem;color:var(--muted);line-height:1.6;}
+
+/* Medium ad */
+.ad-medium{display:flex;justify-content:center;margin-bottom:1.75rem;}
+.medium-slot{width:300px;height:250px;display:flex;align-items:center;justify-content:center;background:var(--ad-bg);border:1px dashed rgba(155,28,28,.18);border-radius:6px;}
+/* Shrink on tiny screens */
+@media(max-width:340px){.medium-slot{width:260px;height:210px;}}
+
+/* Captcha */
+.captcha-area{margin-bottom:1.75rem;display:flex;justify-content:center;}
+.captcha-box{background:rgba(30,10,10,.7);border:1px solid var(--border);border-radius:8px;padding:1rem 1.5rem;display:flex;align-items:center;gap:.85rem;min-width:280px;max-width:340px;width:100%;}
+.captcha-check{width:26px;height:26px;border:2px solid rgba(155,28,28,.4);border-radius:4px;flex-shrink:0;}
+.captcha-text{font-size:.9rem;color:var(--muted);font-weight:500;}
+.captcha-logo{margin-left:auto;font-size:.65rem;color:rgba(240,232,228,.22);letter-spacing:.04em;line-height:1.4;text-align:right;flex-shrink:0;}
+
+/* Get Link button */
+.get-link-btn{width:100%;padding:1.1rem 1.5rem;background:rgba(40,15,15,.85);border:1px solid rgba(155,28,28,.25);border-radius:10px;color:rgba(240,232,228,.3);font-family:'Raleway',sans-serif;font-size:1.05rem;font-weight:700;letter-spacing:.05em;cursor:not-allowed;display:flex;align-items:center;justify-content:center;gap:.75rem;transition:all .35s;position:relative;overflow:hidden;}
+.get-link-btn.active{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;cursor:pointer;border-color:transparent;box-shadow:0 4px 20px rgba(192,57,43,.3);}
+.get-link-btn.active::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent,rgba(255,255,255,.18),transparent);transform:rotate(45deg);animation:btnshine 2.5s infinite;}
+@keyframes btnshine{from{left:-50%;}to{left:150%;}}
+.spinner{width:20px;height:20px;border:2.5px solid rgba(240,232,228,.12);border-top-color:rgba(192,57,43,.7);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.ad-bottom{display:flex;justify-content:center;margin-top:1.75rem;}
+
+/* Info section */
+.info-section{display:grid;grid-template-columns:1fr;gap:1rem;margin-top:1.5rem;}
+@media(min-width:580px){.info-section{grid-template-columns:repeat(3,1fr);}}
+.info-card{background:var(--card-bg-info);border:1px solid var(--border-color);border-radius:12px;padding:1.4rem;}
+.info-card .icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;}
+.info-card .icon.red{background:rgba(192,57,43,.12);color:#C0392B;}
+.info-card .icon.blue{background:rgba(59,130,246,.1);color:#60A5FA;}
+.info-card .icon.green{background:rgba(34,197,94,.1);color:#4ADE80;}
+.info-card h3{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:.5rem;}
+.info-card p{font-size:.88rem;color:var(--subtle-text);line-height:1.7;}
+.cta-section{background:var(--card-bg-info);border:1px solid var(--border-color);border-radius:12px;padding:1.75rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-top:1rem;}
+.cta-section h2{font-family:'Playfair Display',serif;font-size:clamp(1rem,2.5vw,1.25rem);font-weight:700;color:var(--text);}
+.cta-section p{font-size:.88rem;color:var(--subtle-text);margin-top:.25rem;}
+.cta-button{background:var(--primary);color:#fff;text-decoration:none;padding:.8rem 1.75rem;border-radius:8px;font-weight:700;font-size:.92rem;transition:all .2s;white-space:nowrap;display:inline-block;}
+.cta-button:hover{background:var(--primary-hover);transform:translateY(-2px);}
+
+/* Footer */
+footer{background:var(--header-bg);border-top:1px solid var(--border);margin-top:2rem;}
+.footer-inner{max-width:1280px;margin:0 auto;padding:1.1rem 1.25rem;display:flex;flex-direction:column;align-items:center;gap:.75rem;font-size:.82rem;color:var(--muted);}
+@media(min-width:640px){.footer-inner{flex-direction:row;justify-content:space-between;}}
+.footer-links{display:flex;gap:1.5rem;flex-wrap:wrap;}
+.footer-links a{color:var(--muted);text-decoration:none;transition:color .2s;font-size:.82rem;}
+.footer-links a:hover{color:var(--accent);}
+.footer-dmca{display:flex;align-items:center;gap:.3rem;}
+</style>
+</head>
+<body>
+<div class="accent-border"></div>
+<div class="preview-badge">PREVIEW — adult theme</div>
+
+<div id="adblock-modal">
+  <div class="adblock-inner">
+    <div class="adblock-icon"><svg fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M4.93 4.93l14.14 14.14" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <h2>AdBlock Detected!</h2>
+    <p>Please disable your ad blocker to continue. Our service relies on advertisements to remain free.</p>
+    <button class="adblock-btn" onclick="document.getElementById('adblock-modal').classList.remove('show')">I've Disabled AdBlock – Reload</button>
+  </div>
+</div>
+
+<div class="page-wrap">
+  <header>
+    <div class="header-inner">
+      <div class="logo">Mr<span>Short</span></div>
+      <div class="header-timer">
+        <div class="header-timer-ring">
+          <svg viewBox="0 0 30 30"><circle class="ht-track" cx="15" cy="15" r="12"/><circle class="ht-fill" id="ht-fill" cx="15" cy="15" r="12"/></svg>
+          <div class="header-timer-num" id="ht-num">10</div>
+        </div>
+        <span class="header-timer-label">seconds</span>
+      </div>
+    </div>
+    <div class="progress-strip"><div class="progress-strip-fill" id="progress-fill" style="width:100%"></div></div>
+  </header>
+
+  <main>
+    <div class="three-col">
+      <!-- Left Skyscraper -->
+      <div class="col-skyscraper">
+        <div class="sky-card">
+          <p class="ad-label-small">Advertisement</p>
+          <div class="sky-slot"><span class="ad-placeholder-text">160×600<br>Skyscraper</span></div>
+        </div>
+      </div>
+
+      <!-- Center -->
+      <div>
+        <div class="center-card">
+          <!-- Top 728×90 -->
+          <div class="ad-leaderboard">
+            <p class="ad-label-small">Advertisement</p>
+            <div class="leaderboard-slot"><span class="ad-placeholder-text">728×90 Leaderboard</span></div>
+          </div>
+
+          <!-- Timer -->
+          <div class="timer-area">
+            <div class="timer-circle">
+              <svg class="tc-svg" viewBox="0 0 120 120"><circle class="tc-track" cx="60" cy="60" r="54"/><circle class="tc-fill" id="tc-fill" cx="60" cy="60" r="54"/></svg>
+              <div class="tc-num" id="tc-num">10</div>
+            </div>
+            <p class="timer-heading">Your destination is <em style="color:var(--accent)">almost ready</em></p>
+            <p class="timer-sub">Please wait while we prepare your exclusive content...</p>
+          </div>
+
+          <!-- Middle 300×250 -->
+          <div class="ad-medium">
+            <div class="medium-slot"><span class="ad-placeholder-text">300×250 Banner</span></div>
+          </div>
+
+          <!-- Captcha -->
+          <div class="captcha-area">
+            <div class="captcha-box">
+              <div class="captcha-check"></div>
+              <span class="captcha-text">I'm not a robot</span>
+              <span class="captcha-logo">reCAPTCHA<br>Privacy · Terms</span>
+            </div>
+          </div>
+
+          <!-- Button -->
+          <button class="get-link-btn" id="get-link-btn">
+            <div class="spinner" id="btn-spinner"></div>
+            <span id="btn-text">Please wait...</span>
+          </button>
+
+          <!-- Bottom 300×250 -->
+          <div class="ad-bottom">
+            <div class="medium-slot"><span class="ad-placeholder-text">300×250 Banner</span></div>
+          </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="info-section">
+          <div class="info-card">
+            <div class="icon red"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+            <h3>Create an account</h3>
+            <p>Creating an account would not take you more than 3 minutes. You only need to provide your email, username and a password.</p>
+          </div>
+          <div class="info-card">
+            <div class="icon blue"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
+            <h3>Shorten and share links</h3>
+            <p>After you create an account, you can use one of our powerful tools to shorten links that you want to share.</p>
+          </div>
+          <div class="info-card">
+            <div class="icon green"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+            <h3>Earn money</h3>
+            <p>Once you share the links with potential visitors, you get paid for each visit to your links based on our payout rates.</p>
+          </div>
+        </div>
+        <div class="cta-section">
+          <div>
+            <h2>Ready to start earning with MrShort?</h2>
+            <p>Register your account and start the journey. It is 100% free!</p>
+          </div>
+          <a href="#" class="cta-button">Sign up</a>
+        </div>
+      </div>
+
+      <!-- Right Skyscraper -->
+      <div class="col-skyscraper">
+        <div class="sky-card">
+          <p class="ad-label-small">Advertisement</p>
+          <div class="sky-slot"><span class="ad-placeholder-text">160×600<br>Skyscraper</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <span>© 2026 MrShort. All rights reserved.</span>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#" class="footer-dmca" style="color:rgba(240,232,228,.35);">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          Report DMCA
+        </a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+const TOTAL=10;let t=TOTAL;
+const tcFill=document.getElementById('tc-fill'),tcNum=document.getElementById('tc-num'),htFill=document.getElementById('ht-fill'),htNum=document.getElementById('ht-num'),pFill=document.getElementById('progress-fill'),btn=document.getElementById('get-link-btn'),spinner=document.getElementById('btn-spinner'),btnText=document.getElementById('btn-text');
+const CIRC=339.3,HTC=75.4;
+tcFill.style.strokeDashoffset=0;htFill.style.strokeDashoffset=0;
+const iv=setInterval(()=>{
+  t--;tcNum.textContent=t;htNum.textContent=t;
+  const p=t/TOTAL;
+  tcFill.style.strokeDashoffset=CIRC*(1-p);htFill.style.strokeDashoffset=HTC*(1-p);pFill.style.width=(p*100)+'%';
+  if(t<=0){clearInterval(iv);spinner.style.display='none';btnText.textContent='✓ Continue to Destination';btn.classList.add('active');}
+},1000);
+</script>
+</body>
+</html>
