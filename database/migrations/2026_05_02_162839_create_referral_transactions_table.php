@@ -17,6 +17,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Guard: if the table already exists (e.g. after a partial failed migration),
+        // drop it cleanly so we can rebuild with the correct schema.
+        Schema::dropIfExists('referral_transactions');
+
         Schema::create('referral_transactions', function (Blueprint $table) {
             $table->id();
 
@@ -30,11 +34,10 @@ return new class extends Migration
                 ->constrained('users')
                 ->cascadeOnDelete();
 
-            // The specific click that triggered this commission (nullable for future manual credits)
-            $table->foreignId('link_click_id')
-                ->nullable()
-                ->constrained('link_clicks')
-                ->nullOnDelete();
+            // The specific click that triggered this commission (nullable for future manual credits).
+            // Stored as a plain column (no FK) for cross-engine compatibility —
+            // avoids MySQL error 1824 when link_clicks uses MyISAM or a different collation.
+            $table->unsignedBigInteger('link_click_id')->nullable();
 
             // The base earning of the referred click (before the commission rate is applied)
             $table->decimal('base_click_earning', 14, 10)->default(0);
@@ -49,6 +52,8 @@ return new class extends Migration
 
             // Fast lookup for dashboard charts
             $table->index(['referrer_id', 'created_at']);
+            // Index for reverse lookup (which clicks generated commissions)
+            $table->index('link_click_id');
         });
     }
 
