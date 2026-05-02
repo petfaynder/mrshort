@@ -1,4 +1,4 @@
-<div class="bg-white dark:bg-white/10 p-6 rounded-lg">
+<div class="bg-white dark:bg-white/10 p-6 rounded-lg" wire:poll.2000ms="pollJobResult">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
         <h2 class="text-lg font-semibold text-heading-light dark:text-heading-dark">Dead Link Checker</h2>
         <div class="flex items-center gap-4 flex-shrink-0">
@@ -15,11 +15,31 @@
             </button>
         </div>
     </div>
-    <p class="text-sm text-text-light dark:text-subtext-dark mb-4">We check your latest 20 links initially. Click "Start Scan" to re-check them, or use "Scan All Links" to check up to 100 recent links.</p>
+    <p class="text-sm text-text-light dark:text-subtext-dark mb-4">We check your latest 20 links initially. Click "Start Scan" to re-check them, or use "Scan All Links" to check up to 100 recent links. Scanning runs in the background — the page will update automatically when complete.</p>
+
+    @if(session('error'))
+        <div class="mb-4 p-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-md">
+            {{ session('error') }}
+        </div>
+    @endif
 
     @if($isScanning)
-        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
-            <div class="bg-primary h-2.5 rounded-full transition-all duration-300" style="width: {{ $progress }}%"></div>
+        <div class="mb-4">
+            <div class="flex justify-between text-xs text-text-light dark:text-subtext-dark mb-1">
+                <span class="flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm animate-spin text-primary">progress_activity</span>
+                    Scanning in background...
+                </span>
+                <span>{{ $progress }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 overflow-hidden">
+                @if($progress > 0)
+                    <div class="bg-primary h-2.5 rounded-full transition-all duration-500" style="width: {{ $progress }}%"></div>
+                @else
+                    {{-- Indeterminate bar while waiting for the job to start --}}
+                    <div class="bg-primary h-2.5 rounded-full w-1/3 animate-pulse"></div>
+                @endif
+            </div>
         </div>
     @endif
 
@@ -75,7 +95,13 @@
                                     </span>
                                 @endif
                             @else
-                                <span class="text-text-light dark:text-subtext-dark">Pending...</span>
+                                <span class="text-text-light dark:text-subtext-dark">
+                                    @if($isScanning)
+                                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs animate-spin">progress_activity</span> Queued...</span>
+                                    @else
+                                        —
+                                    @endif
+                                </span>
                             @endif
                         </td>
                     </tr>
