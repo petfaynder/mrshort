@@ -14,6 +14,7 @@ class WithdrawalRequest extends Model
         'user_id',
         'amount',
         'payment_method',
+        'payment_details',
         'status',
         'fraud_score',
         'is_flagged',
@@ -21,8 +22,9 @@ class WithdrawalRequest extends Model
     ];
 
     protected $casts = [
-        'is_flagged' => 'boolean',
-        'amount' => 'decimal:2',
+        'is_flagged'      => 'boolean',
+        'amount'          => 'decimal:2',
+        'payment_details' => 'array',
     ];
 
     /**

@@ -89,19 +89,18 @@ class AdminDashboardStats extends Component
         $this->pendingWithdrawalRequestsAmount = WithdrawalRequest::where('status', 'pending')->sum('amount');
         $this->openSupportTicketsCount = Ticket::where('status', 'open')->count();
 
-        // Top Countries - improved query
-        $this->topCountries = LinkClick::select('country', DB::raw('count(*) as total_clicks'))
-            ->whereNotNull('country')
-            ->where('country', '!=', '')
-            ->groupBy('country')
+        // Top Countries — uses country_id FK joined to countries table
+        $this->topCountries = LinkClick::select('countries.name', DB::raw('count(*) as total_clicks'))
+            ->join('countries', 'link_clicks.country_id', '=', 'countries.id')
+            ->groupBy('countries.id', 'countries.name')
             ->orderByDesc('total_clicks')
             ->take(5)
             ->get()
             ->map(function ($item) {
                 $totalSystemClicks = $this->totalViews > 0 ? $this->totalViews : 1;
                 return [
-                    'name' => $item->country,
-                    'clicks' => $item->total_clicks,
+                    'name'       => $item->name,
+                    'clicks'     => $item->total_clicks,
                     'percentage' => round(($item->total_clicks / $totalSystemClicks) * 100, 2)
                 ];
             })->toArray();
@@ -149,18 +148,19 @@ class AdminDashboardStats extends Component
 
         // === YENİ WIDGET VERİLERİ ===
 
-        // 1. Son Kısaltılan Linkler
+        // 1. Son Kısaltılan Linkler — withCount to avoid N+1
         $this->recentLinks = Link::with('user')
+            ->withCount('clicks')
             ->orderByDesc('created_at')
             ->take(10)
             ->get()
             ->map(function ($link) {
                 return [
-                    'short_code' => $link->short_code,
+                    'short_code'   => $link->code,  // Link model uses 'code' not 'short_code'
                     'original_url' => \Str::limit($link->original_url, 40),
-                    'user' => $link->user ? $link->user->name : 'Anonymous',
-                    'clicks' => $link->clicks()->count(),
-                    'created_at' => $link->created_at->diffForHumans(),
+                    'user'         => $link->user ? $link->user->name : 'Anonymous',
+                    'clicks'       => $link->clicks_count,
+                    'created_at'   => $link->created_at->diffForHumans(),
                 ];
             })->toArray();
 

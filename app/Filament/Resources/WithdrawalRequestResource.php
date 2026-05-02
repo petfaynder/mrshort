@@ -63,8 +63,8 @@ class WithdrawalRequestResource extends Resource
                         Forms\Components\Select::make('status')
                             ->label('Durum')
                             ->options([
-                                'pending' => 'Beklemede',
-                                'approved' => 'Onaylandı',
+                                'pending'   => 'Beklemede',
+                                'approved'  => 'Onaylandı',
                                 'completed' => 'Tamamlandı',
                                 'cancelled' => 'İptal Edildi',
                             ])
@@ -72,6 +72,18 @@ class WithdrawalRequestResource extends Resource
                         Forms\Components\TextInput::make('payment_method')
                             ->label('Ödeme Yöntemi'),
                     ])->columns(2),
+
+                Forms\Components\Section::make('💳 Ödeme Hesabı Detayları')
+                    ->description('Kullanıcının ödemeyi almak istediği hesap bilgileri')
+                    ->schema([
+                        Forms\Components\KeyValue::make('payment_details')
+                            ->label('Ödeme Detayları')
+                            ->keyLabel('Alan')
+                            ->valueLabel('Değer')
+                            ->disabled()
+                            ->columnSpanFull()
+                            ->helperText('PayPal: email | Banka: iban, account_holder, bank_name, swift_bic'),
+                    ])->collapsible()->collapsed(false),
                 
                 Forms\Components\Section::make('Fraud Analizi')
                     ->schema([

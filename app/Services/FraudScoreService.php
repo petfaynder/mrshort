@@ -60,24 +60,26 @@ class FraudScoreService
         }
         
         // 3. Country Diversity (15%)
+        // Few unique countries with high volume = suspicious (bot farm in one region)
+        // Many diverse countries = organic traffic (low fraud risk)
         $countryCounts = $clicks->groupBy('country_id');
         $uniqueCountries = $countryCounts->count();
         $topCountryRatio = $countryCounts->max(fn($g) => $g->count()) / $total;
         
         $countryScore = match(true) {
-            $uniqueCountries > 50 => 15,
-            $uniqueCountries > 30 => 10,
-            $uniqueCountries < 3 && $total > 100 => 10,
-            default => 0
+            $uniqueCountries < 3 && $total > 100  => 15,  // Very few countries with lots of clicks = suspicious
+            $uniqueCountries < 5 && $total > 200  => 10,  // Still low diversity
+            $uniqueCountries > 50                 => 0,   // Very diverse traffic = organic
+            default                               => 0
         };
         $metrics['country_diversity'] = [
-            'unique_countries' => $uniqueCountries,
+            'unique_countries'  => $uniqueCountries,
             'top_country_ratio' => round($topCountryRatio * 100, 1),
-            'score' => $countryScore,
-            'max' => 15
+            'score'             => $countryScore,
+            'max'               => 15
         ];
         
-        // Auto-flag: Single country > 95%
+        // Auto-flag: Single country > 95% with high volume = concentrated bot traffic
         if ($topCountryRatio > 0.95 && $total > 100) {
             $flagReasons[] = "Too much traffic from single country: " . round($topCountryRatio * 100, 1) . "%";
         }
