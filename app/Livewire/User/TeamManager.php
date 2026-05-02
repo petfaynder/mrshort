@@ -161,10 +161,13 @@ class TeamManager extends Component
             $this->loadData();
             return;
         }
-        
+
+        // Escape LIKE wildcards (% and _) to prevent unintended pattern matching
+        $escaped = addcslashes($this->searchQuery, '%_');
+
         $this->teams = Team::where('is_public', true)
             ->where('is_active', true)
-            ->where('name', 'like', '%' . $this->searchQuery . '%')
+            ->where('name', 'like', '%' . $escaped . '%')
             ->orderBy('weekly_points', 'desc')
             ->limit(20)
             ->get()

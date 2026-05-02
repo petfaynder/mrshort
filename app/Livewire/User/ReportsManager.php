@@ -93,134 +93,144 @@ class ReportsManager extends Component
     {
         $userId = $this->targetUserId;
 
-        $query = LinkClick::whereHas('link', function ($query) use ($userId) {
-                                $query->where('user_id', $userId);
-                            })
-                            ->where('is_skipped', false);
+        // ── Build base query builder (NOT executed, cloned per dimension) ───────
+        $baseQuery = LinkClick::whereHas('link', function ($q) use ($userId) {
+                                    $q->where('user_id', $userId);
+                                })
+                                ->where('is_skipped', false);
 
         if ($this->startDate) {
-            $query->whereBetween('created_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59']);
+            $baseQuery->whereBetween('created_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59']);
         }
 
-        $clicks = $query->with('link', 'country')->get(); // Link ve Country ilişkilerini yükle
+        // ── Aggregate scalars — no rows loaded into PHP ────────────────────────
+        $this->totalClicks   = (clone $baseQuery)->count();
+        $this->totalEarnings = (clone $baseQuery)->sum('cpm_rate') / 1000;
 
-        $this->totalClicks = $clicks->count();
-        $this->totalEarnings = $clicks->sum('cpm_rate') / 1000; // CPM oranına göre toplam kazanç
+        // ── Country distribution ───────────────────────────────────────────────
+        $countryRows = (clone $baseQuery)
+            ->selectRaw('country_id, COUNT(*) as total')
+            ->groupBy('country_id')
+            ->orderByDesc('total')
+            ->with('country')
+            ->get();
 
-        // Ülkelere göre tıklama dağılımı
-        $clicksByCountry = $clicks->groupBy('country_id')->map(function ($group, $countryId) {
-            $countryModel = \App\Models\Country::find($countryId); // Country modelini doğrudan ID ile çek
-            $countryName = $countryModel ? $countryModel->iso_code : 'Unknown';
-            return [
-                'country' => $countryModel,
-                'total' => $group->count(),
-            ];
-        })->sortByDesc('total');
+        $validCountryRows = $countryRows->filter(fn($r) => $r->country !== null);
 
-        // Harita için sadece geçerli ülke kodlarına sahip verileri kullan
-        // "Unknown" (null country) değerleri amCharts haritasında poligon ile eşleşmediği için
-        // heat rule hesaplamasını bozuyor - bu yüzden filtreliyoruz
-        $validCountryData = $clicksByCountry->filter(fn($item) => $item['country'] !== null);
-        
         $this->clicksByCountryChartData = [
-            'labels' => $validCountryData->pluck('country.iso_code')->toArray(),
-            'data' => $validCountryData->pluck('total')->toArray(),
+            'labels' => $validCountryRows->pluck('country.iso_code')->values()->toArray(),
+            'data'   => $validCountryRows->pluck('total')->values()->toArray(),
         ];
 
-        $this->heatmapData = $clicksByCountry->map(function ($item) {
-            if ($item['country'] && $item['country']->latitude && $item['country']->longitude) {
-                return [
-                    'lat' => $item['country']->latitude,
-                    'lng' => $item['country']->longitude,
-                    'count' => $item['total']
-                ];
+        $this->heatmapData = $countryRows->map(function ($r) {
+            if ($r->country && $r->country->latitude && $r->country->longitude) {
+                return ['lat' => $r->country->latitude, 'lng' => $r->country->longitude, 'count' => (int) $r->total];
             }
             return null;
         })->filter()->values()->toArray();
 
         $this->dispatch('heatmap-data-updated', data: $this->clicksByCountryChartData);
 
-        // Zamana göre tıklama trendleri
-        $this->clicksOverTime = $clicks->groupBy(function($date) {
-            return Carbon::parse($date->created_at)->format('Y-m-d');
-        })->map(function ($row, $date) {
-            return [
-                'click_date' => $date,
-                'total' => $row->count(),
-            ];
-        })->sortBy('click_date')->values();
+        // ── Time trends ───────────────────────────────────────────────────────
+        $this->clicksOverTime = (clone $baseQuery)
+            ->selectRaw('DATE(created_at) as click_date, COUNT(*) as total')
+            ->groupBy('click_date')
+            ->orderBy('click_date')
+            ->get()
+            ->map(fn($r) => ['click_date' => $r->click_date, 'total' => (int) $r->total])
+            ->values();
 
+        // ── Device type ───────────────────────────────────────────────────────
+        $this->clicksByDeviceType = (clone $baseQuery)
+            ->selectRaw('device_type, COUNT(*) as total')
+            ->groupBy('device_type')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn($r) => ['device_type' => $r->device_type, 'total' => (int) $r->total])
+            ->values()
+            ->toArray();
 
-        // Cihaz türlerine göre tıklamalar
-        $this->clicksByDeviceType = $clicks->groupBy('device_type')->map(function ($group) {
-            return [
-                'device_type' => $group->first()->device_type,
-                'total' => $group->count(),
-            ];
-        })->sortByDesc('total')->values();
+        // ── OS ────────────────────────────────────────────────────────────────
+        $this->clicksByOs = (clone $baseQuery)
+            ->selectRaw('os, COUNT(*) as total')
+            ->groupBy('os')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn($r) => ['os' => $r->os, 'total' => (int) $r->total])
+            ->values()
+            ->toArray();
 
-        // İşletim sistemlerine göre tıklamalar
-        $this->clicksByOs = $clicks->groupBy('os')->map(function ($group) {
-            return [
-                'os' => $group->first()->os,
-                'total' => $group->count(),
-            ];
-        })->sortByDesc('total')->values();
+        // ── Browser ───────────────────────────────────────────────────────────
+        $this->clicksByBrowser = (clone $baseQuery)
+            ->selectRaw('browser, COUNT(*) as total')
+            ->groupBy('browser')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn($r) => ['browser' => $r->browser, 'total' => (int) $r->total])
+            ->values()
+            ->toArray();
 
-        // Tarayıcılara göre tıklamalar
-        $this->clicksByBrowser = $clicks->groupBy('browser')->map(function ($group) {
-            return [
-                'browser' => $group->first()->browser,
-                'total' => $group->count(),
-            ];
-        })->sortByDesc('total')->values();
+        // ── Per-link stats (total + unique clicks + earnings) ─────────────────
+        $linkRows = (clone $baseQuery)
+            ->selectRaw('link_id, COUNT(*) as total_clicks, SUM(cpm_rate) as total_cpm, COUNT(DISTINCT ip_address) as unique_ips')
+            ->groupBy('link_id')
+            ->with('link')
+            ->get();
 
-        // Linklere göre tıklamalar
-        $clicksByLinkData = $clicks->groupBy('link_id')->map(function ($group) {
-            $link = $group->first()->link;
+        $sortField = $this->sortBy;
+        $sortDir   = $this->sortDirection;
+
+        $clicksByLinkData = $linkRows->map(function ($r) {
+            $link = $r->link;
+            if (!$link) return null;
             return [
-                'link_id' => $link->id,
+                'link_id'      => $link->id,
                 'original_url' => $link->original_url,
-                'short_link' => $link->shortLink(),
-                'total_clicks' => $group->count(),
-                'earnings' => $group->sum('cpm_rate') / 1000,
+                'short_link'   => $link->shortLink(),
+                'total_clicks' => (int) $r->total_clicks,
+                'earnings'     => round($r->total_cpm / 1000, 6),
             ];
-        });
+        })->filter()->values();
 
-        if ($this->sortDirection === 'asc') {
-            $this->clicksByLink = $clicksByLinkData->sortBy($this->sortBy)->values()->all();
-        } else {
-            $this->clicksByLink = $clicksByLinkData->sortByDesc($this->sortBy)->values()->all();
-        }
+        $this->clicksByLink = ($sortDir === 'asc'
+            ? $clicksByLinkData->sortBy($sortField)
+            : $clicksByLinkData->sortByDesc($sortField)
+        )->values()->all();
 
-        // Tekil tıklamalar (IP adresine göre)
-        $this->uniqueClicksByLink = $clicks->groupBy('link_id')->mapWithKeys(function ($group, $linkId) {
-            return [$linkId => $group->unique('ip_address')->count()];
-        });
+        // Unique clicks per link — already computed via COUNT(DISTINCT) above
+        $this->uniqueClicksByLink = $linkRows->pluck('unique_ips', 'link_id');
 
-        // Yönlendiren domainlere göre tıklamalar
-        $this->clicksByReferrer = $clicks->groupBy('referrer')->map(function ($group) {
-            return [
-                'referrer' => $group->first()->referrer,
-                'total' => $group->count(),
-            ];
-        })->sortByDesc('total')->values();
+        // ── Referrer ──────────────────────────────────────────────────────────
+        $this->clicksByReferrer = (clone $baseQuery)
+            ->selectRaw('referrer, COUNT(*) as total')
+            ->groupBy('referrer')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn($r) => ['referrer' => $r->referrer, 'total' => (int) $r->total])
+            ->values()
+            ->toArray();
 
-        // Bot durumuna göre tıklamalar
-        $this->clicksByBotStatus = $clicks->groupBy('is_bot')->map(function ($group) {
-            return [
-                'is_bot' => $group->first()->is_bot,
-                'total' => $group->count(),
-            ];
-        })->sortByDesc('total')->values();
+        // ── Bot status ────────────────────────────────────────────────────────
+        $this->clicksByBotStatus = (clone $baseQuery)
+            ->selectRaw('is_bot, COUNT(*) as total')
+            ->groupBy('is_bot')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn($r) => ['is_bot' => (bool) $r->is_bot, 'total' => (int) $r->total])
+            ->values()
+            ->toArray();
 
-        // Son 1 dakikadaki tıklama sayısına göre dağılım
-        $this->clicksByRecentClickCount = $clicks->groupBy('recent_click_count')->map(function ($group) {
-            return [
-                'recent_click_count' => $group->first()->recent_click_count,
-                'total' => $group->count(),
-            ];
-        })->sortBy('recent_click_count')->values();
+        // ── Recent click count distribution ───────────────────────────────────
+        $this->clicksByRecentClickCount = (clone $baseQuery)
+            ->selectRaw('recent_click_count, COUNT(*) as total')
+            ->groupBy('recent_click_count')
+            ->orderBy('recent_click_count')
+            ->get()
+            ->map(fn($r) => ['recent_click_count' => $r->recent_click_count, 'total' => (int) $r->total])
+            ->values()
+            ->toArray();
+
+
     }
 
     public function sortBy($field)

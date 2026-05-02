@@ -17,6 +17,7 @@ use App\Enums\AdType;
 use Carbon\Carbon; // Add this import
 use App\Services\CryptomusService; // Add Service
 use App\Services\GumroadService; // Add Gumroad Service
+use App\Services\LinkValidationService; // For URL safety check
 use Illuminate\Support\Facades\Log; // Add Log
 
 class CreateAdCampaign extends Component
@@ -198,6 +199,15 @@ class CreateAdCampaign extends Component
     public function createCampaign(CryptomusService $cryptomusService)
     {
         $this->validate();
+
+        // Safety check: validate popup_url against malware/phishing databases
+        if (setting('url_safety_enabled', false)) {
+            $safetyErrors = app(LinkValidationService::class)->checkUrlSafety($this->popup_url);
+            if (!empty($safetyErrors)) {
+                $this->addError('popup_url', implode(' ', $safetyErrors));
+                return;
+            }
+        }
 
         $user = Auth::user();
 

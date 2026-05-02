@@ -12,7 +12,8 @@ class PerformanceOverview extends Component
 {
     public $topCountries = [];
     public $goalProgress = 0;
-    public $currentEarnings = 0;
+    public $currentEarnings = 0;       // This month's publisher-only earnings
+    public $totalReferralEarnings = 0; // All-time referral earnings (separate display)
     public $monthlyGoal = 0;
     
     // Modal State
@@ -63,16 +64,21 @@ class PerformanceOverview extends Component
 
         // Goal Logic
         $this->monthlyGoal = $user->monthly_goal ?? 100;
-        // Recalculate earnings for accurate goal tracking
+
+        // Publisher earnings for this month (accurate: from link_clicks)
         $publisherEarnings = LinkClick::whereIn('link_id', $linkIds)
             ->where('is_skipped', false)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('cpm_rate') / 1000;
-            
-        $referralEarnings = $user->referral_earnings ?? 0; // This might be total, not monthly. Keeping it simple for now.
 
-        $this->currentEarnings = $publisherEarnings + $referralEarnings;
-        $this->goalProgress = $this->monthlyGoal > 0 ? min(($this->currentEarnings / $this->monthlyGoal) * 100, 100) : 0;
+        // Goal progress uses only publisher earnings for this month.
+        // Referral earnings don't have daily granularity, so they are shown separately
+        // rather than being divided by account age (which was inaccurate).
+        $this->currentEarnings      = $publisherEarnings;
+        $this->totalReferralEarnings = $user->referral_earnings ?? 0;
+        $this->goalProgress = $this->monthlyGoal > 0
+            ? min(($this->currentEarnings / $this->monthlyGoal) * 100, 100)
+            : 0;
     }
 
     public function openGoalModal()

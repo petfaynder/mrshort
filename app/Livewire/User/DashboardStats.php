@@ -29,28 +29,31 @@ class DashboardStats extends Component
         $linkIds = $user->links()->pluck('id');
 
         $startDate = Carbon::parse($month)->startOfMonth();
-        $endDate = Carbon::parse($month)->endOfMonth();
+        $endDate   = Carbon::parse($month)->endOfMonth();
 
-        $query = LinkClick::whereIn('link_id', $linkIds)
+        // Use SQL aggregates instead of loading ALL clicks into RAM
+        $stats = LinkClick::whereIn('link_id', $linkIds)
             ->where('is_skipped', false)
-            ->whereBetween('created_at', [$startDate, $endDate]);
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw('
+                COUNT(*) as total_views,
+                SUM(CASE WHEN cpm_rate > 0 THEN 1 ELSE 0 END) as paid_views,
+                SUM(CASE WHEN cpm_rate > 0 THEN cpm_rate ELSE 0 END) as paid_cpm_sum
+            ')
+            ->first();
 
-        $clicks = $query->get();
-
-        $totalViews = $clicks->count();
-        $paidViews = $clicks->where('cpm_rate', '>', 0)->count();
-
-        // Sum paid cpm_rates for this month. cpm_rate is stored as per-1000-views rate.
-        $paidClicksCpmSum = $clicks->where('cpm_rate', '>', 0)->sum('cpm_rate');
+        $totalViews      = (int) ($stats->total_views ?? 0);
+        $paidViews       = (int) ($stats->paid_views  ?? 0);
+        $paidClicksCpmSum = (float) ($stats->paid_cpm_sum ?? 0);
         $publisherEarnings = $paidClicksCpmSum / 1000;
 
         $referralEarnings = $user->referral_earnings ?? 0;
 
-        $this->totalViews = $totalViews;
-        $this->paidViews = $paidViews;
+        $this->totalViews        = $totalViews;
+        $this->paidViews         = $paidViews;
         $this->publisherEarnings = $publisherEarnings;
-        $this->referralEarnings = $referralEarnings;
-        $this->averageCpm = $paidViews > 0 ? ($paidClicksCpmSum / $paidViews) : 0;
+        $this->referralEarnings  = $referralEarnings;
+        $this->averageCpm        = $paidViews > 0 ? ($paidClicksCpmSum / $paidViews) : 0;
     }
 
     public function render()

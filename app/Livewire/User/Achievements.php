@@ -136,10 +136,15 @@ class Achievements extends Component
     {
         return match($goal->type) {
             'shorten_links' => $user->links()->count(),
-            'clicks' => $user->links()->sum('clicks'),
-            'referrals' => \App\Models\User::where('referred_by_user_id', $user->id)->count(),
-            'earnings' => ($user->link_earnings ?? 0) + ($user->referral_earnings ?? 0),
-            default => 0,
+            // Fix: links()->sum('clicks') was always 0 because 'clicks' is in link_clicks table, not links table.
+            // Use a proper subquery count via the linkClicks relationship.
+            'clicks'        => \App\Models\LinkClick::whereIn(
+                                'link_id',
+                                $user->links()->pluck('id')
+                               )->where('is_skipped', false)->count(),
+            'referrals'     => \App\Models\User::where('referred_by_user_id', $user->id)->count(),
+            'earnings'      => ($user->link_earnings ?? 0) + ($user->referral_earnings ?? 0),
+            default         => 0,
         };
     }
     

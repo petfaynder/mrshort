@@ -117,10 +117,24 @@ class Settings extends Component
 
         $user->forceFill([
             'name' => $this->name,
-            'email' => $this->email,
         ])->save();
 
-        session()->flash('success', 'Profile information successfully updated.');
+        // If email changed, reset verification status and trigger re-verification
+        if ($user->email !== $this->email) {
+            $user->forceFill([
+                'email'             => $this->email,
+                'email_verified_at' => null,
+            ])->save();
+
+            // Send new verification email if MustVerifyEmail is implemented
+            if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail) {
+                $user->sendEmailVerificationNotification();
+            }
+
+            session()->flash('success', 'Profile updated. A verification email has been sent to your new address.');
+        } else {
+            session()->flash('success', 'Profile information successfully updated.');
+        }
     }
 
     public function updatePassword()

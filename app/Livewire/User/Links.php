@@ -124,12 +124,27 @@ class Links extends Component
             return;
         }
 
+        // Also run safety check (malware/phishing detection)
+        if (setting('url_safety_enabled', false)) {
+            $safetyErrors = $validator->checkUrlSafety($this->original_url);
+            if (!empty($safetyErrors)) {
+                $this->addError('original_url', $safetyErrors[0]);
+                return;
+            }
+        }
+
         $codeLength = setting('link_code_length', 6);
-        $code = Str::random($codeLength);
+
+        // Retry loop to guarantee a unique code
+        $attempts = 0;
+        do {
+            $code = \Illuminate\Support\Str::random($codeLength);
+            $attempts++;
+        } while (\App\Models\Link::where('code', $code)->exists() && $attempts < 10);
 
         Auth::user()->links()->create([
             'original_url' => $this->original_url,
-            'code' => $code,
+            'code'         => $code,
         ]);
 
         $this->original_url = '';

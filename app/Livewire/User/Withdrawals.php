@@ -20,6 +20,8 @@ class Withdrawals extends Component
     public $account_holder_name;
     public $bank_name;
     public $swift_bic;
+    public $crypto_wallet;  // Crypto wallet address
+    public $papara_number; // Papara account number
 
     // Statistics
     public $stats_total_withdrawn;
@@ -94,23 +96,60 @@ class Withdrawals extends Component
         $minWithdrawal = setting('min_withdrawal_amount', 5);
 
         $this->validate([
-            'withdrawal_amount' => 'required|numeric|min:' . $minWithdrawal . '|max:' . $this->available_balance,
-            'payment_method' => 'required|in:PayPal,Bank Transfer',
-            'paypal_email' => 'required_if:payment_method,PayPal|email',
-            'iban' => 'required_if:payment_method,Bank Transfer',
-            'account_holder_name' => 'required_if:payment_method,Bank Transfer',
-            'bank_name' => 'required_if:payment_method,Bank Transfer',
+            'withdrawal_amount'  => 'required|numeric|min:' . $minWithdrawal . '|max:' . $this->available_balance,
+            'payment_method'     => 'required|in:PayPal,Bank Transfer,Crypto,Papara',
+            'paypal_email'       => 'required_if:payment_method,PayPal|nullable|email',
+            'iban'               => 'required_if:payment_method,Bank Transfer|nullable|string',
+            'account_holder_name'=> 'required_if:payment_method,Bank Transfer|nullable|string',
+            'bank_name'          => 'required_if:payment_method,Bank Transfer|nullable|string',
+            'crypto_wallet'      => 'required_if:payment_method,Crypto|nullable|string',
+            'papara_number'      => 'required_if:payment_method,Papara|nullable|string',
         ]);
 
-        WithdrawalRequest::create([
-            'user_id'        => $user->id,
-            'amount'         => $this->withdrawal_amount,
-            'payment_method' => $this->payment_method,
-            'status'         => 'pending',
-        ]);
+        // Build payment details based on method
+        $paymentDetails = null;
+        if ($this->payment_method === 'PayPal') {
+            $paymentDetails = ['email' => $this->paypal_email];
+        } elseif ($this->payment_method === 'Bank Transfer') {
+            $paymentDetails = [
+                'iban'           => $this->iban,
+                'account_holder' => $this->account_holder_name,
+                'bank_name'      => $this->bank_name,
+                'swift_bic'      => $this->swift_bic,
+            ];
+        } elseif ($this->payment_method === 'Crypto') {
+            $paymentDetails = ['wallet_address' => $this->crypto_wallet];
+        } elseif ($this->payment_method === 'Papara') {
+            $paymentDetails = ['papara_number' => $this->papara_number];
+        }
 
-        $user->earnings -= $this->withdrawal_amount;
-        $user->save();
+        // Wrap the entire operation in a transaction for true atomicity
+        $success = \Illuminate\Support\Facades\DB::transaction(function () use ($user, $paymentDetails) {
+            // 1. Atomically check & decrement balance first
+            $affected = \App\Models\User::where('id', $user->id)
+                ->where('earnings', '>=', $this->withdrawal_amount)
+                ->decrement('earnings', $this->withdrawal_amount);
+
+            if (!$affected) {
+                return false; // Insufficient balance — transaction rolls back
+            }
+
+            // 2. Only create the record if balance was successfully deducted
+            WithdrawalRequest::create([
+                'user_id'         => $user->id,
+                'amount'          => $this->withdrawal_amount,
+                'payment_method'  => $this->payment_method,
+                'payment_details' => $paymentDetails ? json_encode($paymentDetails) : null,
+                'status'          => 'pending',
+            ]);
+
+            return true;
+        });
+
+        if (!$success) {
+            $this->addError('withdrawal_amount', 'Insufficient balance. Please refresh and try again.');
+            return;
+        }
 
         session()->flash('success', 'Withdrawal request submitted successfully.');
 
@@ -122,9 +161,8 @@ class Withdrawals extends Component
         $withdrawal = WithdrawalRequest::where('id', $id)->where('user_id', Auth::id())->where('status', 'pending')->first();
 
         if ($withdrawal) {
-            $user = Auth::user();
-            $user->earnings += $withdrawal->amount;
-            $user->save();
+            // Atomically refund the balance
+            \App\Models\User::where('id', Auth::id())->increment('earnings', $withdrawal->amount);
 
             $withdrawal->status = 'cancelled';
             $withdrawal->save();
@@ -141,7 +179,7 @@ class Withdrawals extends Component
                 $query->where('status', $this->status);
             })
             ->when($this->method, function ($query) {
-                $query->where('method', $this->method);
+                $query->where('payment_method', $this->method); // 'method' property maps to 'payment_method' column
             })
             ->latest()
             ->paginate(10);

@@ -103,7 +103,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/battle-pass', \App\Livewire\User\BattlePass::class)->name('user.battle-pass');
     Route::get('/user/teams', \App\Livewire\User\TeamManager::class)->name('user.teams');
     Route::get('/user/vip', \App\Livewire\User\VipProgress::class)->name('user.vip');
-    Route::get('/user/vip', \App\Livewire\User\VipProgress::class)->name('user.vip');
 });
 
 // Feedback System Routes (Publicly Accessible)

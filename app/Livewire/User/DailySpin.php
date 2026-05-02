@@ -60,12 +60,15 @@ class DailySpin extends Component
             return;
         }
 
-        if (!$this->canSpin) {
+        // Always check eligibility from DB, not stale component property
+        if (!UserSpin::canUserSpin(Auth::id())) {
             Notification::make()
                 ->title("You can't spin the wheel yet!")
                 ->body('Please wait for the cooldown to expire.')
                 ->warning()
                 ->send();
+            // Refresh state to reflect actual cooldown
+            $this->loadData();
             return;
         }
 
@@ -83,15 +86,18 @@ class DailySpin extends Component
             return;
         }
 
-        // Record the spin
-        UserSpin::create([
-            'user_id' => Auth::id(),
-            'prize_id' => $prize->id,
-            'prize_value' => $prize->value,
-        ]);
+        // Wrap spin record + prize application in a transaction to prevent double-spend
+        \Illuminate\Support\Facades\DB::transaction(function () use ($prize) {
+            // Record the spin first
+            UserSpin::create([
+                'user_id'    => Auth::id(),
+                'prize_id'   => $prize->id,
+                'prize_value' => $prize->value,
+            ]);
 
-        // Apply the prize
-        $this->applyPrize($prize);
+            // Apply the prize
+            $this->applyPrize($prize);
+        });
 
         // Store won prize for display
         $this->wonPrize = $prize;
