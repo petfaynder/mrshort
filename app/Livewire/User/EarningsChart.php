@@ -5,6 +5,7 @@ namespace App\Livewire\User;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LinkClick;
+use App\Models\ReferralTransaction;
 use Carbon\Carbon;
 
 class EarningsChart extends Component
@@ -56,7 +57,7 @@ class EarningsChart extends Component
         $startDate = Carbon::parse($this->selectedMonth)->startOfMonth();
         $endDate = Carbon::parse($this->selectedMonth)->endOfMonth();
 
-        // Single query: get per-day totals including real cpm_rate sums
+        // ── Query 1: Per-day link click earnings (CPM + bonuses) ─────────────
         $dailyData = LinkClick::whereIn('link_id', $linkIds)
             ->where('is_skipped', false)
             ->whereBetween('created_at', [$startDate, $endDate])
@@ -64,26 +65,39 @@ class EarningsChart extends Component
                 DATE(created_at) as date,
                 COUNT(*) as total_clicks,
                 SUM(CASE WHEN cpm_rate > 0 THEN 1 ELSE 0 END) as paid_clicks,
-                SUM(cpm_rate) as total_cpm_rate
+                SUM(cpm_rate) as total_cpm_rate,
+                SUM(bonus_amount) as total_bonus_amount
             ')
             ->groupBy('date')
             ->orderBy('date', 'asc')
             ->get()
             ->keyBy('date');
 
+        // ── Query 2: Per-day referral commission earnings ─────────────────────
+        $referralData = ReferralTransaction::where('referrer_id', $user->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw('DATE(created_at) as date, SUM(amount) as total_referral')
+            ->groupBy('date')
+            ->get()
+            ->keyBy('date');
+
+        // ── Build final stats array ───────────────────────────────────────────
         $statsData = [];
         $currentDate = $startDate->copy();
 
         while ($currentDate->lte($endDate)) {
             $dateString = $currentDate->format('Y-m-d');
-            $row = $dailyData->get($dateString);
+            $row        = $dailyData->get($dateString);
+            $refRow     = $referralData->get($dateString);
 
-            $views      = $row ? (int) $row->total_clicks : 0;
-            $paidClicks = $row ? (int) $row->paid_clicks  : 0;
-            $totalCpmRateSum = $row ? (float) $row->total_cpm_rate : 0.0;
+            $views            = $row ? (int)   $row->total_clicks      : 0;
+            $paidClicks       = $row ? (int)   $row->paid_clicks       : 0;
+            $totalCpmRateSum  = $row ? (float) $row->total_cpm_rate    : 0.0;
+            $totalBonusAmount = $row ? (float) $row->total_bonus_amount : 0.0;
+            $referralEarnings = $refRow ? (float) $refRow->total_referral : 0.0;
 
-            // Earnings = sum of cpm_rates / 1000  (cpm_rate is stored as $/1000-views unit)
-            $earnings = $totalCpmRateSum / 1000;
+            // Earnings = base (sum of cpm_rates / 1000) + bonus amounts tracked per click
+            $earnings = ($totalCpmRateSum / 1000) + $totalBonusAmount;
 
             // Average CPM = average cpm_rate among PAID clicks only
             $cpm = $paidClicks > 0 ? ($totalCpmRateSum / $paidClicks) : 0;
@@ -94,7 +108,7 @@ class EarningsChart extends Component
                 'paid_views'         => $paidClicks,
                 'publisher_earnings' => round($earnings, 6),
                 'cpm'                => round($cpm, 4),
-                'referral_earnings'  => 0,
+                'referral_earnings'  => round($referralEarnings, 6),
             ];
 
             $currentDate->addDay();

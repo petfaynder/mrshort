@@ -44,12 +44,18 @@ class LinkController extends Controller
         }
 
         $codeLength = setting('link_code_length', 6);
-        $code = Str::random($codeLength);
+
+        // Retry loop to guarantee a unique code
+        $attempts = 0;
+        do {
+            $code = Str::random($codeLength);
+            $attempts++;
+        } while (Link::where('code', $code)->exists() && $attempts < 10);
 
         $link = Link::create([
-            'user_id' => auth()->id(),
+            'user_id'      => auth()->id(),
             'original_url' => $request->input('original_url'),
-            'code' => $code,
+            'code'         => $code,
         ]);
 
         return redirect('/')->with('success', 'Link shortened: ' . $link->shortLink());
@@ -75,7 +81,13 @@ class LinkController extends Controller
         }
 
         $codeLength = setting('link_code_length', 6);
-        $code = Str::random($codeLength);
+
+        // Retry loop to guarantee a unique code
+        $attempts = 0;
+        do {
+            $code = Str::random($codeLength);
+            $attempts++;
+        } while (Link::where('code', $code)->exists() && $attempts < 10);
 
         $link = Link::create([
             'user_id' => auth()->id(),
@@ -448,31 +460,40 @@ class LinkController extends Controller
             $user = \App\Models\User::find($pendingClickData['user_id']);
             if ($user) {
                 $cpmRate = $pendingClickData['cpm_rate'];
-                $earning = $cpmRate / 1000; // Earning for a single click
+                $baseEarning = $cpmRate / 1000; // Base earning for a single click (no bonuses)
+                $earning     = $baseEarning;
+                $bonusAmount = 0.0; // Tracks total bonus earned this click for chart accuracy
 
                 // Apply VIP Bonus
                 if ($user->vipLevel && $user->vipLevel->cpm_bonus_percent > 0) {
-                    $vipBonus = $earning * ($user->vipLevel->cpm_bonus_percent / 100);
-                    $earning += $vipBonus;
+                    $vipBonus     = $earning * ($user->vipLevel->cpm_bonus_percent / 100);
+                    $bonusAmount += $vipBonus;
+                    $earning     += $vipBonus;
                 }
 
                 // Apply Telegram Traffic Bonus (+10%)
                 if ($user->hasTelegramBonus()) {
                     $telegramBonusService = app(\App\Services\TelegramBonusService::class);
                     $telegramBonus = $earning * ($telegramBonusService->getCpmBonusMultiplier() - 1);
-                    $earning += $telegramBonus;
+                    $bonusAmount  += $telegramBonus;
+                    $earning      += $telegramBonus;
                     \Log::info('Telegram bonus applied.', [
-                        'user_id' => $user->id,
+                        'user_id'        => $user->id,
                         'telegram_bonus' => $telegramBonus,
                     ]);
                 }
 
+                // Persist total bonus on the click record for accurate daily chart reporting
+                if ($bonusAmount > 0) {
+                    $linkClick->update(['bonus_amount' => $bonusAmount]);
+                }
+
+                // Update user earnings (earnings is a computed accessor: link_earnings + referral_earnings)
                 $user->link_earnings += $earning;
-                $user->earnings = $user->link_earnings + $user->referral_earnings;
-                
-                // Track monthly earnings for VIP
+
+                // Track monthly earnings for VIP level system
                 $user->increment('monthly_earnings', $earning);
-                
+
                 $user->save();
 
                 // Process referral earnings if enabled
@@ -483,8 +504,17 @@ class LinkController extends Controller
                         $commissionAmount = $earning * $referralCommissionRate;
 
                         $referrerUser->referral_earnings += $commissionAmount;
-                        $referrerUser->earnings = $referrerUser->link_earnings + $referrerUser->referral_earnings;
                         $referrerUser->save();
+
+                        // Log each commission as a transaction row for accurate daily chart breakdown
+                        \App\Models\ReferralTransaction::create([
+                            'referrer_id'       => $referrerUser->id,
+                            'referred_user_id'  => $user->id,
+                            'link_click_id'     => $linkClick->id,
+                            'base_click_earning' => $earning,
+                            'amount'            => $commissionAmount,
+                            'commission_rate'   => $referralCommissionRate,
+                        ]);
                     }
                 }
 
@@ -492,20 +522,21 @@ class LinkController extends Controller
                 if ($user->telegram_bonus_enabled) {
                     $telegramBonusService = app(\App\Services\TelegramBonusService::class);
                     $newClickCount = $telegramBonusService->incrementVerificationCounter($user);
-                    
+
                     if ($telegramBonusService->needsVerification($user->fresh())) {
-                        // Dispatch verification job
                         \App\Jobs\VerifyTelegramTrafficJob::dispatch($user->fresh());
                         \Log::info('Telegram verification job dispatched.', [
-                            'user_id' => $user->id,
+                            'user_id'     => $user->id,
                             'click_count' => $newClickCount,
                         ]);
                     }
                 }
-                
+
                 \Log::info('User earnings updated after ad completion.', [
-                    'user_id' => $user->id,
-                    'earning' => $earning
+                    'user_id'      => $user->id,
+                    'base_earning' => $baseEarning,
+                    'bonus_amount' => $bonusAmount,
+                    'total'        => $earning,
                 ]);
             }
         }

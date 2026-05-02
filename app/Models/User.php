@@ -41,7 +41,7 @@ class User extends Authenticatable implements FilamentUser
         'email_verified_at',
         'google_id',
         'avatar',
-        'earnings',
+        // 'earnings' is a computed accessor (link_earnings + referral_earnings) — not mass-assignable
         'link_earnings',
         'referral_earnings',
         'gamification_points', // Gamification points
@@ -74,6 +74,10 @@ class User extends Authenticatable implements FilamentUser
         'telegram_verification_clicks',
         'telegram_referrer_match_rate',
         'telegram_bonus_decision_made',
+        // Subscription & registration meta
+        'plan',
+        'expiration',
+        'register_ip',
     ];
 
     /**
@@ -104,6 +108,8 @@ class User extends Authenticatable implements FilamentUser
             'telegram_bonus_verified_at' => 'datetime',
             'telegram_bonus_failed_at' => 'datetime',
             'telegram_bonus_decision_made' => 'boolean',
+            // Subscription expiry
+            'expiration' => 'datetime',
         ];
     }
 
@@ -182,6 +188,16 @@ class User extends Authenticatable implements FilamentUser
     public function seasonProgress(): HasMany
     {
         return $this->hasMany(UserSeasonProgress::class);
+    }
+
+    /**
+     * Computed: total earnings = link earnings + referral earnings.
+     * Avoids a redundant DB column that could become stale.
+     * Use $user->earnings anywhere — Eloquent resolves via this accessor.
+     */
+    public function getEarningsAttribute(): float
+    {
+        return (float) ($this->link_earnings ?? 0) + (float) ($this->referral_earnings ?? 0);
     }
 
     public function getLevelAttribute(): int

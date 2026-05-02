@@ -12,14 +12,15 @@ class LinkClick extends Model
     protected $fillable = [
         'link_id',
         'ip_address',
-        'country_id', // Eklendi
-        'cpm_rate', // Eklendi
+        'country_id',
+        'cpm_rate',
+        'bonus_amount', // VIP + Telegram bonus applied to this click (dollar amount)
         'country',
         'city',
-        'device_type', // Eklendi
-        'os', // Eklendi
-        'browser', // Eklendi
-        'referrer', // Eklendi
+        'device_type',
+        'os',
+        'browser',
+        'referrer',
         'is_skipped', // Click reduction için
     ];
 
